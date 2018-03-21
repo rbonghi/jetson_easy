@@ -49,33 +49,34 @@ OS_KERNEL=$(uname -r)
 # - JETSON_DESCRIPTION
 source scripts/jetson_release.sh
 
+# Load cuda version
+CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
+
 # Update embedded board
 echo -e $TEXT_GREEN
-echo "|-----------------------------------------------------------------------|"
-echo "| Welcome in the Biddibi Boddibi boo robot embedded board initialzation |"
-echo "|-----------------------------------------------------------------------|"
+echo "|--------------------------------------------------------------------|"
+echo "| Welcome in Biddibi Boddibi Boo robot embedded board initialization |"
+echo "|--------------------------------------------------------------------|"
 echo ""
 echo "Script running from user: $USER"
 echo ""
 echo "System information:"
-echo " - OS: $DISTRIB_DESCRIPTION"
+echo " - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
 echo " - Architecture: $OS_ARCHITECTURE"
 echo " - Kernel: $OS_KERNEL"
 echo " - NVIDIA embedded information:"
 echo "   - Board: $JETSON_DESCRIPTION"
 echo "   - L4T: $JETSON_L4T"
+echo " - CUDA: $CUDA_VERSION"
 
-# TODO show:
-# - Jetpack version
-# - Architecture
-# - Type of board
-
-# Installing order script:
-# - update & dist-upgrade & upgrade
-# - Set hostname
-# - Setup user and email git
-# - Install ROS
-# - Install USB and ACM driver
+echo -e $TEXT_YELLOW
+echo "Installing order script"
+echo " 1 Update & Distribution upgrade & Upgrade"
+echo " 2 Install Jetson performance service"
+echo " 3 Set hostname"
+echo " 4 Setup user and email git"
+echo " 5 Install ROS"
+echo " 6 Install USB and ACM driver"
 
 echo -e $TEXT_RESET
 
@@ -117,9 +118,9 @@ echo -e $TEXT_RESET
 
 # ------------------------------------
 echo -e $TEXT_GREEN
-echo "|-----------------------------------------------------------------------|"
-echo "| Setup HOSTNAME                                                        |"
-echo "|-----------------------------------------------------------------------|"
+echo "|--------------------------------------------------------------------|"
+echo "| Setup HOSTNAME                                                     |"
+echo "|--------------------------------------------------------------------|"
 echo -e $TEXT_RESET
 
 
@@ -127,9 +128,9 @@ read -p "Press any key to continue... " -n1 -s
 
 # ------------------------------------
 echo -e $TEXT_GREEN
-echo "|-----------------------------------------------------------------------|"
-echo "| Installing ROS                                                        |"
-echo "|-----------------------------------------------------------------------|"
+echo "|--------------------------------------------------------------------|"
+echo "| Installing ROS                                                     |"
+echo "|--------------------------------------------------------------------|"
 echo -e $TEXT_RESET
 
 
