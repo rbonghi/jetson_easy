@@ -52,88 +52,146 @@ source scripts/jetson_release.sh
 # Load cuda version
 CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
 
-# Update embedded board
-echo -e $TEXT_GREEN
-echo "|--------------------------------------------------------------------|"
-echo "| Welcome in Biddibi Boddibi Boo robot embedded board initialization |"
-echo "|--------------------------------------------------------------------|"
-echo ""
-echo "Script running from user: $USER"
-echo ""
-echo "System information:"
-echo " - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
-echo " - Architecture: $OS_ARCHITECTURE"
-echo " - Kernel: $OS_KERNEL"
-echo " - NVIDIA embedded information:"
-echo "   - Board: $JETSON_DESCRIPTION"
-echo "   - L4T: $JETSON_L4T"
-echo " - CUDA: $CUDA_VERSION"
+title_header()
+{
+    tput cup 11 17
+    # Set reverse video mode
+    tput rev
+    echo $1
+    tput sgr0
+    
+    #put message in middle of screen
+    tput cup 13 0
+}
 
-echo -e $TEXT_YELLOW
-echo "Installing order script"
-echo " 1 Update & Distribution upgrade & Upgrade"
-echo " 2 Install Jetson performance service"
-echo " 3 Set hostname"
-echo " 4 Setup user and email git"
-echo " 5 Install ROS"
-echo " 6 Install USB and ACM driver"
+system_information()
+{
+    title_header "S Y S T E M - I N F O R M A T I O N"
+    
+    tput setaf 2
+    echo "  User: $USER"
+    echo ""
+    echo "  System information:"
+    echo "   - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
+    echo "   - Architecture: $OS_ARCHITECTURE"
+    echo "   - Kernel: $OS_KERNEL"
+    echo ""
+    echo "  NVIDIA embedded information:"
+    echo "   - Board: $JETSON_DESCRIPTION"
+    echo "   - L4T: $JETSON_L4T"
+    echo "   - CUDA: $CUDA_VERSION"
+    echo ""
+    tput sgr0
+}
 
-echo -e $TEXT_RESET
+installation_setup()
+{
+    title_header "I N S T A L L A T I O N"
 
-read -p "Do you want continue? [Y/n] " -n 1 -r
-echo    # (optional) move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]
+    tput setaf 4
+    echo "  Installing order script"
+    echo "   1 Update & Distribution upgrade & Upgrade"
+    echo "   2 Install Jetson performance service"
+    echo "   3 Set hostname"
+    echo "   4 Setup user and email git"
+    echo "   5 Install ROS"
+    echo "   6 Install USB and ACM driver"
+    tput sgr0
+}
+
+run_script()
+{
+    # ------------------------------------
+    # - update & dist-upgrade & upgrade
+
+    sudo apt-get update
+    echo -e $TEXT_YELLOW
+    echo 'APT update finished...'
+    echo -e $TEXT_RESET
+
+    # Automatically upgrade all packages
+    sudo apt-get -y dist-upgrade
+    echo -e $TEXT_YELLOW
+    echo 'APT distributive upgrade finished...'
+    echo -e $TEXT_RESET
+
+    # Automatically upgrade all packages
+    sudo apt-get -y upgrade
+    echo -e $TEXT_YELLOW
+    echo 'APT upgrade finished...'
+    echo -e $TEXT_RESET
+
+    # Automatically remove packages
+    sudo apt-get -y autoremove
+    echo -e $TEXT_YELLOW
+    echo 'APT auto remove finished...'
+    echo -e $TEXT_RESET
+}
+
+tput setb 3 #Green in xterm and brown in linux terminal
+#loop around gathering input until QUIT is more than 0
+QUIT=0
+# Start menu
+SEL=1
+
+while [ $QUIT -lt 1 ]
+do
+
+    tput clear
+
+    # Write Header
+    tput setaf 3
+    echo ""
+    echo "    Biddibi Boddibi Boo - NVIDIA Jetson easy setup script"
+    echo "    Raffaello Bonghi - raffaello@rnext.it"
+    tput sgr0
+    echo ""
+    echo "  MENU"
+    echo "  1 .. System Information"
+    echo "  2 .. Load scripts"
+    echo "  3 .. Start installation"
+    echo "  4 .. QUIT"
+    tput bold
+    echo "  Select item: "
+    tput sgr0
+
+
+    #Delete from cursor to end of line
+    tput el
+    case $SEL in
+        1) system_information ;;
+        3) installation_setup ;;
+        *) title_header "T E S T"
+           echo "You selected $SEL";;
+    esac
+
+    #Move cursor to after select message
+    tput cup 9 15
+    #Delete from cursor to end of line
+    tput el
+    read SEL
+    if [ ${#SEL} -lt 1 ]
+        then
+            continue
+    fi
+    if [ $SEL -eq 4 ]
+        then
+            QUIT=1
+            continue
+    fi
+   
+done
+
+#reset the screen
+#Find out if this is a "linux" virtual terminal
+if [ $TERM ~ "linux" ]
 then
-    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+     tput setb 0 #reset background to black
 fi
 
-# Debug stop
-exit 1
-
-# ------------------------------------
-# - update & dist-upgrade & upgrade
-
-sudo apt-get update
-echo -e $TEXT_YELLOW
-echo 'APT update finished...'
-echo -e $TEXT_RESET
-
-# Automatically upgrade all packages
-sudo apt-get -y dist-upgrade
-echo -e $TEXT_YELLOW
-echo 'APT distributive upgrade finished...'
-echo -e $TEXT_RESET
-
-# Automatically upgrade all packages
-sudo apt-get -y upgrade
-echo -e $TEXT_YELLOW
-echo 'APT upgrade finished...'
-echo -e $TEXT_RESET
-
-# Automatically remove packages
-sudo apt-get -y autoremove
-echo -e $TEXT_YELLOW
-echo 'APT auto remove finished...'
-echo -e $TEXT_RESET
-
-# ------------------------------------
-echo -e $TEXT_GREEN
-echo "|--------------------------------------------------------------------|"
-echo "| Setup HOSTNAME                                                     |"
-echo "|--------------------------------------------------------------------|"
-echo -e $TEXT_RESET
-
-
-read -p "Press any key to continue... " -n1 -s
-
-# ------------------------------------
-echo -e $TEXT_GREEN
-echo "|--------------------------------------------------------------------|"
-echo "| Installing ROS                                                     |"
-echo "|--------------------------------------------------------------------|"
-echo -e $TEXT_RESET
-
-
+tput reset
+tput clear
+tput rc
 
 if [ -f /var/run/reboot-required ]; then
     echo -e $TEXT_RED_B
@@ -141,4 +199,3 @@ if [ -f /var/run/reboot-required ]; then
     echo -e $TEXT_RESET
 fi
 
-echo "END!"
