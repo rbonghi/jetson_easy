@@ -32,11 +32,50 @@ TEXT_GREEN='\e[0;32m'
 TEXT_YELLOW='\e[0;33m'
 TEXT_RED_B='\e[1;31m'
 
+# Load environment variables:
+# - DISTRIB_ID
+# - DISTRIB_RELEASE
+# - DISTRIB_CODENAME
+# - DISTRIB_DESCRIPTION
+source /etc/lsb-release
+
+# Load architecture
+ARCHITECTURE=$(uname -m)
+
+# NVIDIA Identify version 
+# reference: https://devtalk.nvidia.com/default/topic/1014424/jetson-tx2/identifying-tx1-and-tx2-at-runtime/
+case $(cat /sys/module/tegra_fuse/parameters/tegra_chip_id) in
+    64)
+        JETSON_BOARD="TK1"
+    33)
+        JETSON_BOARD="TX1"
+    24)
+        JETSON_BOARD="TX2"
+    *)
+        JETSON_BOARD="UNKNOWN"
+esac
+# NVIDIA Jetson version
+JETSON_VER=$(head -n 1 /etc/nv_tegra_release)
+
 # Update embedded board
 echo -e $TEXT_GREEN
 echo "|-----------------------------------------------------------------------|"
 echo "| Welcome in the Biddibi Boddibi boo robot embedded board initialzation |"
 echo "|-----------------------------------------------------------------------|"
+echo ""
+echo "System information:"
+echo " - System version: $DISTRIB_DESCRIPTION"
+echo " - Architecture: $ARCHITECTURE"
+echo " - NVIDIA Jetson information:"
+echo "   - Board: $JETSON_BOARD"
+echo "   - version: $JETSON_VER"
+echo " - User: $USER"
+
+# TODO show:
+# - Jetpack version
+# - Architecture
+# - Type of board
+
 # Installing order script:
 # - update & dist-upgrade & upgrade
 # - Set hostname
@@ -44,8 +83,13 @@ echo "|-----------------------------------------------------------------------|"
 # - Install USB and ACM driver
 
 echo -e $TEXT_RESET
-read -p "Press any key to continue... " -n1 -s
-echo -e "\n "
+
+read -p "Do you want continue? [Y/n] " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+fi
 # ------------------------------------
 # - update & dist-upgrade & upgrade
 
