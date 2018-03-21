@@ -37,25 +37,7 @@ TEXT_RED_B='\e[1;31m'
 # - DISTRIB_RELEASE
 # - DISTRIB_CODENAME
 # - DISTRIB_DESCRIPTION
-source /etc/lsb-release
-
-# Load architecture
-ARCHITECTURE=$(uname -m)
-
-# NVIDIA Identify version 
-# reference: https://devtalk.nvidia.com/default/topic/1014424/jetson-tx2/identifying-tx1-and-tx2-at-runtime/
-case $(cat /sys/module/tegra_fuse/parameters/tegra_chip_id) in
-    64)
-        JETSON_BOARD="TK1"
-    33)
-        JETSON_BOARD="TX1"
-    24)
-        JETSON_BOARD="TX2"
-    *)
-        JETSON_BOARD="UNKNOWN"
-esac
-# NVIDIA Jetson version
-JETSON_VER=$(head -n 1 /etc/nv_tegra_release)
+source scripts/board_variables.sh
 
 # Update embedded board
 echo -e $TEXT_GREEN
@@ -67,7 +49,7 @@ echo "System information:"
 echo " - System version: $DISTRIB_DESCRIPTION"
 echo " - Architecture: $ARCHITECTURE"
 echo " - NVIDIA Jetson information:"
-echo "   - Board: $JETSON_BOARD"
+echo "   - Board: $JETSON_DESCRIPTION"
 echo "   - version: $JETSON_VER"
 echo " - User: $USER"
 
