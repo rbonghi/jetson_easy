@@ -47,7 +47,7 @@ OS_KERNEL=$(uname -r)
 # - JETSON_BOARD
 # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
 # - JETSON_DESCRIPTION
-source scripts/board_variables.sh
+source scripts/jetson_release.sh
 
 # Update embedded board
 echo -e $TEXT_GREEN
