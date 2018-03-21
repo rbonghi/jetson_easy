@@ -27,16 +27,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Load environment variables:
-# - DISTRIB_ID
-# - DISTRIB_RELEASE
-# - DISTRIB_CODENAME
-# - DISTRIB_DESCRIPTION
-source /etc/lsb-release
-
-# Load architecture
-ARCHITECTURE=$(uname -m)
-
 # NVIDIA Identify version 
 # reference: https://devtalk.nvidia.com/default/topic/1014424/jetson-tx2/identifying-tx1-and-tx2-at-runtime/
 case $(cat /sys/module/tegra_fuse/parameters/tegra_chip_id) in
@@ -49,8 +39,17 @@ case $(cat /sys/module/tegra_fuse/parameters/tegra_chip_id) in
     *)
         JETSON_BOARD="UNKNOWN" ;;
 esac
-JETSON_DESCRIPTION="NVIDIA Jetson$JETSON_BOARD"
+JETSON_DESCRIPTION="NVIDIA Jetson $JETSON_BOARD"
 
 # NVIDIA Jetson version
-JETSON_VER=$(head -n 1 /etc/nv_tegra_release)
+JETSON_L4T_STRING=$(head -n 1 /etc/nv_tegra_release)
+
+# Load release and revision
+JETSON_L4T_RELEASE=$(echo $JETSON_L4T_STRING | cut -f 1 -d ',' | sed 's/\# R//g' | cut -d ' ' -f1)
+JETSON_L4T_REVISION=$(echo $JETSON_L4T_STRING | cut -f 2 -d ',' | sed 's/\ REVISION: //g' | cut -d. -f1)
+
+# Write Jetson description
+JETSON_L4T="$JETSON_L4T_RELEASE.$JETSON_L4T_REVISION"
+
+
 

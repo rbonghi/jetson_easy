@@ -37,6 +37,16 @@ TEXT_RED_B='\e[1;31m'
 # - DISTRIB_RELEASE
 # - DISTRIB_CODENAME
 # - DISTRIB_DESCRIPTION
+source /etc/lsb-release
+
+# Load architecture
+OS_ARCHITECTURE=$(uname -m)
+OS_KERNEL=$(uname -r)
+
+# Load environment variables:
+# - JETSON_BOARD
+# - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
+# - JETSON_DESCRIPTION
 source scripts/board_variables.sh
 
 # Update embedded board
@@ -45,13 +55,15 @@ echo "|-----------------------------------------------------------------------|"
 echo "| Welcome in the Biddibi Boddibi boo robot embedded board initialzation |"
 echo "|-----------------------------------------------------------------------|"
 echo ""
+echo "Script running from user: $USER"
+echo ""
 echo "System information:"
-echo " - System version: $DISTRIB_DESCRIPTION"
-echo " - Architecture: $ARCHITECTURE"
-echo " - NVIDIA Jetson information:"
+echo " - OS: $DISTRIB_DESCRIPTION"
+echo " - Architecture: $OS_ARCHITECTURE"
+echo " - Kernel: $OS_KERNEL"
+echo " - NVIDIA embedded information:"
 echo "   - Board: $JETSON_DESCRIPTION"
-echo "   - version: $JETSON_VER"
-echo " - User: $USER"
+echo "   - L4T: $JETSON_L4T"
 
 # TODO show:
 # - Jetpack version
@@ -73,6 +85,10 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
 fi
+
+# Debug stop
+exit 1
+
 # ------------------------------------
 # - update & dist-upgrade & upgrade
 
