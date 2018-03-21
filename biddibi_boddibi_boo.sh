@@ -61,6 +61,7 @@ echo " - User: $USER"
 # Installing order script:
 # - update & dist-upgrade & upgrade
 # - Set hostname
+# - Setup user and email git
 # - Install ROS
 # - Install USB and ACM driver
 
