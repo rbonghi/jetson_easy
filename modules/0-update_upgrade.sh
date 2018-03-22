@@ -38,25 +38,25 @@ run_script()
     tput setaf 6
     echo 'APT update starting...'
     tput sgr0
-    #sudo apt-get update
+    sudo apt-get update
     
     # Automatically distributive upgrade all packages
     tput setaf 6
     echo 'APT distributive upgrade starting...'
     tput sgr0
-    #sudo apt-get -y dist-upgrade
+    sudo apt-get -y dist-upgrade
     
     # Automatically upgrade all packages
     tput setaf 6
     echo 'APT upgrade starting...'
     tput sgr0
-    #sudo apt-get -y dist-upgrade
+    sudo apt-get -y dist-upgrade
     
     # Automatically remove packages
     tput setaf 6
     echo 'APT autoremove starting...'
     tput sgr0
-    #sudo apt-get -y autoremove
+    sudo apt-get -y autoremove
     
     tput setaf 6
     echo 'END'

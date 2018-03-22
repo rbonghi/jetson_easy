@@ -27,6 +27,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Request sudo password
+if [ $EUID != 0 ]; then
+    sudo "$0" "$@"
+    exit $?
+fi
+
 TEXT_RESET='\e[0m'
 TEXT_GREEN='\e[0;32m'
 TEXT_YELLOW='\e[0;33m'
@@ -58,6 +64,9 @@ source jetson/jetson_release.sh
 
 # Load cuda version
 CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
+
+# User before sudo
+LOCAL_USER=$SUDO_USER
 
 #loop around gathering input until QUIT is more than 0
 QUIT=0

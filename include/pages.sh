@@ -49,7 +49,7 @@ title_header()
 system_information()
 {    
     tput setaf 2
-    echo "  User: $USER"
+    echo "  User: $LOCAL_USER"
     echo "  Hostname: $HOSTNAME"
     echo ""
     echo "  System:"
