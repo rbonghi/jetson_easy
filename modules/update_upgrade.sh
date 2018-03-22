@@ -27,76 +27,33 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-TEXT_RESET='\e[0m'
-TEXT_GREEN='\e[0;32m'
-TEXT_YELLOW='\e[0;33m'
-TEXT_RED_B='\e[1;31m'
+# Update and upgrade
 
-source include/pages.sh
+run_script()
+{
+    # ------------------------------------
+    # - update & dist-upgrade & upgrade
 
-# Load environment variables:
-# - DISTRIB_ID
-# - DISTRIB_RELEASE
-# - DISTRIB_CODENAME
-# - DISTRIB_DESCRIPTION
-source /etc/lsb-release
-
-# Load architecture
-OS_ARCHITECTURE=$(uname -m)
-OS_KERNEL=$(uname -r)
-
-# Load environment variables:
-# - JETSON_BOARD
-# - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
-# - JETSON_DESCRIPTION
-source jetson/jetson_release.sh
-
-# Load cuda version
-CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
-
-#loop around gathering input until QUIT is more than 0
-QUIT=0
-# Start menu
-SEL=0
-
-while [ $QUIT -lt 1 ]
-do
-    # Clear shell
-    tput clear
-    
-    #Delete from cursor to end of line
-    #tput el
-    case $SEL in
-        1)  # Load header
-            title_header "Start-Jetson Easy"
-            # Load page
-            installation_setup ;;
-        2)  # Load header
-            title_header "Jetson Easy - Installing"
-            # Load page
-            installing_page ;;
-        *)  # Load header
-            title_header "System-Information"
-            # Load page
-            system_information ;;
-    esac
-
-done
-
-#reset the screen
-#Find out if this is a "linux" virtual terminal
-if [ $TERM ~ "linux" ]
-then
-     tput setb 0 #reset background to black
-fi
-
-tput reset
-tput clear
-tput rc
-
-if [ -f /var/run/reboot-required ]; then
-    echo -e $TEXT_RED_B
-    echo 'Reboot required!'
+    sudo apt-get update
+    echo -e $TEXT_YELLOW
+    echo 'APT update finished...'
     echo -e $TEXT_RESET
-fi
 
+    # Automatically upgrade all packages
+    sudo apt-get -y dist-upgrade
+    echo -e $TEXT_YELLOW
+    echo 'APT distributive upgrade finished...'
+    echo -e $TEXT_RESET
+
+    # Automatically upgrade all packages
+    sudo apt-get -y upgrade
+    echo -e $TEXT_YELLOW
+    echo 'APT upgrade finished...'
+    echo -e $TEXT_RESET
+
+    # Automatically remove packages
+    sudo apt-get -y autoremove
+    echo -e $TEXT_YELLOW
+    echo 'APT auto remove finished...'
+    echo -e $TEXT_RESET
+}
