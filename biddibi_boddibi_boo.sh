@@ -47,7 +47,7 @@ OS_KERNEL=$(uname -r)
 # - JETSON_BOARD
 # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
 # - JETSON_DESCRIPTION
-source scripts/jetson_release.sh
+source jetson/jetson_release.sh
 
 # Load cuda version
 CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
@@ -79,7 +79,7 @@ system_information()
     echo ""
     echo "  NVIDIA embedded information:"
     echo "   - Board: $JETSON_DESCRIPTION"
-    echo "   - L4T: $JETSON_L4T"
+    echo "   - Jetpack $JETSON_JETPACK - L4T: $JETSON_L4T"
     echo "   - CUDA: $CUDA_VERSION"
     echo ""
     tput sgr0
