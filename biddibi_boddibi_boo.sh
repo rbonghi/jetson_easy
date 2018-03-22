@@ -57,7 +57,7 @@ title_header()
     tput cup 11 17
     # Set reverse video mode
     tput rev
-    echo $1
+    echo ${1^^} | sed -e 's/\(.\)/\1 /g'
     tput sgr0
     
     #put message in middle of screen
@@ -66,10 +66,11 @@ title_header()
 
 system_information()
 {
-    title_header "S Y S T E M - I N F O R M A T I O N"
+    title_header "System-Information"
     
     tput setaf 2
     echo "  User: $USER"
+    echo "  Hostname: $HOSTNAME"
     echo ""
     echo "  System information:"
     echo "   - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
@@ -86,7 +87,7 @@ system_information()
 
 installation_setup()
 {
-    title_header "I N S T A L L A T I O N"
+    title_header "Start-Jetson Easy"
 
     tput setaf 4
     echo "  Installing order script"
@@ -98,7 +99,7 @@ installation_setup()
     echo "   6 Install USB and ACM driver"
     tput sgr0
 }
-
+"Start Jetson easy"
 run_script()
 {
     # ------------------------------------
@@ -149,7 +150,7 @@ do
     echo "  MENU"
     echo "  1 .. System Information"
     echo "  2 .. Load scripts"
-    echo "  3 .. Start installation"
+    echo "  3 .. Start Jetson easy"
     echo "  4 .. QUIT"
     tput bold
     echo "  Select item: "
@@ -161,7 +162,7 @@ do
     case $SEL in
         1) system_information ;;
         3) installation_setup ;;
-        *) title_header "T E S T"
+        *) title_header "Test"
            echo "You selected $SEL";;
     esac
 
