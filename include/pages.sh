@@ -70,18 +70,14 @@ system_menu()
     tput bold
     echo "  MENU"
     tput sgr0
-    echo "  1 .. Start Jetson Easy"
-    echo "  2 .. QUIT"
+    echo "  [S] .. Start Jetson Easy"
+    echo "  [Q] .. QUIT"
     
     read -r -p "  Select item: " SEL
-    if [ ${#SEL} -lt 1 ]
-    then
-        continue
-    fi
-    if [ $SEL -eq 2 ]
-        then
-            QUIT=1
-            continue
-    fi
+    case "${SEL^^}" in
+        "S") SEL=1 ;;
+        "Q") QUIT=1
+            continue ;;
+    esac
 }
 

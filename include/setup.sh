@@ -65,7 +65,7 @@ modify_list_modules()
        # Read the value
        IFS='' read -r -n1 ans
        #read -d'' -s -n1 ans
-       if [ "$ans" == "x" ]
+       if [ "${ans,,}" == "x" ]
        then
             NEW_LOAD_SCRIPT+="$(echo $file):"
        elif [ "$ans" == "" ]

@@ -60,26 +60,22 @@ installation_setup()
     tput bold
     echo "  MENU"
     tput sgr0
-    echo "  1 .. System Information"
-    echo "  2 .. QUIT"
-    echo "  3 .. Modify"
-    echo "  4 .. START"
-    read -r -p "  Select item: " INSTALL_SEL
-    if [ ${#INSTALL_SEL} -lt 1 ]
-    then
-        continue
-    fi
-    case $INSTALL_SEL in
-        1)  # Go In system information page
+    echo "  [I] .. System Information"
+    echo "  [M] .. Modify"
+    echo "  [J] .. Start"
+    echo "  [Q] .. QUIT"
+    read -r -p "  Select item: " INSTALL_SEL    
+    case "${INSTALL_SEL^^}" in
+        "I")  # Go In system information page
             SEL=0
             continue ;;
-        2)  # Close the script
+        "Q")  # Close the script
             QUIT=1
             continue ;;
-        3)  # Modify script
+        "M")  # Modify script
             modify_list_modules 9 6
             continue ;;
-        4)  # Launch Installing script
+        "J")  # Launch Installing script
             SEL=2
             continue ;;
         # Otherwise skip
