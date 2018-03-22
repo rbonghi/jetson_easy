@@ -27,61 +27,14 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-title_header()
+# Install all Jetson enviroments variables and performance service
+
+MODULE_NAME="Install Jetson performance service"
+MODULE_DEFAULT=1
+
+run_script()
 {
-    # Write Header
-    tput setaf 3
-    echo ""
-    echo "    Biddibi Boddibi Boo - NVIDIA Jetson Easy setup script"
-    echo "    Raffaello Bonghi - raffaello@rnext.it"
-    tput sgr0
-    
-    tput cup 4 17
-    # Set reverse video mode
-    tput rev
-    echo ${1^^} | sed -e 's/\(.\)/\1 /g'
-    tput sgr0
-    
-    #put message in middle of screen
-    tput cup 6 0
+    echo "Run script ..."
 }
 
-system_information()
-{    
-    tput setaf 2
-    echo "  User: $USER"
-    echo "  Hostname: $HOSTNAME"
-    echo ""
-    echo "  System:"
-    echo "   - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
-    echo "   - Architecture: $OS_ARCHITECTURE"
-    echo "   - Kernel: $OS_KERNEL"
-    echo ""
-    echo "  NVIDIA embedded:"
-    echo "   - Board: $JETSON_DESCRIPTION"
-    echo "   - Jetpack $JETSON_JETPACK - L4T: $JETSON_L4T"
-    echo "   - CUDA: $CUDA_VERSION"
-    tput sgr0
-}
-
-system_menu()
-{    
-    echo ""
-    tput bold
-    echo "  MENU"
-    tput sgr0
-    echo "  1 .. Start Jetson Easy"
-    echo "  2 .. QUIT"
-    
-    read -r -p "  Select item: " SEL
-    if [ ${#SEL} -lt 1 ]
-    then
-        continue
-    fi
-    if [ $SEL -eq 2 ]
-        then
-            QUIT=1
-            continue
-    fi
-}
 

@@ -27,33 +27,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Update and upgrade
+# Install ROS
+
+MODULE_NAME="Install ROS"
+MODULE_DEFAULT=0
 
 run_script()
 {
-    # ------------------------------------
-    # - update & dist-upgrade & upgrade
-
-    sudo apt-get update
-    echo -e $TEXT_YELLOW
-    echo 'APT update finished...'
-    echo -e $TEXT_RESET
-
-    # Automatically upgrade all packages
-    sudo apt-get -y dist-upgrade
-    echo -e $TEXT_YELLOW
-    echo 'APT distributive upgrade finished...'
-    echo -e $TEXT_RESET
-
-    # Automatically upgrade all packages
-    sudo apt-get -y upgrade
-    echo -e $TEXT_YELLOW
-    echo 'APT upgrade finished...'
-    echo -e $TEXT_RESET
-
-    # Automatically remove packages
-    sudo apt-get -y autoremove
-    echo -e $TEXT_YELLOW
-    echo 'APT auto remove finished...'
-    echo -e $TEXT_RESET
+    echo "Run script ..."
 }

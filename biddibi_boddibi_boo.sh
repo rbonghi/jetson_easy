@@ -32,7 +32,12 @@ TEXT_GREEN='\e[0;32m'
 TEXT_YELLOW='\e[0;33m'
 TEXT_RED_B='\e[1;31m'
 
-source include/pages.sh
+# Load all script in folder
+for file in include/* ; do
+  if [ -f "$file" ] ; then
+    source "$file"
+  fi
+done
 
 # Load environment variables:
 # - DISTRIB_ID
@@ -59,6 +64,9 @@ QUIT=0
 # Start menu
 SEL=0
 
+# Load setup
+load_modules
+
 while [ $QUIT -lt 1 ]
 do
     # Clear shell
@@ -72,13 +80,18 @@ do
             # Load page
             installation_setup ;;
         2)  # Load header
-            title_header "Jetson Easy - Installing"
+            title_header "Jetson Easy-Installing"
             # Load page
             installing_page ;;
+        3)  # Load header
+            title_header "Jetson Easy-Recap"
+            # Load page
+            ending_page ;;
         *)  # Load header
             title_header "System-Information"
             # Load page
-            system_information ;;
+            system_information
+            system_menu ;;
     esac
 
 done

@@ -27,4 +27,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Install all Jetson enviroments variables and performance service
+# Change the hostname module
+
+MODULE_NAME="Set hostname"
+MODULE_DEFAULT=0
+
+run_script()
+{
+    echo "Run script ..."
+}
