@@ -72,12 +72,13 @@ system_information()
         tput setaf 1
         tput bold
         echo "  This is not a Jetson Board"
+        echo "  Please copy this repository in your Jetson board"
         tput sgr0
     else
         tput setaf 2
         echo "  NVIDIA embedded:"
         echo "   - Board: $JETSON_DESCRIPTION"
-        echo "   - Jetpack $JETSON_JETPACK - L4T: $JETSON_L4T"
+        echo "   - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
         echo "   - CUDA: $CUDA_VERSION"
         tput sgr0
     fi
