@@ -34,7 +34,27 @@ MODULE_DEFAULT=1
 
 run_script()
 {
-    echo "Run script ..."
+    local JETSON_FOLDER="/etc/jetson_easy/"
+    
+    echo "Write Jetson folder in $JETSON_FOLDER ..."
+    sudo cp $(pwd)/jetson/jetson_release.sh /usr/local/bin/jetson_release
+    
+    #if [ -d "$JETSON_FOLDER" ]; then
+        # remove folder
+    #    echo "Remove old folder"
+    #    sudo rm -r $JETSON_FOLDER
+    #fi
+    # Copy folder
+    #sudo cp -r $(pwd)/jetson/ $JETSON_FOLDER
+    #echo "... Copied!"
+    
+    # Add reference jetson_reference
+    
+    # Install Jetson perfomance service
+    
+    # Set default configuration
+    
 }
+
 
 
