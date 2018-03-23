@@ -30,8 +30,16 @@
 title_header()
 {
     # Write Header
+    if [ -z ${DEBUG+x} ] 
+    then
+        echo ""
+    else
+        tput setaf 1
+        tput bold
+        echo "DEBUG MODE"
+        tput sgr0
+    fi
     tput setaf 3
-    echo ""
     echo "    Biddibi Boddibi Boo - NVIDIA Jetson Easy setup script"
     echo "    Raffaello Bonghi - raffaello@rnext.it"
     tput sgr0
@@ -57,11 +65,22 @@ system_information()
     echo "   - Architecture: $OS_ARCHITECTURE"
     echo "   - Kernel: $OS_KERNEL"
     echo ""
-    echo "  NVIDIA embedded:"
-    echo "   - Board: $JETSON_DESCRIPTION"
-    echo "   - Jetpack $JETSON_JETPACK - L4T: $JETSON_L4T"
-    echo "   - CUDA: $CUDA_VERSION"
     tput sgr0
+    
+    if [ -z ${JETSON_DESCRIPTION+x} ] ; 
+    then 
+        tput setaf 1
+        tput bold
+        echo "  This is not a Jetson Board"
+        tput sgr0
+    else
+        tput setaf 2
+        echo "  NVIDIA embedded:"
+        echo "   - Board: $JETSON_DESCRIPTION"
+        echo "   - Jetpack $JETSON_JETPACK - L4T: $JETSON_L4T"
+        echo "   - CUDA: $CUDA_VERSION"
+        tput sgr0
+    fi
 }
 
 system_menu()
@@ -70,13 +89,24 @@ system_menu()
     tput bold
     echo "  MENU"
     tput sgr0
-    echo "  [S] .. Start Jetson Easy"
-    echo "  [Q] .. QUIT"
+    
+    # Add in menu the option to start the jetson easy only if is a Jetson board or is in debug mode
+    if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
+    then 
+        echo "  [s] .. Start Jetson Easy"
+    fi
+    
+    echo "  [q] .. QUIT"
     
     read -r -p "  Select item: " SEL
-    case "${SEL^^}" in
-        "S") SEL=1 ;;
-        "Q") QUIT=1
+    case "${SEL,,}" in
+        "s") # Enable S button only if a Jetson Bpard or is in debug mode
+             if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
+             then
+                 SEL=1
+             fi
+             continue ;;
+        "q") QUIT=1
             continue ;;
     esac
 }

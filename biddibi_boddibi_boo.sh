@@ -27,6 +27,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# To Enable the debug mode
+if [ -f DEBUG ]; then
+    DEBUG=1
+fi
+
 # Request sudo password
 if [ $EUID != 0 ]; then
     sudo "$0" "$@"

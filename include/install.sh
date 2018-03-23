@@ -60,10 +60,10 @@ installation_setup()
     tput bold
     echo "  MENU"
     tput sgr0
-    echo "  [I] .. System Information"
-    echo "  [M] .. Modify"
-    echo "  [J] .. Start"
-    echo "  [Q] .. QUIT"
+    echo "  [i] .. System Information"
+    echo "  [m] .. Modify"
+    echo "  [j] .. Start"
+    echo "  [q] .. QUIT"
     read -r -p "  Select item: " INSTALL_SEL    
     case "${INSTALL_SEL^^}" in
         "I")  # Go In system information page
