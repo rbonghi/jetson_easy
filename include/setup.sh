@@ -127,3 +127,17 @@ print_all_modules()
     done
 }
 
+print_done_modules()
+{
+    IFS=':' read -ra ADDR <<< "$LOAD_SCRIPT"
+    for file in "${ADDR[@]}"; do
+        # process "$file"
+        source "$file"
+        
+        echo "    * [$(check_ifis_inlist "$file")] $MODULE_NAME"
+    done
+    # else return empty
+    echo " "
+    return
+}
+

@@ -51,15 +51,10 @@ installation_setup()
     echo "  Installing order script"
     # Load all modules availables 
     print_all_modules
-    echo ""
+    echo "  TODO Setup user and email git"
+    echo "  TODO Install USB and ACM driver"
     tput sgr0
-
-#    echo "   1. [ ] Update & Distribution upgrade & Upgrade"
-#    echo "   2. [ ] Install Jetson performance service"
-#    echo "   3. [ ] Set hostname"
-#    echo "   4. [ ] Setup user and email git"
-#    echo "   5. [ ] Install ROS"
-#    echo "   6. [ ] Install USB and ACM driver"
+    echo ""
     tput bold    
     echo "  MENU"
     tput sgr0
@@ -116,12 +111,26 @@ installing_page()
 ending_page()
 {
 
-    system_information
+    #system_information
     
-    echo ""
+    tput setaf 6
+    echo "  Module installed:"
+    print_done_modules
+    tput sgr0
+    
+    if [ -f /var/run/reboot-required ]; then
+        tput setaf 1
+        tput bold
+        echo "    Reboot required!"
+        echo ""
+        tput sgr0
+    fi
+    
     # Wait before to close
     #read -p "Press enter to continue"
-    read -n 1 -s -r -p "Press any key to CLOSE"
+    tput bold
+    read -n 1 -s -r -p "  Press any key to CLOSE"
+    tput sgr0
     # Close script
     QUIT=1
     continue
