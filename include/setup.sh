@@ -47,10 +47,15 @@ load_all_modules()
 
 load_modules()
 {
-    if [ ! -f setup.txt ]; then
+    if [ -f setup.txt ]
+    then
+        echo "Setup found!"
+    else
         echo "Setup NOT found!"
+        load_all_modules
     fi
     
+    # TEMP
     load_all_modules
 }
 

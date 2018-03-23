@@ -110,14 +110,14 @@ system_menu()
     # Add in menu the option to start the jetson easy only if is a Jetson board or is in debug mode
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
     then 
-        echo "  [s] .. Start Jetson Easy"
+        echo "  [J] .. Start Jetson Easy"
     fi
     
-    echo "  [q] .. QUIT"
+    echo "  [Q] .. QUIT"
     
     read -r -p "  Select item: " SEL
-    case "${SEL,,}" in
-        "s") # Enable S button only if a Jetson Bpard or is in debug mode
+    case "${SEL^^}" in
+        "J") # Enable S button only if a Jetson Bpard or is in debug mode
              if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
              then
                  SEL=1

@@ -64,10 +64,11 @@ installation_setup()
     tput bold
     echo "  MENU"
     tput sgr0
-    echo "  [i] .. System Information"
-    echo "  [m] .. Modify"
-    echo "  [j] .. Start"
-    echo "  [q] .. QUIT"
+    echo "  [I] .. System Information"
+    echo "  [M] .. Modify"
+    echo "  [S] .. Save configuration in setup.txt"
+    echo "  [R] .. RUN"
+    echo "  [Q] .. QUIT"
     read -r -p "  Select item: " INSTALL_SEL    
     case "${INSTALL_SEL^^}" in
         "I")  # Go In system information page
@@ -79,7 +80,8 @@ installation_setup()
         "M")  # Modify script
             modify_list_modules 9 6
             continue ;;
-        "J")  # Launch Installing script
+        "S") continue ;;
+        "R")  # Launch Installing script
             SEL=2
             continue ;;
         # Otherwise skip
