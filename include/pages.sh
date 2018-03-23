@@ -57,11 +57,18 @@ title_header()
 print_isSetup()
 {
     tput bold
-    if [ -f setup.txt ]
+    if [ $CONFIG_SAVED -eq 1 ] ;
     then
-        echo "  Loaded configuration from setup.txt"
+        tput setaf 1
+        echo "  Configuration SAVED!"
+        CONFIG_SAVED=0
     else
-        echo "  Loaded default configuration"
+        if [ -f setup.txt ]
+        then
+            echo "  Loaded configuration from setup.txt"
+        else
+            echo "  Loaded default configuration"
+        fi
     fi
     tput sgr0
 }
@@ -123,7 +130,7 @@ system_menu()
                  SEL=1
              fi
              continue ;;
-        "q") QUIT=1
+        "Q") QUIT=1
             continue ;;
     esac
 }

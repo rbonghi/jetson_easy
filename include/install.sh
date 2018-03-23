@@ -60,8 +60,7 @@ installation_setup()
 #    echo "   4. [ ] Setup user and email git"
 #    echo "   5. [ ] Install ROS"
 #    echo "   6. [ ] Install USB and ACM driver"
-
-    tput bold
+    tput bold    
     echo "  MENU"
     tput sgr0
     echo "  [I] .. System Information"
@@ -78,9 +77,11 @@ installation_setup()
             QUIT=1
             continue ;;
         "M")  # Modify script
-            modify_list_modules 9 6
+            modify_list_modules 10 6
             continue ;;
-        "S") continue ;;
+        "S") # Save setup
+             save_setup
+             continue ;;
         "R")  # Launch Installing script
             SEL=2
             continue ;;

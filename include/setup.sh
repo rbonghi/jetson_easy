@@ -28,7 +28,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 LOAD_SCRIPT=""
-
+CONFIG_SAVED=0
+    
 load_all_modules()
 {
     # Read all scripts in modules
@@ -45,18 +46,22 @@ load_all_modules()
     done
 }
 
+save_setup()
+{
+    echo "LOAD_SCRIPT=\"$LOAD_SCRIPT\"" > setup.txt
+    CONFIG_SAVED=1
+}
+
 load_modules()
 {
     if [ -f setup.txt ]
     then
         echo "Setup found!"
+        source setup.txt
     else
         echo "Setup NOT found!"
         load_all_modules
     fi
-    
-    # TEMP
-    load_all_modules
 }
 
 modify_list_modules()
