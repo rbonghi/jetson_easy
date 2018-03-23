@@ -41,6 +41,10 @@ convert_string()
 # Load hte installation page script
 installation_setup()
 {
+    # Load which type of configuration is loaded
+    tput setaf 4
+    print_isSetup
+    
     tput setaf 4
     echo "  Legend: [X]= Run [ ]= Skip"
     echo ""

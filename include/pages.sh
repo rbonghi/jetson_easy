@@ -54,8 +54,24 @@ title_header()
     tput cup 6 0
 }
 
+print_isSetup()
+{
+    tput bold
+    if [ -f setup.txt ]
+    then
+        echo "  Loaded configuration from setup.txt"
+    else
+        echo "  Loaded default configuration"
+    fi
+    tput sgr0
+}
+
 system_information()
 {    
+    # Load which type of configuration is loaded
+    tput setaf 2
+    print_isSetup
+    
     tput setaf 2
     echo "  User: $LOCAL_USER"
     echo "  Hostname: $HOSTNAME"
