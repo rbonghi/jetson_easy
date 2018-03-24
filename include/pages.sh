@@ -102,7 +102,7 @@ system_information()
         echo "  NVIDIA embedded:"
         echo "   - Board: $JETSON_DESCRIPTION"
         echo "   - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
-        echo "   - CUDA: $CUDA_VERSION"
+        echo "   - CUDA: $JETSON_CUDA"
         tput sgr0
     fi
 }

@@ -67,9 +67,6 @@ OS_KERNEL=$(uname -r)
 # - JETSON_DESCRIPTION
 source jetson/jetson_release.sh
 
-# Load cuda version
-CUDA_VERSION=$(cat /usr/local/cuda/version.txt | sed 's/\CUDA Version //g')
-
 # User before sudo
 LOCAL_USER=$SUDO_USER
 
