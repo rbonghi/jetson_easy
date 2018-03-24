@@ -124,14 +124,28 @@ ending_page()
         echo "    Reboot required!"
         echo ""
         tput sgr0
+        # Check if you want reboot one time
+        read -r -p "  Do you want reboot now [y/N]?  " response
+        case "$response" in
+            [yY][eE][sS]|[yY]) 
+                # Send reboot command
+                QUIT=1
+                # Reboot the system
+                sudo reboot ;;
+            [nN][oO]|[nN])
+                # Send reboot command
+                QUIT=1 ;;
+            *)  # Otherwise skip
+                continue ;;
+        esac
+    else
+        # Wait before to close
+        #read -p "Press enter to continue"
+        tput bold
+        read -n 1 -s -r -p "  Press any key to CLOSE"
+        tput sgr0
+        # Close script
+        QUIT=1
+        continue
     fi
-    
-    # Wait before to close
-    #read -p "Press enter to continue"
-    tput bold
-    read -n 1 -s -r -p "  Press any key to CLOSE"
-    tput sgr0
-    # Close script
-    QUIT=1
-    continue
 }

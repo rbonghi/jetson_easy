@@ -118,20 +118,22 @@ system_menu()
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
     then 
         echo "  [J] .. Start Jetson Easy"
+        echo "  [Q] .. QUIT"
+        
+        read -r -p "  Select item: " SEL
+        case "${SEL^^}" in
+            "J") SEL=1
+                 continue ;;
+            "Q") QUIT=1
+                continue ;;
+        esac
+    else
+        tput bold
+        read -n 1 -s -r -p "  Press any key to CLOSE"
+        tput sgr0
+        # Close script
+        QUIT=1
+        continue
     fi
-    
-    echo "  [Q] .. QUIT"
-    
-    read -r -p "  Select item: " SEL
-    case "${SEL^^}" in
-        "J") # Enable S button only if a Jetson Bpard or is in debug mode
-             if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
-             then
-                 SEL=1
-             fi
-             continue ;;
-        "Q") QUIT=1
-            continue ;;
-    esac
 }
 

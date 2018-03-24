@@ -65,6 +65,7 @@ OS_KERNEL=$(uname -r)
 # - JETSON_BOARD
 # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
 # - JETSON_DESCRIPTION
+# - JETSON_CUDA
 source jetson/jetson_release.sh
 
 # User before sudo
