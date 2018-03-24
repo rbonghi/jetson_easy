@@ -38,7 +38,10 @@ run_script()
     local JETSON_BIN_FOLDER="/usr/local/bin"
     
     # Uninstall the service
-    sudo service jetson_performance uninstall
+    if service --status-all | grep -Fq 'jetson_performance'; then
+        echo "Stop and uninstall the jetson performance script"
+        sudo service jetson_performance uninstall
+    fi
 
     if [ -d "$JETSON_FOLDER" ]; then
         # remove folder
