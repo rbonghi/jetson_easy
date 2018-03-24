@@ -32,24 +32,6 @@ if [ -f DEBUG ]; then
     DEBUG=1
 fi
 
-# Request sudo password
-if [ $EUID != 0 ]; then
-    sudo "$0" "$@"
-    exit $?
-fi
-
-TEXT_RESET='\e[0m'
-TEXT_GREEN='\e[0;32m'
-TEXT_YELLOW='\e[0;33m'
-TEXT_RED_B='\e[1;31m'
-
-# Load all script in folder
-for file in include/* ; do
-  if [ -f "$file" ] ; then
-    source "$file"
-  fi
-done
-
 # Load environment variables:
 # - DISTRIB_ID
 # - DISTRIB_RELEASE
@@ -68,63 +50,156 @@ OS_KERNEL=$(uname -r)
 # - JETSON_CUDA
 source jetson/jetson_variables.sh
 
-# User before sudo
-LOCAL_USER=$SUDO_USER
+menu_title()
+{
+    if [ ! -z ${DEBUG+x} ]
+    then
+        echo "DEBUG MODE - Biddibi Boddibi Boo"
+    else
+        echo "Biddibi Boddibi Boo"
+    fi
+}
 
-#loop around gathering input until QUIT is more than 0
-QUIT=0
+menu_header()
+{
+    echo "NVIDIA Jetson Easy setup script"
+    echo "Author: Raffaello Bonghi"
+    echo " email: raffaello@rnext.it"
+}
+
+jetson_status()
+{
+    echo "NVIDIA embedded:"
+    echo " - Board: $JETSON_DESCRIPTION"
+    echo " - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
+    echo " - CUDA: $JETSON_CUDA"
+}
+
+system_info()
+{
+    menu_header
+    echo ""
+    echo "User: $USER"
+    echo "Hostname: $HOSTNAME"
+    echo ""
+    echo "System:"
+    echo " - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
+    echo " - Architecture: $OS_ARCHITECTURE"
+    echo " - Kernel: $OS_KERNEL"
+    echo ""
+    jetson_status
+}
+
+LOAD_SCRIPT=""
+
+modules_load_all()
+{
+    # Read all scripts in modules
+    for file in modules/* ; do
+      if [ -f "$file" ] ; then
+        # Load source
+        source "$file"
+        # Load all modules
+        LOAD_SCRIPT+="$(echo $file):"
+      fi
+    done
+}
+
 # Start menu
-SEL=0
+MENU_SELECTION=menu_information
 
-# Load setup
-load_modules
+menu_information()
+{
+    if (whiptail --title "$(menu_title)" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
+    then
+        #Execute configuration menu
+        MENU_SELECTION=menu_configuration   
+    else
+        # Quit the script
+        MENU_SELECTION=0
+    fi
+}
 
-# Resize shell 
-resize -s 30 80
-
-while [ $QUIT -lt 1 ]
-do
-    # Clear shell
-    tput clear
+submenu_configuration()
+{
+    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Submenu of $1"
     
-    #Delete from cursor to end of line
-    #tput el
-    case $SEL in
-        1)  # Load header
-            title_header "Start-Jetson Easy"
-            # Load page
-            installation_setup ;;
-        2)  # Load header
-            title_header "Jetson Easy-Installing"
-            # Load page
-            installing_page ;;
-        3)  # Load header
-            title_header "Jetson Easy-Recap"
-            # Load page
-            ending_page ;;
-        *)  # Load header
-            title_header "System-Information"
-            # Load page
-            system_information
-            system_menu ;;
+    echo "Your chosen option:" $1
+}
+
+menu_configuration()
+{
+    local MENULIST=()
+    local COUNTER=1
+    # Load first element in menu
+    MENULIST+=("<--Back" "Turn to Information menu")
+    # Read modules
+    for file in modules/* ; do
+      if [ -f "$file" ] ; then
+        # Load source
+        source "$file"
+        # Add element in menu
+        MENULIST+=("$COUNTER" "$MODULE_NAME")
+        #Increase counter
+        COUNTER=$((COUNTER+1))
+      fi
+    done
+    # Load last element in menu
+    MENULIST+=("Start-->" "Start install")
+    # Evaluate the size
+    local ARLENGTH
+    let ARLENGTH=${#repoar[@]}
+    # Load menu
+    local OPTION=0
+    while [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
+    do
+        # Write the menu         
+        OPTION=$(whiptail --title "Test Menu Dialog" --menu "Choose your option" 25 60 $ARLENGTH "${MENULIST[@]}" 3>&1 1>&2 2>&3)
+        
+        exitstatus=$?
+        if [ $exitstatus = 0 ]; then
+            # Load submenu only if is not "Start-->" or "<--Back"
+            if [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
+            then
+                submenu_configuration $OPTION
+            fi
+        else
+            # You chose Cancel
+            OPTION="<--Back"
+        fi
+    done
+    
+    case $OPTION in
+        "<--Back")
+            MENU_SELECTION=menu_information
+            ;;
+        "Start-->")
+            MENU_SELECTION=menu_install
+            ;;
+        *)
+            MENU_SELECTION=menu_information
+            ;;
     esac
+}
 
-done
+menu_install()
+{
+    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Installing ..."
+    # Quit
+    MENU_SELECTION=0
+}
 
-#reset the screen
-#Find out if this is a "linux" virtual terminal
-if [ $TERM ~ "linux" ]
+
+if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]
 then
-     tput setb 0 #reset background to black
-fi
-
-tput reset
-tput clear
-tput rc
-
-if [ -f /var/run/reboot-required ]; then
-    echo -e $TEXT_RED_B
-    echo 'Reboot required!'
-    echo -e $TEXT_RESET
+    # Loop menu
+    while [ $MENU_SELECTION != 0 ]
+    do  
+        # Load Menu
+        ${MENU_SELECTION}
+    done
+    
+else
+    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
 fi
 
