@@ -125,10 +125,12 @@ ending_page()
         echo ""
         tput sgr0
         # Check if you want reboot one time
+        tput bold
         read -r -p "  Do you want reboot now [y/N]?  " response
+        tput sgr0
         case "$response" in
             [yY][eE][sS]|[yY]) 
-                # Send reboot command
+                # Close the script
                 QUIT=1
                 # Reboot the system
                 sudo reboot ;;

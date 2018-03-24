@@ -110,13 +110,12 @@ system_information()
 system_menu()
 {    
     echo ""
-    tput bold
-    echo "  MENU"
-    tput sgr0
-    
     # Add in menu the option to start the jetson easy only if is a Jetson board or is in debug mode
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]; 
     then 
+        tput bold
+        echo "  MENU"
+        tput sgr0
         echo "  [J] .. Start Jetson Easy"
         echo "  [Q] .. QUIT"
         
