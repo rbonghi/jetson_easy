@@ -122,26 +122,44 @@ menu_information()
 
 submenu_configuration()
 {
-    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Submenu of $1"
-    
-    echo "Your chosen option:" $1
+    # Load source
+    source "$1"
+    # Execute the function with the same name    
+    local FUNC=$(echo $1 | cut -f2 -d "/")
+    # Check if exist the function   
+    if type ${FUNC} &>/dev/null 
+    then
+        ${FUNC}
+    else
+        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "DEFAULT - Submenu of $MODULE_NAME"
+    fi
+    # Print the choice
+    echo "Your chosen option:" $MODULE_NAME
 }
 
 menu_configuration()
 {
     local MENULIST=()
+    local MENU_REFERENCE=()
     local COUNTER=1
     # Load first element in menu
     MENULIST+=("<--Back" "Turn to Information menu")
+    MENU_REFERENCE+=("0" "")
     # Read modules
-    for file in modules/* ; do
-      if [ -f "$file" ] ; then
-        # Load source
-        source "$file"
-        # Add element in menu
-        MENULIST+=("$COUNTER" "$MODULE_NAME")
-        #Increase counter
-        COUNTER=$((COUNTER+1))
+    for folder in modules/* ; do
+      if [ -d "$folder" ] ; then
+        # Check if exist the same file with the name of the folder
+        local FILE="$folder"/$(echo $folder | cut -f2 -d "/").sh
+        if [ -f $FILE ]
+        then
+            # Load source
+            source "$FILE"
+            # Add element in menu
+            MENULIST+=("$COUNTER" "$MODULE_NAME")
+            MENU_REFERENCE+=("$COUNTER" "$FILE")
+            #Increase counter
+            COUNTER=$((COUNTER+1))
+        fi
       fi
     done
     # Load last element in menu
@@ -161,7 +179,7 @@ menu_configuration()
             # Load submenu only if is not "Start-->" or "<--Back"
             if [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
             then
-                submenu_configuration $OPTION
+                submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
             fi
         else
             # You chose Cancel

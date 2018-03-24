@@ -63,3 +63,9 @@ run_script()
     tput sgr0
 }
 
+0-update_upgrade()
+{
+    # Write name
+    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Submenu of $MODULE_NAME"
+}
+
