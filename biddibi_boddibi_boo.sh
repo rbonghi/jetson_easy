@@ -79,6 +79,9 @@ SEL=0
 # Load setup
 load_modules
 
+# Resize shell 
+resize -s 30 80
+
 while [ $QUIT -lt 1 ]
 do
     # Clear shell
