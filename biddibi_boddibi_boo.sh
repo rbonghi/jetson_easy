@@ -66,7 +66,7 @@ OS_KERNEL=$(uname -r)
 # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
 # - JETSON_DESCRIPTION
 # - JETSON_CUDA
-source jetson/jetson_release.sh
+source jetson/jetson_variables.sh
 
 # User before sudo
 LOCAL_USER=$SUDO_USER
