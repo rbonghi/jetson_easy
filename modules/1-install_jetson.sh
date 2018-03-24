@@ -37,6 +37,9 @@ run_script()
     local JETSON_FOLDER="/etc/jetson_easy"
     local JETSON_BIN_FOLDER="/usr/local/bin"
     
+    # Uninstall the service
+    sudo service jetson_performance uninstall
+
     if [ -d "$JETSON_FOLDER" ]; then
         # remove folder
         echo "Remove old folder"
