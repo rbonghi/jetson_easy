@@ -49,6 +49,7 @@ run_script()
     # Write a new dir and copy scripts
     sudo mkdir $JETSON_FOLDER
     sudo cp $(pwd)/jetson/jetson_variables.sh "$JETSON_FOLDER/jetson_variables"
+    sudo cp $(pwd)/jetson/jetson_performance.sh "$JETSON_FOLDER/jetson_performance.sh"
     
     echo "Load jetson_release script $JETSON_FOLDER ..."
     sudo cp $(pwd)/jetson/jetson_release.sh "$JETSON_BIN_FOLDER/jetson_release"
@@ -56,6 +57,7 @@ run_script()
     # Add reference jetson_reference
     
     # Install Jetson perfomance service
+    sudo $JETSON_FOLDER/jetson_performance.sh install
     
     # Set default configuration
     
