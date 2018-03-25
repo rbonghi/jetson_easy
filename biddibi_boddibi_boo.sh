@@ -60,7 +60,9 @@ source include/modules.sh
 usage()
 {
 	if [ "$1" != "" ]; then
-		echo -e ${RED}"$1"${NC}
+    	tput setaf 1
+		echo "$1"
+		tput sgr0
 	fi
 	
     echo "Bibbibi Boddibi Boo is an automatic install for different type of modules."
