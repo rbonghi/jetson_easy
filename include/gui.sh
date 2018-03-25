@@ -144,9 +144,25 @@ submenu_extra()
     local  __enablevar=$2
     
     local MENU_EXTRA=()
+    local MENU_EXTRA_FUNC=()
     MENU_EXTRA+=("<--Back" "Turn to Information menu")
     MENU_EXTRA+=("Enable" "Enable or disable this module")
-    local OPTION_EXTRA=$(whiptail --title "$MODULE_NAME" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_EXTRA[@]}" 3>&1 1>&2 2>&3)
+    MENU_EXTRA_FUNC+=("0")
+    local COUNTER=1
+    local sub_element
+    for sub_element in "${MODULE_SUBMENU[@]}"
+    do
+        local name=$(echo $sub_element | cut -f1 -d ":")
+        local func=$(echo $sub_element | cut -f2 -d ":")
+        MENU_EXTRA+=("$COUNTER" "$name")
+        MENU_EXTRA_FUNC+=("$func")
+        #Increase counter
+        COUNTER=$((COUNTER+1))
+    done
+    
+    OPTION_EXTRA=$(whiptail --title "$MODULE_NAME" --menu "$MODULE_DESCRIPTION
+    
+    Choose your option" 25 60 $ARLENGTH "${MENU_EXTRA[@]}" 3>&1 1>&2 2>&3)
     
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
@@ -160,10 +176,11 @@ submenu_extra()
             # Load submenu
             submenu_configuration $3
             
-        elif [[ $OPTION_EXTRA != "Start-->" && $OPTION_EXTRA != "<--Back" ]]
+        elif [ $OPTION_EXTRA != "<--Back" ]
         then
-            echo "Called $OPTION_EXTRA"
-            #submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
+            # echo "Called $OPTION_EXTRA + ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}"
+            # Run extra menu
+            ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}
         fi
     else
         # You chose Cancel
@@ -173,14 +190,15 @@ submenu_extra()
 
 submenu_configuration()
 {
+    unset MODULE_SUBMENU
     # Load source
     source "$1"
     # Load the function with the same name    
     local FUNC=$(echo $1 | cut -f2 -d "/")
     # Save the name of the function
     local NAME=$(echo $FUNC | cut -f1 -d ".")
-    # Check if exist the function   
-    if type ${FUNC} &>/dev/null 
+    # Check if exist the function
+    if [ ! -z ${MODULE_SUBMENU+x} ]
     then
         # Launch the function
         # ${FUNC} $(modules_isInList $NAME) STATUS
