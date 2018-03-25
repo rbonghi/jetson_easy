@@ -40,6 +40,16 @@ script_run()
 {
     # Automatically update all packages
     tput setaf 6
+    echo 'APT Set repository [universe, multiverse, restricted]'
+    tput sgr0
+    
+    # Configure repositories
+    sudo apt-add-repository universe
+    sudo apt-add-repository multiverse
+    sudo apt-add-repository restricted
+
+    # Automatically update all packages
+    tput setaf 6
     echo 'APT update starting...'
     tput sgr0
     sudo apt-get update

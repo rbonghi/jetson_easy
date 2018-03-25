@@ -150,7 +150,7 @@ submenu_default()
         #echo "You chose Cancel."
         eval $__enablevar="-1"
     fi
-    
+
 }
 
 submenu_extra()
