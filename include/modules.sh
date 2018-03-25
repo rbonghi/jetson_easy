@@ -87,7 +87,33 @@ modules_save()
         MODULES_CONFIG=$1
     fi
     
-    echo "MODULES_LIST=\"$MODULES_LIST\"" > $MODULES_CONFIG
+    echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG
+    
+    for folder in $MODULES_FOLDER/* ; do
+      if [ -d "$folder" ] ; then
+        # Check if exist the same file with the name of the folder
+        local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FILE="$folder"/$FILE_NAME.sh
+        if [ -f $FILE ]
+        then
+            # Unset save function
+            unset -f script_save
+            # Load source
+            source "$FILE"
+            # Check if exist the function
+            if type script_save &>/dev/null
+            then
+                # Write name module
+                echo "# Variables for: $MODULE_NAME" >> $MODULES_CONFIG
+                # Save script
+                script_save $MODULES_CONFIG
+            fi
+        fi
+      fi
+    done
+    
+    echo "# List of availables modules" >> $MODULES_CONFIG
+    echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG
     
     echo "Save in $MODULES_CONFIG"
 }
@@ -210,7 +236,7 @@ modules_run()
                 # Write name module
                 echo "Running module - $MODULE_NAME"
                 # run script
-                exesudo run_script
+                exesudo script_run
             fi
         done
         echo "... Done"

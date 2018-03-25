@@ -31,6 +31,11 @@
 # GUI
 # --------------------------------
 
+# Reference:
+# http://manpages.ubuntu.com/manpages/xenial/man1/whiptail.1.html
+# https://en.wikibooks.org/wiki/Bash_Shell_Scripting/Whiptail
+# http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
+
 menu_title()
 {
     if [ ! -z ${DEBUG+x} ]
@@ -181,6 +186,8 @@ submenu_extra()
             # echo "Called $OPTION_EXTRA + ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}"
             # Run extra menu
             ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}
+            # Load submenu
+            submenu_configuration $3
         fi
     else
         # You chose Cancel

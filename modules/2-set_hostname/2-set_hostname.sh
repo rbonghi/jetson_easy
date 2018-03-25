@@ -34,25 +34,33 @@ MODULE_DESCRIPTION="Set a new hostname for the board."
 MODULE_DEFAULT=0
 MODULE_SUBMENU=("Write new hostname:new_hostname")
 
-run_script()
+script_run()
 {
     echo "Run script ..."
 }
 
+script_save()
+{
+    if [ ! -z ${NEW_HOSTNAME+x} ]
+    then
+        echo "NEW_HOSTNAME=\"$NEW_HOSTNAME\"" >> $1
+        echo "Saved Hostname"
+    fi
+}
+
 new_hostname()
 {
-    COLOR=$(whiptail --inputbox "What is your favorite Color?" 8 78 Blue --title "Example Dialog" 3>&1 1>&2 2>&3)
-                                                                            # A trick to swap stdout and stderr.
-    # Again, you can pack this inside if, but it seems really long for some 80-col terminal users.
+    if [ -z ${NEW_HOSTNAME+x} ]
+    then
+        # Write hostname
+        NEW_HOSTNAME=$HOSTNAME
+    fi
+    
+    HOSTNAME_TMP_VALUE=$(whiptail --inputbox "Set new hostname" 8 78 $NEW_HOSTNAME --title "New hostname" 3>&1 1>&2 2>&3)
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
-        echo "User selected Ok and entered " $COLOR
-    else
-        echo "User selected Cancel."
+        # Write the new hostname
+        NEW_HOSTNAME=$HOSTNAME_TMP_VALUE
     fi
-
-    echo "(Exit status was $exitstatus)"
-    
-    echo "hello"
 }
 

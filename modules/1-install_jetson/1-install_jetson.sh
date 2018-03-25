@@ -33,7 +33,7 @@ MODULE_NAME="Install Jetson performance service"
 MODULE_DESCRIPTION="Install jetson_release add variables and jetson_performance"
 MODULE_DEFAULT=1
 
-run_script()
+script_run()
 {
     local JETSON_FOLDER="/etc/jetson_easy"
     local JETSON_BIN_FOLDER="/usr/local/bin"
@@ -72,7 +72,5 @@ run_script()
     # END
     echo "... END INSTALL!"
 }
-
-
 
 

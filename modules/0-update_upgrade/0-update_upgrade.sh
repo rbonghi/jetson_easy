@@ -36,7 +36,7 @@ MODULE_DESCRIPTION="Launch in order:
  - apt-get upgrade"
 MODULE_DEFAULT=1
 
-run_script()
+script_run()
 {
     # Automatically update all packages
     tput setaf 6
