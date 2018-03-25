@@ -269,21 +269,76 @@ menu_information()
 
 menu_install()
 {
-    whiptail --title "$(menu_title) - Install" --textbox /dev/stdin 30 60 <<< "Installing ...
+    #Password Input
+    psw=$(whiptail --title "$(menu_title) - SUDO Password" --passwordbox "Enter your password and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+    #Password If
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
     
-$(modules_run)"
-    # Move to recap menu
-    MENU_SELECTION=menu_recap
+        # Launch installation menu
+        #whiptail --title "$(menu_title) - Install" --textbox /dev/stdin 30 60 <<< "Installing ..."
+        
+        # Check if the root password if good
+        sudo -k # make sure to ask for password on next sudo
+        if $(echo $psw | sudo -S -i true); then
+            # Run module
+            modules_run
+            # Move to recap menu
+            MENU_SELECTION=menu_recap
+        fi        
+    else
+        #Password If cancel
+        whiptail --title "Cancel" --msgbox "Operation Cancel" 10 60
+        #Execute configuration menu
+        MENU_SELECTION=menu_configuration
+    fi
+}
+
+menu_list_installed()
+{
+    local folder
+    # Read modules
+    echo "Modules installed:"
+    echo ""
+    for folder in $MODULES_FOLDER/* ; do
+      if [ -d "$folder" ] ; then
+        # Check if exist the same file with the name of the folder
+        local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FILE="$folder"/$FILE_NAME.sh
+        if [ -f $FILE ]
+        then
+            if [ $(modules_isInList $FILE_NAME) == "1" ]
+            then
+                # Load source
+                source "$FILE"
+                # Add element in menu
+                echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
+            fi
+        fi
+      fi
+    done
+    if [ $(modules_require_reboot) == "1" ]
+    then
+        echo ""
+        echo ""
+        echo "    REBOOT REQUIRED!"
+    fi
 }
 
 menu_recap()
 {
-    whiptail --title "$(menu_title) - Recap" --textbox /dev/stdin 30 60 <<< "Recap ... 
-
-BLA BLA
-BLA BLA
-BLA BLA
-BLA BLA"
+    if [ $(modules_require_reboot) == "1" ]
+    then
+        # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
+        if (whiptail --title "$(menu_title) - Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 30 60) then
+            echo "System rebotting ... "
+            sudo reboot
+        else
+            echo "System require a reboot!"
+        fi
+    else
+        whiptail --title "$(menu_title) - Recap" --textbox /dev/stdin 30 60 <<< "$(menu_list_installed)"
+    fi
     # Quit
     MENU_SELECTION=0
 }

@@ -183,8 +183,19 @@ modules_remove()
     fi
 }
 
+
+test_it_out ()
+{
+    local params=( "$@" )
+    echo "Hello "$( whoami )"!"
+    echo "You passed the following params:"
+    printf "%s\n" "${params[@]}" ## print array
+}
+
 modules_run()
 {
+    source include/exesudo.sh
+    
     if [ ! -z $MODULES_LIST ]
     then
         echo "Start install script..."
@@ -198,12 +209,22 @@ modules_run()
                 source "$FILE"
                 # Write name module
                 echo "Running module - $MODULE_NAME"
-                
+                # run script
+                exesudo run_script
             fi
         done
         echo "... Done"
     else
         echo "No modules"
+    fi
+}
+
+modules_require_reboot()
+{
+    if [ -f /var/run/reboot-required ]; then
+        echo "1"
+    else
+        echo "0"
     fi
 }
 
