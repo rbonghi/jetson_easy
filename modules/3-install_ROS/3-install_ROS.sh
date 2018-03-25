@@ -30,9 +30,37 @@
 # Install ROS
 
 MODULE_NAME="Install ROS"
+MODULE_DESCRIPTION="Install ROS, set a new hostname and set a new master uri"
 MODULE_DEFAULT=0
+MODULE_SUBMENU=("Set distro:set_distro" "Install workspace:write_workspace")
 
-run_script()
+script_run()
 {
     echo "Run script ..."
+}
+
+set_distro()
+{
+    if [ -z ${ROS_DISTRO+x} ]
+    then
+        # Write hostname
+        ROS_DISTRO="kinetic"
+    fi
+    
+    ROS_DISTRO_TMP_VALUE=$(whiptail --inputbox "Set distribution" 8 78 $ROS_DISTRO --title "Set ROS distribution" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the new hostname
+        ROS_DISTRO=$ROS_DISTRO_TMP_VALUE
+    fi
+}
+
+write_workspace()
+{
+    HOSTNAME_TMP_VALUE=$(whiptail --inputbox "Set new hostname" 8 78 VERDE --title "New hostname" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the new hostname
+        echo "HELLO"
+    fi
 }
