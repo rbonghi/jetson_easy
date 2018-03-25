@@ -88,6 +88,9 @@ modules_save()
     fi
     
     echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG
+    echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG
+    echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG
+    echo "" >> $MODULES_CONFIG
     
     for folder in $MODULES_FOLDER/* ; do
       if [ -d "$folder" ] ; then
