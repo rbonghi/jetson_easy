@@ -29,7 +29,7 @@
 
 MODULES_LIST=""
 MODULES_FOLDER="modules"
-MODULES_CONFIG=""
+MODULES_CONFIG="setup.txt"
 
 # --------------------------------
 # LOAD_MODULES
@@ -61,10 +61,8 @@ modules_load_default()
 
 modules_load()
 {
-    if [ -z $1 ]
+    if [ ! -z $1 ]
     then
-        MODULES_CONFIG="setup.txt"
-    else
         MODULES_CONFIG=$1
     fi
     

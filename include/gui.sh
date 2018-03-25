@@ -267,7 +267,7 @@ menu_load_list()
     # Load last element in menu
     MENU_LIST+=("Start-->" "Start install")
     # Load last element in menu
-    MENU_LIST+=("Save" "Save configuration in setup.txt")
+    MENU_LIST+=("Save" "Save configuration in $MODULES_CONFIG")
 }
 
 menu_configuration()

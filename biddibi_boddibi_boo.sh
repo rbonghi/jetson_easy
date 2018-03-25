@@ -50,6 +50,9 @@ OS_KERNEL=$(uname -r)
 # - JETSON_CUDA
 source jetson/jetson_variables.sh
 
+# Load user interface
+source include/modules.sh
+
 # --------------------------------
 # MAIN
 # --------------------------------
@@ -66,12 +69,11 @@ usage()
     echo "options,"
     echo "   -h|--help | This help"
     echo "   -s        | Launch the system in silent mode (Without GUI)"
+    echo "   -c [file] | Load configuration file from other reference [file]"
 }
 
 loop_gui()
 {
-    # Load user interface
-    source include/modules.sh
     # Load user interface
     source include/gui.sh
     
@@ -83,14 +85,8 @@ loop_gui()
 
 silent_mode()
 {
-    # Load user interface
-    source include/modules.sh
-
     # Load all modules
     modules_load
-
-    # Load user interface
-    source include/gui.sh
     
     # All modules are in MODULES_LIST
     echo "Module loaded:"
@@ -111,6 +107,11 @@ main()
 {
     while [ -n "$1" ]; do
 	    case "$1" in
+	        -c)
+	            # Load configuration file from other reference [file]
+	            MODULES_CONFIG="$2"
+	            shift 1
+	            ;;
 	        -s)
 	            # Launch the system in silent mode (Without GUI)
 	            silent_mode
