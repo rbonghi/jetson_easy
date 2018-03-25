@@ -138,6 +138,37 @@ submenu_default()
     
 }
 
+submenu_extra()
+{
+    # Load enable variable
+    local  __enablevar=$2
+    
+    local MENU_EXTRA=()
+    MENU_EXTRA+=("<--Back" "Turn to Information menu")
+    MENU_EXTRA+=("Enable" "Enable or disable this module")
+    local OPTION_EXTRA=$(whiptail --title "$MODULE_NAME" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_EXTRA[@]}" 3>&1 1>&2 2>&3)
+    
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Load submenu only if is not "Start-->" or "<--Back"
+        if [ $OPTION_EXTRA == "Enable" ]
+        then
+            # Load default Enable menu
+            submenu_default $1 STATUS
+            #echo "You chose Cancel."
+            eval $__enablevar="$STATUS"
+            
+        elif [[ $OPTION_EXTRA != "Start-->" && $OPTION_EXTRA != "<--Back" ]]
+        then
+            echo "Called $OPTION_EXTRA"
+            #submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
+        fi
+    else
+        # You chose Cancel
+        OPTION_EXTRA="<--Back"
+    fi
+}
+
 submenu_configuration()
 {
     # Load source
@@ -150,7 +181,8 @@ submenu_configuration()
     if type ${FUNC} &>/dev/null 
     then
         # Launch the function
-        ${FUNC} $(modules_isInList $NAME) STATUS
+        # ${FUNC} $(modules_isInList $NAME) STATUS
+        submenu_extra $(modules_isInList $NAME) STATUS
     else
         # Load default_menu to enable/disable this script
         submenu_default $(modules_isInList $NAME) STATUS

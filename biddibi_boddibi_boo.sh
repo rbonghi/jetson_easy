@@ -60,11 +60,7 @@ source include/modules.sh
 # Load all modules
 modules_load
 # Print list of modules
-echo $MODULES_LIST
-
-#modules_run "develop"
-
-#exit 0
+# echo $MODULES_LIST
 
 # --------------------------------
 # GUI
