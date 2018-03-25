@@ -27,38 +27,58 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Install all Jetson enviroments variables and performance service
+JETSON_FOLDER="/etc/jetson_easy"
+JETSON_BIN_FOLDER="/usr/local/bin"
 
-MODULE_NAME="Install Jetson performance service"
-MODULE_DESCRIPTION="Install jetson_release add variables and jetson_performance"
-MODULE_DEFAULT=1
-
-script_run()
-{
-    tput setaf 6
-    echo "Uninstall previous version of jetson_easy"
+# Uninstall the service
+if service --status-all | grep -Fq 'jetson_performance'; then
+    tput setaf 1
+    echo "Stop and jetson_performance service"
     tput sgr0
-    
-    local LOCAL_FOLDER=$(pwd)
-    
-    # Move in jetson folder
-    cd $(pwd)/jetson
+    # Stop the service
+    sudo service jetson_performance stop
+fi
 
-    # Launch uninstaller jetson_easy
-    . uninstall_jetson_easy.sh
-    
-    tput setaf 6
-    echo "Install jetson_easy"
-    tput sgr0
-    
-    # Launch installer jetson_easy
-    . install_jetson_easy.sh
-    
-    cd $LOCAL_FOLDER
-    
-    tput setaf 6
-    echo "Complete!"
-    tput sgr0
-}
+# Remove configuration
+if [ -f $JETSON_FOLDER/l4t_dfs.conf ]
+then
+    echo "Remove the jetson_clock.sh configuration"
+    sudo rm $JETSON_FOLDER/l4t_dfs.conf
+fi
 
+# Remove symbolic link
+if [ -f $JETSON_FOLDER/jetson_clocks.sh ]
+then
+    echo "Remove jetson_clock symbolic link"
+    sudo rm $JETSON_FOLDER/jetson_clocks.sh
+fi
+
+# Remove the service
+sudo update-rc.d -f jetson_performance remove
+
+# Remove the service from /etc/init.d
+if [ -f "/etc/init.d/jetson_performance" ]
+then
+    echo "Remove the service from /etc/init.d"
+    sudo rm "/etc/init.d/jetson_performance"
+fi
+
+# Update service list
+sudo systemctl daemon-reload
+
+# Remove jetson_release link
+if [ -f "$JETSON_BIN_FOLDER/jetson_release" ]
+then
+    echo "Remove jetson_release link"
+    sudo rm "$JETSON_BIN_FOLDER/jetson_release"
+fi
+
+# Remove jetson_easy folder
+if [ -d "$JETSON_FOLDER" ]; then
+    # remove folder
+    echo "Remove jetson_easy folder"
+    sudo rm -r $JETSON_FOLDER
+fi
+
+echo "Uninstall jetson_easy complete!"
 

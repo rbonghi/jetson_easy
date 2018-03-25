@@ -27,38 +27,40 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Install all Jetson enviroments variables and performance service
+JETSON_FOLDER="/etc/jetson_easy"
+JETSON_BIN_FOLDER="/usr/local/bin"
 
-MODULE_NAME="Install Jetson performance service"
-MODULE_DESCRIPTION="Install jetson_release add variables and jetson_performance"
-MODULE_DEFAULT=1
-
-script_run()
-{
-    tput setaf 6
-    echo "Uninstall previous version of jetson_easy"
+if [ -d "$JETSON_FOLDER" ]; then
+    # remove folder
+    tput setaf 1
+    echo "ERROR Folder $JETSON_FOLDER exist"
     tput sgr0
+    exit 0
+else
+    echo "Installing jetson_easy"
+    # Copy folder
+    echo "Copy $JETSON_FOLDER"
+    sudo mkdir $JETSON_FOLDER
+    sudo cp -r * $JETSON_FOLDER
+    # Link jetson_release
+    echo "Link jetson_release"
+    #sudo cp $(pwd)/jetson/jetson_release.sh "$JETSON_BIN_FOLDER/jetson_release"
+    sudo ln -s $JETSON_FOLDER/jetson_release.sh $JETSON_BIN_FOLDER/jetson_release
     
-    local LOCAL_FOLDER=$(pwd)
-    
-    # Move in jetson folder
-    cd $(pwd)/jetson
-
-    # Launch uninstaller jetson_easy
-    . uninstall_jetson_easy.sh
-    
-    tput setaf 6
-    echo "Install jetson_easy"
-    tput sgr0
-    
-    # Launch installer jetson_easy
-    . install_jetson_easy.sh
-    
-    cd $LOCAL_FOLDER
-    
-    tput setaf 6
-    echo "Complete!"
-    tput sgr0
-}
-
-
+    # Copy the service in /etc/init.d/
+    if [ ! -f "/etc/init.d/jetson_performance" ]
+    then
+        echo "Copy the service in /etc/init.d/"
+        sudo cp $JETSON_FOLDER/jetson_performance.sh "/etc/init.d/jetson_performance"
+    fi
+    # Add symbolic link of jetson_clock
+    if [ ! -f $JETSON_FOLDER/jetson_clocks.sh ]
+    then
+        echo "Link jetson_clock.sh"
+        sudo ln -s $HOME/jetson_clocks.sh $JETSON_FOLDER/jetson_clocks.sh
+    fi
+    # Install the service
+    sudo update-rc.d jetson_performance defaults
+    # Run the service
+    sudo service jetson_performance start
+fi
