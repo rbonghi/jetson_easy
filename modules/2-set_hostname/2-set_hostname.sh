@@ -36,7 +36,25 @@ MODULE_SUBMENU=("Write new hostname:new_hostname")
 
 script_run()
 {
-    echo "Run script ..."
+    if [ ! -z ${NEW_HOSTNAME+x} ]
+    then
+        if [ $NEW_HOSTNAME != $HOSTNAME ]
+        then
+            echo "Change hostname in /etc/hostname"
+            echo "$NEW_HOSTNAME" | sudo tee /etc/hostname
+            echo "Change hostname in /etc/hosts"
+            local HOSTS=$(cat /etc/hosts)
+            # Update reference
+            HOSTS="${HOSTS/$HOSTNAME/$NEW_HOSTNAME}"
+            sudo echo "$HOSTS" | sudo tee /etc/hosts
+            echo "Enable require reboot"
+            MODULES_REQUIRE_REBOOT=1
+        else
+            echo "Hostname already setted $HOSTNAME"
+        fi
+    else
+        echo "No NEW_HOSTNAME has setted"
+    fi
 }
 
 script_save()

@@ -237,7 +237,8 @@ modules_run()
                 # Write name module
                 echo "Running module - $MODULE_NAME"
                 # run script
-                exesudo script_run
+                # exesudo script_run
+                script_run
             fi
         done
         echo "... Done"
@@ -248,7 +249,8 @@ modules_run()
 
 modules_require_reboot()
 {
-    if [ -f /var/run/reboot-required ]; then
+    if [ -f /var/run/reboot-required ] || [ ! -z ${MODULES_REQUIRE_REBOOT+x} ]
+    then
         echo "1"
     else
         echo "0"

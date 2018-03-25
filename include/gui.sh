@@ -40,9 +40,9 @@ menu_title()
 {
     if [ ! -z ${DEBUG+x} ]
     then
-        echo "DEBUG MODE - Biddibi Boddibi Boo"
+        echo "DEBUG MODE -"
     else
-        echo "Biddibi Boddibi Boo"
+        echo ""
     fi
 }
 
@@ -66,7 +66,17 @@ system_info()
     menu_header
     echo ""
     echo "User: $USER"
-    echo "Hostname: $HOSTNAME"
+    if [ ! -z ${NEW_HOSTNAME+x} ]
+    then
+        if [ $NEW_HOSTNAME != $HOSTNAME ]
+        then
+            echo "Hostname: $HOSTNAME -> $NEW_HOSTNAME"
+        else
+            echo "Hostname: $HOSTNAME"         
+        fi
+    else
+        echo "Hostname: $HOSTNAME"
+    fi
     echo ""
     echo "System:"
     echo " - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
@@ -282,7 +292,7 @@ menu_configuration()
         local ARLENGTH
         let ARLENGTH=${#repoar[@]}
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title) - Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
@@ -316,7 +326,7 @@ menu_configuration()
 
 menu_information()
 {
-    if (whiptail --title "$(menu_title)" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
     then
         #Execute configuration menu
         MENU_SELECTION=menu_configuration   
@@ -329,7 +339,7 @@ menu_information()
 menu_install()
 {
     #Password Input
-    psw=$(whiptail --title "$(menu_title) - SUDO Password" --passwordbox "Enter your password and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+    psw=$(whiptail --title "$(menu_title)SUDO Password" --passwordbox "Enter your password and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
     #Password If
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
@@ -346,8 +356,6 @@ menu_install()
             MENU_SELECTION=menu_recap
         fi        
     else
-        #Password If cancel
-        whiptail --title "Cancel" --msgbox "Operation Cancel" 10 60
         #Execute configuration menu
         MENU_SELECTION=menu_configuration
     fi
@@ -389,14 +397,14 @@ menu_recap()
     if [ $(modules_require_reboot) == "1" ]
     then
         # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
-        if (whiptail --title "$(menu_title) - Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 30 60) then
+        if (whiptail --title "$(menu_title)Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 30 60) then
             echo "System rebotting ... "
             sudo reboot
         else
             echo "System require a reboot!"
         fi
     else
-        whiptail --title "$(menu_title) - Recap" --textbox /dev/stdin 30 60 <<< "$(menu_list_installed)"
+        whiptail --title "$(menu_title)Recap" --textbox /dev/stdin 30 60 <<< "$(menu_list_installed)"
     fi
     # Quit
     MENU_SELECTION=0
@@ -414,7 +422,7 @@ menu_loop()
         done
         
     else
-        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
+        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
     fi
 }
 
