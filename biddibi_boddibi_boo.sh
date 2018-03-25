@@ -56,6 +56,10 @@ source jetson/jetson_variables.sh
 
 usage()
 {
+	if [ "$1" != "" ]; then
+		echo -e ${RED}"$1"${NC}
+	fi
+	
     echo "Bibbibi Boddibi Boo is an automatic install for different type of modules."
     echo "Usage:"
     echo "$0 [options]"
@@ -104,20 +108,28 @@ silent_mode()
 
 main()
 {
-	case "$1" in
-	    -s)
-	        # Launch the system in silent mode (Without GUI)
-	        silent_mode
-	        ;;
-        -h|--help)
-            # Load help
-			usage
-			;;
-		*)
-		    # Load GUI menu loop
-			loop_gui
-			;;
-	esac
+    while [ -n "$1" ]; do
+	    case "$1" in
+	        -s)
+	            # Launch the system in silent mode (Without GUI)
+	            silent_mode
+	            exit 0
+	            ;;
+            -h|--help)
+                # Load help
+			    usage
+			    exit 0
+			    ;;
+		    *)
+		        usage "Unknown option: $1"
+		        exit 1
+			    ;;
+	    esac
+		shift 1
+	done
+	
+    # Load GUI menu loop
+    loop_gui
 }
 
 main $@
