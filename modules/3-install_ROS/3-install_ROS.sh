@@ -39,6 +39,15 @@ script_run()
     echo "Run script ..."
 }
 
+script_save()
+{
+    if [ ! -z ${ROS_DISTRO+x} ]
+    then
+        echo "ROS_DISTRO=\"$ROS_DISTRO\"" >> $1
+        echo "Saved ROS parameters"
+    fi
+}
+
 set_distro()
 {
     if [ -z ${ROS_DISTRO+x} ]
