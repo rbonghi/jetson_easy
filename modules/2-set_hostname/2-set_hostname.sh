@@ -37,3 +37,8 @@ run_script()
 {
     echo "Run script ..."
 }
+
+2-set_hostname()
+{
+        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "DEFAULT - Submenu of $MODULE_NAME"
+}

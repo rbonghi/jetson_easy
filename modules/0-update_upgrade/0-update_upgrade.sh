@@ -67,7 +67,4 @@ run_script()
     tput sgr0
 }
 
-0-update_upgrade()
-{
-        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "DEFAULT - Submenu of $MODULE_NAME"
-}
+

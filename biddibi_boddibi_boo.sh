@@ -71,11 +71,31 @@ modules_load_default()
             # If a default module
             if [ $MODULE_DEFAULT -eq 1 ]
             then
-                MODULES_LIST+="$FILE_NAME:"
+                MODULES_LIST+=":$FILE_NAME"
             fi
         fi
       fi
     done
+    # remove first in the list
+    MODULES_LIST=$(echo $MODULES_LIST | cut -f2- -d ":")
+}
+
+modules_load()
+{
+    if [ ! -z $1 ]
+    then
+        if [ -f $1 ]
+        then
+            echo "Setup \"$1\" found!"
+            source setup.txt
+        else
+            echo "Setup \"$1\" NOT found! Load default"
+            modules_load_default
+        fi
+    else
+        echo "Load default"
+        modules_load_default
+    fi
 }
 
 modules_isInList()
@@ -92,12 +112,73 @@ modules_isInList()
     echo "0"
 }
 
+modules_add()
+{
+    if [ ! -z $MODULES_LIST ]
+    then
+        local NEW_MODULES_LIST=""
+        if [ $(modules_isInList $1) == "0" ]
+        then
+            local one_add="0"
+            echo "Add new module $1"
+            local IDX=$( echo $1 | cut -f1 -d "-" )
+            # Build a reverse list
+            local REVERSE_MODULES_LIST=$(echo $MODULES_LIST | awk -F ':' '{ for (i=NF; i>1; i--) printf("%s:",$i); print $1; }')
+            # Build a new list add add in sequence
+            IFS=':' read -ra MODULE <<< "$REVERSE_MODULES_LIST"
+            for mod in "${MODULE[@]}"; do
+                # Get counter index
+                local COUNTER=$( echo $mod | cut -f1 -d "-" )
+                # echo "$IDX - $COUNTER"
+                if [ "$IDX" -ge "$COUNTER" ] && [ $one_add == "0" ]
+                then
+                    NEW_MODULES_LIST+="$1:$mod:"
+                    # Add one time
+                    one_add="1"
+                elif [ "$IDX" -le "$COUNTER" ] && [ $one_add == "0" ]
+                then
+                    # Add before
+                    NEW_MODULES_LIST+="$mod:$1:"
+                    # Add one time
+                    one_add="1"
+                else
+                    NEW_MODULES_LIST+="$mod:"
+                fi
+            done
+            # Reoder list
+            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | awk -F ':' '{ for (i=NF; i>1; i--) printf("%s:",$i); print $1; }')
+            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | cut -f2- -d ":")
+            #Update module list
+            MODULES_LIST=$NEW_MODULES_LIST
+        else
+            echo "Module $1 is already in list"
+        fi
+    else
+        # Add in list the first element
+        echo "Add new module $1"
+        MODULES_LIST+="$1"
+    fi
+}
+
+modules_remove()
+{
+    # modules_isInList $1
+    echo "Remove from list: $1"
+}
+
 # TODO temp
 
 # Load all modules
-modules_load_default
+#modules_load
 # Print list of modules
 echo $MODULES_LIST
+
+modules_add "1-pippo"
+echo $MODULES_LIST
+
+modules_add "2-pluto"
+echo $MODULES_LIST
+exit 0
 
 # --------------------------------
 # GUI
@@ -155,7 +236,7 @@ system_info()
 # Start menu
 MENU_SELECTION=menu_information
 
-submenu_default_check()
+submenu_load_check()
 {
     if [ $1 == "YES" ]
     then
@@ -175,6 +256,16 @@ submenu_default_check()
     fi
 }
 
+submenu_get_check()
+{
+    if [ $1 == "YES" ]
+    then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
 submenu_default()
 {
     # Load default status
@@ -182,18 +273,17 @@ submenu_default()
     # Load enable variable
     local  __enablevar=$2
     
-    #!/bin/bash
-    DISTROS=$(whiptail --title "$MODULE_NAME" --radiolist \
+    local default_value
+    default_value=$(whiptail --title "$MODULE_NAME" --radiolist \
     "$MODULE_DESCRIPTION
      
      Do you want run this script?" 15 60 2 \
-    "YES" "launch all updates" $(submenu_default_check "YES") \
-    "NO" "Stop upgrades" $(submenu_default_check "NO") 3>&1 1>&2 2>&3)
+    "YES" "launch all updates" $(submenu_load_check "YES") \
+    "NO" "Stop upgrades" $(submenu_load_check "NO") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
-        #echo "The chosen distro is:" $DISTROS
-        eval $__enablevar="$DISTROS"
+        eval $__enablevar=$(submenu_get_check $default_value)
     else
         #echo "You chose Cancel."
         eval $__enablevar="-1"
@@ -214,14 +304,30 @@ submenu_configuration()
     then
         # Launch the function
         ${FUNC} $(modules_isInList $NAME) STATUS
-        echo "Return value: $STATUS"
     else
         # Load default_menu to enable/disable this script
         submenu_default $(modules_isInList $NAME) STATUS
-        echo "Return value: $STATUS"
     fi
-    # Print the choice
-    # echo "Your chosen option:" $MODULE_NAME
+    # echo "Return value: $STATUS"
+    # Add or remove the module in list
+    case $STATUS in
+        "1") echo "Add module: $NAME"
+             modules_add $NAME ;;
+        "0") echo "Remove module: $NAME"
+             modules_remove $NAME ;;
+        *) ;;
+    esac
+}
+
+menu_checkIfLoaded()
+{
+    # Check if the module is in List
+    if [ $(modules_isInList $FILE_NAME) == "1" ]
+    then
+        echo "X"
+    else
+        echo " "
+    fi
 }
 
 menu_configuration()
@@ -236,13 +342,14 @@ menu_configuration()
     for folder in modules/* ; do
       if [ -d "$folder" ] ; then
         # Check if exist the same file with the name of the folder
-        local FILE="$folder"/$(echo $folder | cut -f2 -d "/").sh
+        local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FILE="$folder"/$FILE_NAME.sh
         if [ -f $FILE ]
         then
             # Load source
             source "$FILE"
             # Add element in menu
-            MENULIST+=("$COUNTER" "$MODULE_NAME")
+            MENULIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
             MENU_REFERENCE+=("$COUNTER" "$FILE")
             #Increase counter
             COUNTER=$((COUNTER+1))
