@@ -36,7 +36,16 @@ MODULE_SUBMENU=("Set user name:set_user_name" "Set email:set_email")
 
 script_run()
 {
-    echo "Install script"
+    echo "Run git configuration"
+    # Initialize rosdep
+    tput setaf 6
+    echo "Install git"
+    tput sgr0
+    sudo apt-get install git -y
+    echo "git config --global user.name \"$NEW_GIT_USERNAME\""
+    git config --global user.name "$NEW_GIT_USERNAME"
+    echo "git config --global user.email $NEW_GIT_EMAIL"
+    git config --global user.email $NEW_GIT_EMAIL
 }
 
 script_save()
