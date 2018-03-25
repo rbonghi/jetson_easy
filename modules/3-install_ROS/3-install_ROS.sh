@@ -46,10 +46,20 @@ ros_is_check()
     fi
 }
 
-MODULE_NAME="Install ROS"
+ros_load_version()
+{
+    local VAR=$1
+    if [ -z ${VAR+x} ] ; then
+        echo ""
+    else
+        echo "- $VAR"
+    fi
+}
+
+MODULE_NAME="Install ROS $(ros_load_version $NEW_ROS_DISTRO)"
 MODULE_DESCRIPTION="Install ROS, set a new hostname and set a new master uri"
 MODULE_DEFAULT=0
-MODULE_SUBMENU=("Set distro:set_distro" "[$(ros_is_check $NEW_WORKSPACE)] Install workspace:write_workspace")
+MODULE_SUBMENU=("Set distro $(ros_load_version $NEW_ROS_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $NEW_WORKSPACE)] Install workspace:write_workspace")
 
 install_ros()
 {
@@ -121,7 +131,40 @@ install_ros()
 
 install_workspace()
 {
-    echo "Install  workspace"
+    if [ ! -z ${NEW_ROS_WS+x} ] ; then
+        # Load sources
+        tput setaf 6
+        echo "Load ROS sources"
+        tput sgr0
+        source /opt/ros/$NEW_ROS_DISTRO/setup.bash
+        # Build default dir location
+        local DEFAULTDIR=$HOME/$NEW_ROS_WS
+        if [ ! -e "$DEFAULTDIR" ] ; then
+            tput setaf 6
+            echo "Creating Catkin Workspace: $DEFAULTDIR"
+            tput sgr0
+            mkdir -p "$DEFAULTDIR"/src
+            # store position
+            local LOCAL_FOLDER=$(pwd)
+            # Move in jetson folder
+            cd "$DEFAULTDIR"/
+            # Launch catkin_make
+            catkin_make
+            # Go back in stored position
+            cd $LOCAL_FOLDER
+            # Load sources
+            tput setaf 6
+            echo "Load sources in .bashrc"
+            tput sgr0
+            grep -q -F "source $DEFAULTDIR/devel/setup.bash" $HOME/.bashrc || echo "source $DEFAULTDIR/devel/setup.bash" >> $HOME/.bashrc
+        else
+            tput setaf 1
+            echo "Folder $DEFAULTDIR already exists; no action!"
+            tput sgr0
+        fi
+    else
+        echo "Any NEW_ROS_WS is setted"
+    fi
 }
 
 script_run()
@@ -166,48 +209,37 @@ script_save()
     then
         echo "NEW_ROS_DISTRO=\"$NEW_ROS_DISTRO\"" >> $1
         echo "NEW_WORKSPACE=\"$NEW_WORKSPACE\"" >> $1
+        echo "NEW_ROS_WS=\"$NEW_ROS_WS\"" >> $1
         echo "Saved ROS parameters"
-    fi
-}
-
-set_distro()
-{
-    if [ -z ${NEW_ROS_DISTRO+x} ]
-    then
-        # Write hostname
-        NEW_ROS_DISTRO="kinetic"
-    fi
-    
-    ROS_DISTRO_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set distribution" 8 78 $NEW_ROS_DISTRO --title "Set ROS distribution" 3>&1 1>&2 2>&3)
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Write the new hostname
-        NEW_ROS_DISTRO=$ROS_DISTRO_TMP_VALUE
     fi
 }
 
 ros_load_check()
 {
-    if [ -z ${NEW_WORKSPACE+x} ]
-    then
-        NEW_WORKSPACE="0"
-    fi
-    
     if [ $1 == "YES" ]
     then
-        if [ $NEW_WORKSPACE == "1" ]
+        if [ $2 == "1" ]
         then
             echo "ON"
         else
             echo "OFF"
         fi
     else
-        if [ $NEW_WORKSPACE == "0" ]
+        if [ $2 == "0" ]
         then
             echo "ON"
         else
             echo "OFF"
         fi
+    fi
+}
+
+ros_load_equal()
+{
+    if [ $1 == $2 ] ; then
+        echo "ON"
+    else
+        echo "OFF"
     fi
 }
 
@@ -226,13 +258,50 @@ write_workspace()
     local NEW_WORKSPACE_TMP_VALUE
     NEW_WORKSPACE_TMP_VALUE=$(whiptail --title "$MODULE_NAME" --radiolist \
     "Do you want install the workspace?" 15 60 2 \
-    "YES" "Install the workspace" $(ros_load_check "YES") \
-    "NO" "Skipp installation" $(ros_load_check "NO") 3>&1 1>&2 2>&3)
+    "YES" "Install the workspace" $(ros_load_check "YES" $NEW_WORKSPACE) \
+    "NO" "Skipp installation" $(ros_load_check "NO" $NEW_WORKSPACE) 3>&1 1>&2 2>&3)
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
         NEW_WORKSPACE=$(ros_get_check $NEW_WORKSPACE_TMP_VALUE)
-        #eval $__enablevar=$(submenu_get_check $NEW_WORKSPACE_TMP_VALUE)
     fi
     
+}
+
+set_distro()
+{
+    if [ -z ${NEW_ROS_DISTRO+x} ]
+    then
+        # Write distribution
+        NEW_ROS_DISTRO="kinetic"
+    fi
+    
+    local ROS_DISTRO_TMP_VALUE
+    ROS_DISTRO_TMP_VALUE=$(whiptail --title "$MODULE_NAME - Set distribution" --radiolist \
+    "Set ROS distribution" 15 60 2 \
+    "kinetic" "Install the workspace" $(ros_load_equal "kinetic" $NEW_ROS_DISTRO) \
+    "lunar" "Skipp installation" $(ros_load_equal "lunar" $NEW_ROS_DISTRO) 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the new distribution
+        NEW_ROS_DISTRO=$ROS_DISTRO_TMP_VALUE
+    fi
+}
+
+set_workspace()
+{
+    if [ -z ${NEW_ROS_WS+x} ]
+    then
+        # Write default workspace
+        NEW_ROS_WS="catkin_ws"
+    fi
+    
+    local NEW_ROS_WS_TMP_VALUE
+    NEW_ROS_WS_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set ROS workspace" 8 78 $NEW_ROS_WS --title "Set ROS workspace" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the new workspace
+        NEW_ROS_WS=$NEW_ROS_WS_TMP_VALUE
+    fi
 }
