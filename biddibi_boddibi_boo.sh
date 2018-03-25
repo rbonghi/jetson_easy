@@ -162,23 +162,37 @@ modules_add()
 
 modules_remove()
 {
-    # modules_isInList $1
-    echo "Remove from list: $1"
+    if [ ! -z $MODULES_LIST ]
+    then
+        if [ $(modules_isInList $1) != "0" ]
+        then
+            local NEW_MODULES_LIST=""
+            echo "Remove module $1"
+            # Build a new list add add in sequence
+            IFS=':' read -ra MODULE <<< "$MODULES_LIST"
+            for mod in "${MODULE[@]}"; do
+                if [ $mod != $1 ]
+                then
+                    NEW_MODULES_LIST+=":$mod"
+                fi
+            done
+            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | cut -f2- -d ":")
+            #Update module list
+            MODULES_LIST=$NEW_MODULES_LIST
+        else
+            echo "Module $1 doesn't exist"
+        fi
+    else
+        echo "Module $1 doesn't exist"
+    fi
 }
 
 # TODO temp
 
 # Load all modules
-#modules_load
+modules_load
 # Print list of modules
 echo $MODULES_LIST
-
-modules_add "1-pippo"
-echo $MODULES_LIST
-
-modules_add "2-pluto"
-echo $MODULES_LIST
-exit 0
 
 # --------------------------------
 # GUI
@@ -311,10 +325,8 @@ submenu_configuration()
     # echo "Return value: $STATUS"
     # Add or remove the module in list
     case $STATUS in
-        "1") echo "Add module: $NAME"
-             modules_add $NAME ;;
-        "0") echo "Remove module: $NAME"
-             modules_remove $NAME ;;
+        "1") modules_add $NAME ;;
+        "0") modules_remove $NAME ;;
         *) ;;
     esac
 }
@@ -330,13 +342,16 @@ menu_checkIfLoaded()
     fi
 }
 
-menu_configuration()
+MENU_LIST=()
+MENU_REFERENCE=()
+
+menu_load_list()
 {
-    local MENULIST=()
-    local MENU_REFERENCE=()
+    MENU_LIST=()
+    MENU_REFERENCE=()
     local COUNTER=1
     # Load first element in menu
-    MENULIST+=("<--Back" "Turn to Information menu")
+    MENU_LIST+=("<--Back" "Turn to Information menu")
     MENU_REFERENCE+=("0" "")
     # Read modules
     for folder in modules/* ; do
@@ -349,7 +364,7 @@ menu_configuration()
             # Load source
             source "$FILE"
             # Add element in menu
-            MENULIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
+            MENU_LIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
             MENU_REFERENCE+=("$COUNTER" "$FILE")
             #Increase counter
             COUNTER=$((COUNTER+1))
@@ -357,16 +372,22 @@ menu_configuration()
       fi
     done
     # Load last element in menu
-    MENULIST+=("Start-->" "Start install")
-    # Evaluate the size
-    local ARLENGTH
-    let ARLENGTH=${#repoar[@]}
+    MENU_LIST+=("Start-->" "Start install")
+}
+
+menu_configuration()
+{
     # Load menu
     local OPTION=0
     while [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
     do
+        # Load menu
+        menu_load_list
+        # Evaluate the size
+        local ARLENGTH
+        let ARLENGTH=${#repoar[@]}
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title) - Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENULIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title) - Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
