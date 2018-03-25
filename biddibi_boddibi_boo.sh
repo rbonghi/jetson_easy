@@ -97,6 +97,7 @@ silent_mode()
     echo $MODULES_LIST
     
     # Run installer script
+    echo "Module run:"
     modules_run
     
     if [ $(modules_require_reboot) == "1" ]
