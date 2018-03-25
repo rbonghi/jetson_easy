@@ -156,7 +156,9 @@ submenu_extra()
             # Load default Enable menu
             submenu_default $1 STATUS
             #echo "You chose Cancel."
-            eval $__enablevar="$STATUS"
+            eval $__enablevar="$STATUS"            
+            # Load submenu
+            submenu_configuration $3
             
         elif [[ $OPTION_EXTRA != "Start-->" && $OPTION_EXTRA != "<--Back" ]]
         then
@@ -182,7 +184,7 @@ submenu_configuration()
     then
         # Launch the function
         # ${FUNC} $(modules_isInList $NAME) STATUS
-        submenu_extra $(modules_isInList $NAME) STATUS
+        submenu_extra $(modules_isInList $NAME) STATUS $1
     else
         # Load default_menu to enable/disable this script
         submenu_default $(modules_isInList $NAME) STATUS
