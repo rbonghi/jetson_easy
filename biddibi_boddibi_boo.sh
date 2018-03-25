@@ -51,34 +51,75 @@ OS_KERNEL=$(uname -r)
 source jetson/jetson_variables.sh
 
 # --------------------------------
-# LOAD_MODULES
+# MAIN
 # --------------------------------
 
-# Load user interface
-source include/modules.sh
+usage()
+{
+    echo "Bibbibi Boddibi Boo is an automatic install for different type of modules."
+    echo "Usage:"
+    echo "$0 [options]"
+    echo "options,"
+    echo "   -h|--help | This help"
+    echo "   -s        | Launch the system in silent mode (Without GUI)"
+}
 
-# Load all modules
-modules_load
-# Print list of modules
-# echo $MODULES_LIST
-
-# --------------------------------
-# GUI
-# --------------------------------
-
-# Load user interface
-source include/gui.sh
-
-if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]
-then
-    # Loop menu
-    while [ $MENU_SELECTION != 0 ]
-    do  
-        # Load Menu
-        ${MENU_SELECTION}
-    done
+loop_gui()
+{
+    # Load user interface
+    source include/modules.sh
+    # Load user interface
+    source include/gui.sh
     
-else
-    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
-fi
+    # Load all modules
+    modules_load
+    # Load GUI menu loop
+	menu_loop
+}
+
+silent_mode()
+{
+    # Load user interface
+    source include/modules.sh
+
+    # Load all modules
+    modules_load
+
+    # Load user interface
+    source include/gui.sh
+    
+    # All modules are in MODULES_LIST
+    echo "Module loaded:"
+    echo $MODULES_LIST
+    
+    # Run installer script
+    modules_run
+    
+    if [ $(modules_require_reboot) == "1" ]
+    then
+        echo "Reboot required!"
+        sudo reboot
+    fi
+}
+
+main()
+{
+	case "$1" in
+	    -s)
+	        # Launch the system in silent mode (Without GUI)
+	        silent_mode
+	        ;;
+        -h|--help)
+            # Load help
+			usage
+			;;
+		*)
+		    # Load GUI menu loop
+			loop_gui
+			;;
+	esac
+}
+
+main $@
+exit 0
 

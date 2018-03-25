@@ -402,6 +402,21 @@ menu_recap()
     MENU_SELECTION=0
 }
 
+menu_loop()
+{
+    if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]
+    then
+        # Loop menu
+        while [ $MENU_SELECTION != 0 ]
+        do  
+            # Load Menu
+            ${MENU_SELECTION}
+        done
+        
+    else
+        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
+    fi
+}
 
 
 
