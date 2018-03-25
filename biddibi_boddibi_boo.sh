@@ -78,11 +78,26 @@ modules_load_default()
     done
 }
 
+modules_isInList()
+{
+    IFS=':' read -ra MODULE <<< "$MODULES_LIST"
+    for mod in "${MODULE[@]}"; do
+        if [ "$mod" == $1 ]
+        then
+            echo "1"
+            return
+        fi
+    done
+    # Otherwise return 0
+    echo "0"
+}
+
+# TODO temp
+
+# Load all modules
 modules_load_default
-
+# Print list of modules
 echo $MODULES_LIST
-
-exit 0
 
 # --------------------------------
 # GUI
@@ -190,21 +205,23 @@ submenu_configuration()
 {
     # Load source
     source "$1"
-    # Execute the function with the same name    
+    # Load the function with the same name    
     local FUNC=$(echo $1 | cut -f2 -d "/")
+    # Save the name of the function
+    local NAME=$(echo $FUNC | cut -f1 -d ".")
     # Check if exist the function   
     if type ${FUNC} &>/dev/null 
     then
         # Launch the function
-        ${FUNC} "0" STATUS
+        ${FUNC} $(modules_isInList $NAME) STATUS
         echo "Return value: $STATUS"
     else
         # Load default_menu to enable/disable this script
-        submenu_default "0" STATUS
+        submenu_default $(modules_isInList $NAME) STATUS
         echo "Return value: $STATUS"
     fi
     # Print the choice
-    echo "Your chosen option:" $MODULE_NAME
+    # echo "Your chosen option:" $MODULE_NAME
 }
 
 menu_configuration()
