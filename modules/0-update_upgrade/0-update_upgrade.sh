@@ -30,6 +30,10 @@
 # Update and upgrade
 
 MODULE_NAME="Update & Distribution upgrade & Upgrade"
+MODULE_DESCRIPTION="Launch in order:
+ - apt-get update
+ - apt-get dist-upgrade
+ - apt-get upgrade"
 MODULE_DEFAULT=1
 
 run_script()
@@ -65,7 +69,5 @@ run_script()
 
 0-update_upgrade()
 {
-    # Write name
-    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Submenu of $MODULE_NAME"
+        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "DEFAULT - Submenu of $MODULE_NAME"
 }
-

@@ -50,6 +50,44 @@ OS_KERNEL=$(uname -r)
 # - JETSON_CUDA
 source jetson/jetson_variables.sh
 
+# --------------------------------
+# LOAD_MODULES
+# --------------------------------
+
+MODULES_LIST=""
+
+modules_load_default()
+{
+    # Read modules
+    for folder in modules/* ; do
+      if [ -d "$folder" ] ; then
+        # Check if exist the same file with the name of the folder
+        local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FILE="$folder"/$FILE_NAME.sh
+        if [ -f $FILE ]
+        then
+            # Load source
+            source "$FILE"
+            # If a default module
+            if [ $MODULE_DEFAULT -eq 1 ]
+            then
+                MODULES_LIST+="$FILE_NAME:"
+            fi
+        fi
+      fi
+    done
+}
+
+modules_load_default
+
+echo $MODULES_LIST
+
+exit 0
+
+# --------------------------------
+# GUI
+# --------------------------------
+
 menu_title()
 {
     if [ ! -z ${DEBUG+x} ]
@@ -87,37 +125,65 @@ system_info()
     echo " - Architecture: $OS_ARCHITECTURE"
     echo " - Kernel: $OS_KERNEL"
     echo ""
-    jetson_status
-}
-
-LOAD_SCRIPT=""
-
-modules_load_all()
-{
-    # Read all scripts in modules
-    for file in modules/* ; do
-      if [ -f "$file" ] ; then
-        # Load source
-        source "$file"
-        # Load all modules
-        LOAD_SCRIPT+="$(echo $file):"
-      fi
-    done
+    
+    if [ -z ${JETSON_DESCRIPTION+x} ] ; 
+    then
+        echo ""
+        echo ""
+        echo "This is not a Jetson Board"
+        echo "Please copy this repository in your Jetson board"
+    else
+        jetson_status
+    fi
 }
 
 # Start menu
 MENU_SELECTION=menu_information
 
-menu_information()
+submenu_default_check()
 {
-    if (whiptail --title "$(menu_title)" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
+    if [ $1 == "YES" ]
     then
-        #Execute configuration menu
-        MENU_SELECTION=menu_configuration   
+        if [ $defaultvar == "1" ]
+        then
+            echo "ON"
+        else
+            echo "OFF"
+        fi
     else
-        # Quit the script
-        MENU_SELECTION=0
+        if [ $defaultvar == "0" ]
+        then
+            echo "ON"
+        else
+            echo "OFF"
+        fi
     fi
+}
+
+submenu_default()
+{
+    # Load default status
+    local  defaultvar=$1
+    # Load enable variable
+    local  __enablevar=$2
+    
+    #!/bin/bash
+    DISTROS=$(whiptail --title "$MODULE_NAME" --radiolist \
+    "$MODULE_DESCRIPTION
+     
+     Do you want run this script?" 15 60 2 \
+    "YES" "launch all updates" $(submenu_default_check "YES") \
+    "NO" "Stop upgrades" $(submenu_default_check "NO") 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        #echo "The chosen distro is:" $DISTROS
+        eval $__enablevar="$DISTROS"
+    else
+        #echo "You chose Cancel."
+        eval $__enablevar="-1"
+    fi
+    
 }
 
 submenu_configuration()
@@ -129,9 +195,13 @@ submenu_configuration()
     # Check if exist the function   
     if type ${FUNC} &>/dev/null 
     then
-        ${FUNC}
+        # Launch the function
+        ${FUNC} "0" STATUS
+        echo "Return value: $STATUS"
     else
-        whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "DEFAULT - Submenu of $MODULE_NAME"
+        # Load default_menu to enable/disable this script
+        submenu_default "0" STATUS
+        echo "Return value: $STATUS"
     fi
     # Print the choice
     echo "Your chosen option:" $MODULE_NAME
@@ -172,7 +242,7 @@ menu_configuration()
     while [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
     do
         # Write the menu         
-        OPTION=$(whiptail --title "Test Menu Dialog" --menu "Choose your option" 25 60 $ARLENGTH "${MENULIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title) - Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENULIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
@@ -200,9 +270,21 @@ menu_configuration()
     esac
 }
 
+menu_information()
+{
+    if (whiptail --title "$(menu_title)" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
+    then
+        #Execute configuration menu
+        MENU_SELECTION=menu_configuration   
+    else
+        # Quit the script
+        MENU_SELECTION=0
+    fi
+}
+
 menu_install()
 {
-    whiptail --title "$(menu_title)" --textbox /dev/stdin 10 60 <<< "Installing ..."
+    whiptail --title "$(menu_title) - Install" --textbox /dev/stdin 10 60 <<< "Installing ..."
     # Quit
     MENU_SELECTION=0
 }
