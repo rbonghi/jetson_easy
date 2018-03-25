@@ -208,10 +208,16 @@ script_save()
     if [ ! -z ${NEW_ROS_DISTRO+x} ]
     then
         echo "NEW_ROS_DISTRO=\"$NEW_ROS_DISTRO\"" >> $1
-        echo "NEW_WORKSPACE=\"$NEW_WORKSPACE\"" >> $1
-        echo "NEW_ROS_WS=\"$NEW_ROS_WS\"" >> $1
-        echo "Saved ROS parameters"
     fi
+    if [ ! -z ${NEW_WORKSPACE+x} ]
+    then
+        echo "NEW_WORKSPACE=\"$NEW_WORKSPACE\"" >> $1
+    fi
+    if [ ! -z ${NEW_ROS_WS+x} ]
+    then
+        echo "NEW_ROS_WS=\"$NEW_ROS_WS\"" >> $1
+    fi
+    echo "Saved ROS parameters"
 }
 
 ros_load_check()
