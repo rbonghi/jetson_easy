@@ -64,8 +64,8 @@ ros_status()
 {
     echo "(*) ROS $ROS_DISTRO:"
     echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
-    if [ ! -z ${ROS_IP+x} ] ; then
-        echo "    - ROS_IP: $ROS_IP"
+    if [ ! -z ${ROS_HOSTNAME+x} ] ; then
+        echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
     fi
 }
 
