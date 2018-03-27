@@ -49,49 +49,58 @@ menu_title()
 menu_header()
 {
     echo "NVIDIA Jetson Easy setup script"
-    echo "Author: Raffaello Bonghi"
-    echo " email: raffaello@rnext.it"
+    echo "Author: Raffaello Bonghi     email: raffaello@rnext.it"
 }
 
 jetson_status()
 {
-    echo "NVIDIA embedded:"
-    echo " - Board: $JETSON_DESCRIPTION"
-    echo " - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
-    echo " - CUDA: $JETSON_CUDA"
+    echo "(*) NVIDIA embedded:"
+    echo "    - Board: $JETSON_DESCRIPTION"
+    echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
+    echo "    - CUDA: $JETSON_CUDA"
+}
+
+ros_status()
+{
+    echo "(*) ROS $ROS_DISTRO:"
+    echo "    - ROS_MASTER_URI: "
+    echo "    - ROS_IP: "
 }
 
 system_info()
 {
     menu_header
     echo ""
-    echo "User: $USER"
+    echo "(*) System:"
+    echo "    - User: $USER"
     if [ ! -z ${NEW_HOSTNAME+x} ]
     then
         if [ $NEW_HOSTNAME != $HOSTNAME ]
         then
-            echo "Hostname: $HOSTNAME -> $NEW_HOSTNAME"
+            echo "    - Hostname: $HOSTNAME -> $NEW_HOSTNAME"
         else
-            echo "Hostname: $HOSTNAME"         
+            echo "    - Hostname: $HOSTNAME"         
         fi
     else
-        echo "Hostname: $HOSTNAME"
+        echo "    - Hostname: $HOSTNAME"
     fi
-    echo ""
-    echo "System:"
-    echo " - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
-    echo " - Architecture: $OS_ARCHITECTURE"
-    echo " - Kernel: $OS_KERNEL"
-    echo ""
+    echo "    - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
+    echo "    - Architecture: $OS_ARCHITECTURE"
+    echo "    - Kernel: $OS_KERNEL"
     
+    # NVIDIA Jetson status
     if [ -z ${JETSON_DESCRIPTION+x} ] ; 
     then
-        echo ""
-        echo ""
         echo "This is not a Jetson Board"
         echo "Please copy this repository in your Jetson board"
     else
         jetson_status
+    fi
+    
+    # Add ROS information
+    if [ ! -z ${ROS_DISTRO+x} ]
+    then
+        ros_status
     fi
 }
 
@@ -326,13 +335,25 @@ menu_configuration()
 
 menu_information()
 {
-    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yes-button "Start" --no-button "exit" --yesno "$(system_info)" 25 60)
-    then
-        #Execute configuration menu
-        MENU_SELECTION=menu_configuration   
+    local OK_BUTTON
+    if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
+        OK_BUTTON="Setup"
     else
-        # Quit the script
-        MENU_SELECTION=0
+        OK_BUTTON="Exit"
+    fi
+    
+    if(whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 60 --ok-button "$OK_BUTTON" <<< "$(system_info)"); then
+        # Only if is a Jetson go to setup
+        if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
+            #Execute configuration menu
+            MENU_SELECTION=menu_configuration
+        else
+            #Exit from menu
+            MENU_SELECTION=0             
+        fi
+    else
+        #Exit from menu
+        MENU_SELECTION=0 
     fi
 }
 
@@ -412,18 +433,12 @@ menu_recap()
 
 menu_loop()
 {
-    if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ]
-    then
-        # Loop menu
-        while [ $MENU_SELECTION != 0 ]
-        do  
-            # Load Menu
-            ${MENU_SELECTION}
-        done
-        
-    else
-        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 10 60 <<< "$(system_info)" 
-    fi
+    # Loop menu
+    while [ $MENU_SELECTION != 0 ]
+    do  
+        # Load Menu
+        ${MENU_SELECTION}
+    done
 }
 
 
