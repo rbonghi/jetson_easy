@@ -45,12 +45,22 @@ modules_load_default()
         local FILE="$folder"/$FILE_NAME.sh
         if [ -f $FILE ]
         then
+            # Unset save function
+            unset -f script_load_default
             # Load source
             source "$FILE"
             # If a default module
             if [ $MODULE_DEFAULT -eq 1 ]
             then
                 MODULES_LIST+=":$FILE_NAME"
+            fi
+            # Check if exist the function
+            if type script_load_default &>/dev/null
+            then
+                script_load_default
+                # Load initialization variable function
+                echo "Load Default variable for: $MODULE_NAME"
+                
             fi
         fi
       fi
@@ -90,6 +100,14 @@ modules_save()
     echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG
     echo "" >> $MODULES_CONFIG
     
+    echo "# List of availables modules" >> $MODULES_CONFIG
+    echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG
+    
+    echo "" >> $MODULES_CONFIG
+    echo "# ----------------------------- " >> $MODULES_CONFIG
+    echo "# -     Modules variables     - " >> $MODULES_CONFIG
+    echo "# ----------------------------- " >> $MODULES_CONFIG
+    echo "" >> $MODULES_CONFIG
     for folder in $MODULES_FOLDER/* ; do
       if [ -d "$folder" ] ; then
         # Check if exist the same file with the name of the folder
@@ -108,13 +126,12 @@ modules_save()
                 echo "# Variables for: $MODULE_NAME" >> $MODULES_CONFIG
                 # Save script
                 script_save $MODULES_CONFIG
+                # Add space
+                echo "" >> $MODULES_CONFIG
             fi
         fi
       fi
     done
-    
-    echo "# List of availables modules" >> $MODULES_CONFIG
-    echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG
     
     echo "Save in $MODULES_CONFIG"
 }
@@ -232,13 +249,19 @@ modules_run()
             local FILE="$MODULES_FOLDER/$mod/$mod.sh"
             if [ -f $FILE ]
             then
+                # Unset save function
+                unset -f script_run
                 # Load source
                 source "$FILE"
                 # Write name module
                 echo "Running module - $MODULE_NAME"
-                # run script
-                # exesudo script_run
-                script_run
+                # Check if exist the function
+                if type script_run &>/dev/null
+                then
+                    # run script
+                    # exesudo script_run
+                    script_run
+                fi
             fi
         done
         echo "... Done"

@@ -303,7 +303,7 @@ menu_configuration()
         local ARLENGTH
         let ARLENGTH=${#repoar[@]}
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "Choose your option" 25 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "Choose your option" 20 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then

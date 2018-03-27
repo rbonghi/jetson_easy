@@ -48,6 +48,21 @@ script_run()
     git config --global user.email $NEW_GIT_EMAIL
 }
 
+script_load_default()
+{
+    if [ -z ${NEW_GIT_USERNAME+x} ]
+    then
+        # Default git user name
+        NEW_GIT_USERNAME="default"
+    fi
+    
+    if [ -z ${NEW_GIT_EMAIL+x} ]
+    then
+        # Default git user name
+        NEW_GIT_EMAIL="default@default.com"
+    fi
+}
+
 script_save()
 {
     if [ ! -z ${NEW_GIT_USERNAME+x} ]
@@ -63,12 +78,6 @@ script_save()
 
 set_user_name()
 {
-    if [ -z ${NEW_GIT_USERNAME+x} ]
-    then
-        # Default git user name
-        NEW_GIT_USERNAME="default"
-    fi
-    
     local NEW_GIT_USERNAME_TMP_VALUE
     NEW_GIT_USERNAME_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set user name" 8 78 $NEW_GIT_USERNAME --title "Set user name" 3>&1 1>&2 2>&3)
     exitstatus=$?
@@ -80,12 +89,6 @@ set_user_name()
 
 set_email()
 {
-    if [ -z ${NEW_GIT_EMAIL+x} ]
-    then
-        # Default git user name
-        NEW_GIT_EMAIL="default@default.com"
-    fi
-    
     local NEW_GIT_EMAIL_TMP_VALUE
     NEW_GIT_EMAIL_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set email" 8 78 $NEW_GIT_EMAIL --title "Set email" 3>&1 1>&2 2>&3)
     exitstatus=$?

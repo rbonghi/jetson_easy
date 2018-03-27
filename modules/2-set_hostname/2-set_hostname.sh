@@ -57,11 +57,23 @@ script_run()
     fi
 }
 
+script_load_default()
+{
+    if [ -z ${NEW_HOSTNAME+x} ]
+    then
+        # Write hostname
+        NEW_HOSTNAME=$HOSTNAME
+    fi
+}
+
 script_save()
 {
     if [ ! -z ${NEW_HOSTNAME+x} ]
     then
-        echo "NEW_HOSTNAME=\"$NEW_HOSTNAME\"" >> $1
+        if [ $NEW_HOSTNAME != $HOSTNAME ]
+        then
+            echo "NEW_HOSTNAME=\"$NEW_HOSTNAME\"" >> $1
+        fi
         echo "Saved Hostname"
     fi
 }
