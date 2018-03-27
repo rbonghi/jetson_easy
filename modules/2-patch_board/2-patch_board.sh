@@ -35,7 +35,16 @@ MODULE_DEFAULT=1
 
 script_run()
 {
+    tput setaf 6
     echo "Patch $JETSON_DESCRIPTION from known errors"
+    tput sgr0
+    
+    if [ $JETSON_JETPACK == "3.2" ] ; then
+        echo "Pach opencv in $JETSON_JETPACK"
+    fi
+    
+    #echo $(perl -e exit)
+    
 }
 
 
