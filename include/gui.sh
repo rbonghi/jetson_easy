@@ -63,8 +63,10 @@ jetson_status()
 ros_status()
 {
     echo "(*) ROS $ROS_DISTRO:"
-    echo "    - ROS_MASTER_URI: "
-    echo "    - ROS_IP: "
+    echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
+    if [ ! -z ${ROS_IP+x} ] ; then
+        echo "    - ROS_IP: $ROS_IP"
+    fi
 }
 
 system_info()
@@ -335,25 +337,19 @@ menu_configuration()
 
 menu_information()
 {
-    local OK_BUTTON
+    # Check if is a Jetson
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
-        OK_BUTTON="Setup"
-    else
-        OK_BUTTON="Exit"
-    fi
-    
-    if(whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 60 --ok-button "$OK_BUTTON" <<< "$(system_info)"); then
-        # Only if is a Jetson go to setup
-        if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
+        if (whiptail --title "$(menu_title)Recap" --yes-button "Setup" --no-button "ESC" --yesno "$(system_info)" 22 60) then
             #Execute configuration menu
             MENU_SELECTION=menu_configuration
         else
             #Exit from menu
-            MENU_SELECTION=0             
+            MENU_SELECTION=0
         fi
     else
+        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 60 --ok-button "ESC" <<< "$(system_info)"
         #Exit from menu
-        MENU_SELECTION=0 
+        MENU_SELECTION=0
     fi
 }
 
