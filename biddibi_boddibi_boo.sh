@@ -69,9 +69,10 @@ usage()
     echo "Usage:"
     echo "$0 [options]"
     echo "options,"
-    echo "   -h|--help | This help"
-    echo "   -s        | Launch the system in silent mode (Without GUI)"
-    echo "   -c [file] | Load configuration file from other reference [file]"
+    echo "   -h|--help   | This help"
+    echo "   -s          | Launch the system in silent mode (Without GUI)"
+    echo "   -c [file]   | Load configuration file from other reference [file]"
+    echo "   -p [passwd] |Load password without any other request from the script"
 }
 
 loop_gui()
@@ -94,6 +95,11 @@ silent_mode()
     echo "Module loaded:"
     echo $MODULES_LIST
     
+	if [ ! -z $MODULE_PASSWORD ] ; then
+	    echo "Pass set"
+	    $(echo $MODULE_PASSWORD | sudo -S -i true)
+	fi
+    
     # Run installer script
     echo "Module run:"
     modules_run
@@ -109,6 +115,11 @@ main()
 {
     while [ -n "$1" ]; do
 	    case "$1" in
+	        -p) 
+	            # Load password without any other request from the script
+	            MODULE_PASSWORD="$2"
+	            shift 1
+	            ;;
 	        -c)
 	            # Load configuration file from other reference [file]
 	            MODULES_CONFIG="$2"
@@ -116,8 +127,7 @@ main()
 	            ;;
 	        -s)
 	            # Launch the system in silent mode (Without GUI)
-	            silent_mode
-	            exit 0
+	            IS_SILENT=1
 	            ;;
             -h|--help)
                 # Load help
@@ -132,8 +142,14 @@ main()
 		shift 1
 	done
 	
-    # Load GUI menu loop
-    loop_gui
+	if [ ! -z $IS_SILENT ] ; then
+	    unset IS_SILENT
+        # Launch the system in silent mode (Without GUI)
+        silent_mode
+	else
+        # Load GUI menu loop
+        loop_gui
+	fi
 }
 
 main $@

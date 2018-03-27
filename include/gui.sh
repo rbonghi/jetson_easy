@@ -353,28 +353,37 @@ menu_information()
     fi
 }
 
+menu_launch_run()
+{
+    # Check if the root password if good
+    sudo -k # make sure to ask for password on next sudo
+    if $(echo $MODULE_PASSWORD | sudo -S -i true); then
+        # Run module
+        modules_run
+        # Move to recap menu
+        MENU_SELECTION=menu_recap
+    fi
+}
+
 menu_install()
 {
-    #Password Input
-    psw=$(whiptail --title "$(menu_title)SUDO Password" --passwordbox "Enter your password and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
-    #Password If
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-    
-        # Launch installation menu
-        #whiptail --title "$(menu_title) - Install" --textbox /dev/stdin 30 60 <<< "Installing ..."
-        
-        # Check if the root password if good
-        sudo -k # make sure to ask for password on next sudo
-        if $(echo $psw | sudo -S -i true); then
-            # Run module
-            modules_run
-            # Move to recap menu
-            MENU_SELECTION=menu_recap
-        fi        
+    if [ -z $MODULE_PASSWORD ] ; then
+        #Password Input
+        psw=$(whiptail --title "$(menu_title)SUDO Password" --passwordbox "Enter your password and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+        #Password If
+        exitstatus=$?
+        if [ $exitstatus = 0 ]; then
+            # Save password
+            MODULE_PASSWORD=$psw
+            # Launch run
+            menu_launch_run
+        else
+            #Execute configuration menu
+            MENU_SELECTION=menu_configuration
+        fi
     else
-        #Execute configuration menu
-        MENU_SELECTION=menu_configuration
+        # Launch run
+        menu_launch_run
     fi
 }
 

@@ -161,7 +161,7 @@ script_run()
         tput setaf 1
         echo "Enable require reboot"
         tput sgr0
-        MODULES_REQUIRE_REBOOT=1
+        #MODULES_REQUIRE_REBOOT=1
         
     else
         tput setaf 1
