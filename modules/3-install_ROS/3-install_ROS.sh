@@ -69,11 +69,7 @@ MODULE_DEFAULT=0
 if [ -z ${ROS_NEW_DISTRO+x} ] || [ -z ${ROS_NEW_WORKSPACE+x} ] || [ -z ${ROS_NEW_HOSTNAME+x} ] ; then
     MODULE_SUBMENU=("Set distro:set_distro" "Set workspace:set_workspace" "[ ] Install workspace:write_workspace" "[ ] Set hostname:set_ros_hostname")
 else
-    if [ $ROS_NEW_HOSTNAME=0 ] ; then
-        MODULE_SUBMENU=("Set distro $(ros_load_version $ROS_NEW_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $ROS_NEW_WORKSPACE)] Install workspace:write_workspace" "[$(ros_is_check $ROS_NEW_HOSTNAME)] Set hostname:set_ros_hostname" "Set ROS_MASTER_URI:set_master_uri")
-    else
-        MODULE_SUBMENU=("Set distro $(ros_load_version $ROS_NEW_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $ROS_NEW_WORKSPACE)] Install workspace:write_workspace" "[$(ros_is_check $ROS_NEW_HOSTNAME)] Set hostname:set_ros_hostname")
-    fi
+    MODULE_SUBMENU=("Set distro $(ros_load_version $ROS_NEW_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $ROS_NEW_WORKSPACE)] Install workspace:write_workspace" "[$(ros_is_check $ROS_NEW_HOSTNAME)] Set hostname:set_ros_hostname" "Set ROS_MASTER_URI:set_master_uri")
 fi
 
 install_ros()

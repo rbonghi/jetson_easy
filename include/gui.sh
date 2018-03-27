@@ -401,6 +401,7 @@ menu_list_installed()
         fi
       fi
     done
+    
     if [ $(modules_require_reboot) == "1" ]
     then
         echo ""
