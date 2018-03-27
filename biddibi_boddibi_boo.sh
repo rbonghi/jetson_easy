@@ -96,8 +96,9 @@ silent_mode()
     echo $MODULES_LIST
     
 	if [ ! -z $MODULE_PASSWORD ] ; then
-	    echo "Pass set"
+	    # Pass set
 	    $(echo $MODULE_PASSWORD | sudo -S -i true)
+	    
 	fi
     
     # Run installer script
