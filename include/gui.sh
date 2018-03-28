@@ -188,7 +188,7 @@ submenu_extra()
     
     OPTION_EXTRA=$(whiptail --title "$MODULE_NAME" --menu "$MODULE_DESCRIPTION
     
-    Choose your option" 25 60 $ARLENGTH "${MENU_EXTRA[@]}" 3>&1 1>&2 2>&3)
+    Choose your option" 22 60 $ARLENGTH "${MENU_EXTRA[@]}" 3>&1 1>&2 2>&3)
     
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
