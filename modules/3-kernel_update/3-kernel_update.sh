@@ -44,8 +44,6 @@ MODULE_SUBMENU=("Set folder kernel:set_path" "Kernel patchs:set_kernel_patch")
 
 KERNEL_FOLDER="kernel/kernel-4.4"
 
-JETSON_L4T="28.1"
-
 kernel_is_enabled()
 {
     if [[ $KERNEL_PATCH_LIST = *"$1"* ]] ; then
