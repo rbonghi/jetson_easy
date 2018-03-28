@@ -27,11 +27,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# To Enable the debug mode
-if [ -f DEBUG ]; then
-    DEBUG=1
-fi
-
 # Load environment variables:
 # - DISTRIB_ID
 # - DISTRIB_RELEASE
@@ -52,6 +47,17 @@ source jetson/jetson_variables
 
 # Load user interface
 source include/modules.sh
+
+# To Enable the debug mode
+if [ -f DEBUG ]; then
+    # Set in debug mode
+    DEBUG=1
+    # Load source as a file
+    source DEBUG
+    tput setaf 1
+    echo "Load debug variables"
+    tput sgr0
+fi
 
 # --------------------------------
 # MAIN
