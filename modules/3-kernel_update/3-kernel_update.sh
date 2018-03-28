@@ -40,7 +40,43 @@ FTDI driver converter
 ACM driver"
 MODULE_DEFAULT=0
 
+MODULE_SUBMENU=("Set folder kernel:set_path" "Kernel patchs:set_kernel_patch")
+
 KERNEL_FOLDER="kernel/kernel-4.4"
+
+JETSON_L4T="28.1"
+
+kernel_is_enabled()
+{
+    if [[ $KERNEL_PATCH_LIST = *"$1"* ]] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+    
+}
+
+edit_kernel()
+{
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
+    # Move to the kernel folder
+    #cd $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
+    
+    echo "List: $KERNEL_PATCH_LIST"
+    
+    if [ $(kernel_is_enabled "FTDI") == "ON" ] ; then
+        echo "TODO - Patch with FTDI"
+    fi
+    
+    if [ $(kernel_is_enabled "ACM") == "ON" ] ; then
+        echo "TODO - Patch with ACM"
+    fi
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
+}
 
 make_kernel()
 {
@@ -128,7 +164,7 @@ get_kernel_sources()
     tput sgr0
     #tar -xvf public_release/kernel_src.tbz2
     
-    cd $KERNEL_FOLDER
+    #cd $KERNEL_FOLDER
     #zcat /proc/config.gz > .config
     
     # Ready to configure kernel
@@ -139,10 +175,7 @@ get_kernel_sources()
 }
 
 script_run()
-{
-    # Dowload folder
-    KERNEL_DOWNLOAD_FOLDER="/usr/src"
-    
+{   
     tput setaf 6
     echo "Update the NVIDIA Jetson Kernel $(uname -r)"
     tput sgr0
@@ -150,6 +183,9 @@ script_run()
     if [ $JETSON_L4T == "27.1" ] || [ $JETSON_L4T == "28.1" ] || [ $JETSON_L4T == "28.2" ] ; then
         # Run get kernel sources
         get_kernel_sources 
+        
+        # Patch the kernel
+        edit_kernel
         
         # Make the kernel
         #make_kernel
@@ -170,4 +206,74 @@ script_run()
     fi
 }
 
+script_load_default()
+{
+    if [ -z ${KERNEL_DOWNLOAD_FOLDER+x} ] ; then
+        # Write hostname
+        KERNEL_DOWNLOAD_FOLDER="/usr/src"
+    fi
+    
+    if [ -z ${KERNEL_PATCH_LIST+x} ] ; then
+        # Empty kernel patch list 
+        KERNEL_PATCH_LIST="\"\""
+    fi
+}
+
+script_save()
+{
+    if [ ! -z ${KERNEL_DOWNLOAD_FOLDER+x} ] ; then
+        if [ $KERNEL_DOWNLOAD_FOLDER != "/usr/src" ]
+        then
+            echo "KERNEL_DOWNLOAD_FOLDER=\"$KERNEL_DOWNLOAD_FOLDER\"" >> $1
+        fi
+        echo "Saved kernel path folder"
+    fi
+    
+    if [ ! -z ${KERNEL_PATCH_LIST+x} ] ; then
+        if [ $KERNEL_PATCH_LIST != "\"\"" ]
+        then
+            echo "KERNEL_PATCH_LIST=\"$KERNEL_PATCH_LIST\"" >> $1
+        fi
+        echo "Saved kernel path folder"
+    fi
+}
+
+set_kernel_patch()
+{
+    if [ -z ${KERNEL_PATCH_LIST+x} ]
+    then
+        # Empty kernel patch list
+        KERNEL_PATCH_LIST="\"\""
+    fi
+    
+    local KERNEL_PATCH_TMP
+    KERNEL_PATCH_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
+    "Which kernel patch do you want add?" 15 60 2 \
+    "FTDI" "Enable FTDI driver" $(kernel_is_enabled "FTDI") \
+    "ACM" "Enable ACM driver" $(kernel_is_enabled "ACM") 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save list of new element to patch
+        KERNEL_PATCH_LIST="$KERNEL_PATCH_TMP"
+    fi
+    
+}
+
+set_path()
+{
+    if [ -z ${KERNEL_DOWNLOAD_FOLDER+x} ]
+    then
+        # Write hostname
+        KERNEL_DOWNLOAD_FOLDER="/usr/src"
+    fi
+    
+    local KERNEL_DOWNLOAD_FOLDER_TMP
+    KERNEL_DOWNLOAD_FOLDER_TMP=$(whiptail --inputbox "Set the kernel path folder" 8 78 $KERNEL_DOWNLOAD_FOLDER --title "Kernel path" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the kernel download folder
+        KERNEL_DOWNLOAD_FOLDER=$KERNEL_DOWNLOAD_FOLDER_TMP
+    fi
+}
 
