@@ -52,7 +52,6 @@ kernel_is_enabled()
     else
         echo "OFF"
     fi
-    
 }
 
 edit_kernel()

@@ -35,17 +35,110 @@ htop
 nano"
 MODULE_DEFAULT=0
 
+MODULE_SUBMENU=("Add new packages:set_pkgs")
+
+pkgs_is_enabled()
+{
+    if [[ $PKGS_PATCH_LIST = *"$1"* ]] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
 script_run()
 {
     echo "Install standard packages"
-    tput setaf 6
-    echo "Install htop"
-    tput sgr0
-    sudo apt-get install htop -y
-    tput setaf 6
-    echo "Install nano"
-    tput sgr0
-    sudo apt-get install nano -y
+    
+    if [ $(pkgs_is_enabled "htop") == "ON" ] ; then
+        tput setaf 6
+        echo "Install htop"
+        tput sgr0
+        sudo apt-get install htop -y
+    fi
+    
+    if [ $(pkgs_is_enabled "nano") == "ON" ] ; then
+        tput setaf 6
+        echo "Install nano"
+        tput sgr0
+        sudo apt-get install nano -y
+    fi
+    
+    if [ $(pkgs_is_enabled "ZED") == "ON" ] ; then
+    
+        local ZED_VERSION="2.3"
+    
+        # Check if is installed CUDA
+        if [ ! -z ${JETSON_CUDA+x} ] ; then
+            tput setaf 6
+            echo "Install ZED driver on $JETSON_DESCRIPTION [L4T $JETSON_L4T] with CUDA $JETSON_CUDA"
+            tput sgr0
+            local JETSON_NAME
+            # Select version board
+            if [ $JETSON_BOARD == "TX1" ] ; then
+                JETSON_NAME="tegrax1"
+            elif [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
+                JETSON_NAME="tegrax2"
+                # Check which release of cuda has installed
+                if [ $JETSON_CUDA = "9" ] ; then
+                    JETSON_NAME+="_jp32"
+                elif [ $JETSON_CUDA = "8" ] ; then
+                    JETSON_NAME+="_jp31"
+                fi
+            fi
+            
+            tput setaf 6
+            echo "Download https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME"
+            tput sgr0
+            
+            # TODO check how to install silent the ZED sdk
+            # wget https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME
+        else
+            tput setaf 1
+            echo "I can't install the ZED drivers CUDA is not installed!"
+            tput sgr0
+        fi
+    fi
 }
 
+script_load_default()
+{
+    if [ -z ${PKGS_PATCH_LIST+x} ] ; then
+        # Empty packages patch list 
+        PKGS_PATCH_LIST="\"\""
+    fi
+}
 
+script_save()
+{    
+    if [ ! -z ${PKGS_PATCH_LIST+x} ] ; then
+        if [ $PKGS_PATCH_LIST != "\"\"" ]
+        then
+            echo "PKGS_PATCH_LIST=\"$PKGS_PATCH_LIST\"" >> $1
+        fi
+        echo "Saved packages list"
+    fi
+}
+
+set_pkgs()
+{
+    if [ -z ${PKGS_PATCH_LIST+x} ]
+    then
+        # Empty kernel patch list
+        PKGS_PATCH_LIST="\"\""
+    fi
+    
+    local PKGS_PATCH_LIST_TMP
+    PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
+    "Which new packages do you want add?" 15 60 3 \
+    "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
+    "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
+    "ZED" "Install ZED driver" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save list of new element to patch
+        PKGS_PATCH_LIST="$PKGS_PATCH_LIST_TMP"
+    fi
+    
+}
