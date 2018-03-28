@@ -40,9 +40,10 @@ FTDI driver converter
 ACM driver"
 MODULE_DEFAULT=0
 
-MODULE_SUBMENU=("Set folder kernel:set_path" "Kernel patchs:set_kernel_patch")
+MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch")
 
 KERNEL_FOLDER="kernel/kernel-4.4"
+KERNEL_CONFIG_FILE=".config"
 
 kernel_is_enabled()
 {
@@ -66,6 +67,9 @@ edit_kernel()
     
     if [ $(kernel_is_enabled "FTDI") == "ON" ] ; then
         echo "TODO - Patch with FTDI"
+        # Patch the config file
+        # https://github.com/NVIDIA-Jetson/jetson-trashformers/wiki/Re-configuring-the-Jetson-TX2-Kernel
+        sudo sed -i 's/.*CONFIG_USB_ACM.*/CONFIG_USB_ACM=y/' $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
     fi
     
     if [ $(kernel_is_enabled "ACM") == "ON" ] ; then
@@ -163,7 +167,7 @@ get_kernel_sources()
     #tar -xvf public_release/kernel_src.tbz2
     
     #cd $KERNEL_FOLDER
-    #zcat /proc/config.gz > .config
+    #zcat /proc/config.gz > $KERNEL_CONFIG_FILE
     
     # Ready to configure kernel
     #make xconfig
