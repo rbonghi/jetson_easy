@@ -35,51 +35,60 @@ MODULES_CONFIG="setup.txt"
 # LOAD_MODULES
 # --------------------------------
 
+modules_sort()
+{
+    local MODULES_LIST_ARRAY
+    # transform list in array
+    IFS=$':' MODULES_LIST_ARRAY=($MODULES_LIST)
+    # sort the array
+    IFS=$'\n' MODULES_LIST_ARRAY=($(sort <<<"${MODULES_LIST_ARRAY[*]}"))
+    # Re arrange array in list with delimiter ":"
+    MODULES_LIST=$(echo ${MODULES_LIST_ARRAY[*]} | sed -e "s/ /:/g")
+}
+
 modules_load_default()
 {
     # Read modules
     for folder in $MODULES_FOLDER/* ; do
-      if [ -d "$folder" ] ; then
+        if [ -d "$folder" ] ; then
         # Check if exist the same file with the name of the folder
         local FILE_NAME=$(echo $folder | cut -f2 -d "/")
         local FILE="$folder"/$FILE_NAME.sh
-        if [ -f $FILE ]
-        then
-            # Unset save function
-            unset -f script_load_default
-            # Load source
-            source "$FILE"
-            # If a default module
-            if [ $MODULE_DEFAULT -eq 1 ]
-            then
-                MODULES_LIST+=":$FILE_NAME"
-            fi
-            # Check if exist the function
-            if type script_load_default &>/dev/null
-            then
-                script_load_default
-                # Load initialization variable function
-                echo "Load Default variable for: $MODULE_NAME"
-                
+            if [ -f $FILE ] ; then
+                # Unset save function
+                unset -f script_load_default
+                # Load source
+                source "$FILE"
+                 # If a default module
+                if [ $MODULE_DEFAULT -eq 1 ] ; then
+                    MODULES_LIST+="$FILE_NAME:"
+                fi
+                # Check if exist the function
+                if type script_load_default &>/dev/null
+                then
+                    script_load_default
+                    # Load initialization variable function
+                    echo "Load Default variable for: $MODULE_NAME"
+                fi
             fi
         fi
-      fi
     done
-    # remove first in the list
-    MODULES_LIST=$(echo $MODULES_LIST | cut -f2- -d ":")
+    # Sort all modules
+    modules_sort
 }
 
 modules_load()
 {
-    if [ ! -z $1 ]
-    then
+    if [ ! -z $1 ] ; then
         MODULES_CONFIG=$1
     fi
     
-    if [ -f $MODULES_CONFIG ]
-    then
+    if [ -f $MODULES_CONFIG ] ; then
         echo "Setup \"$MODULES_CONFIG\" found!"
+        # Load setup file
         source $MODULES_CONFIG
+        # Sort all modules
+        modules_sort
     else
         echo "Setup \"$MODULES_CONFIG\" NOT found! Load default"
         modules_load_default
@@ -88,8 +97,7 @@ modules_load()
 
 modules_save()
 {
-    if [ -z $1 ]
-    then
+    if [ -z $1 ] ; then
         MODULES_CONFIG="setup.txt"
     else
         MODULES_CONFIG=$1
@@ -113,8 +121,7 @@ modules_save()
         # Check if exist the same file with the name of the folder
         local FILE_NAME=$(echo $folder | cut -f2 -d "/")
         local FILE="$folder"/$FILE_NAME.sh
-        if [ -f $FILE ]
-        then
+        if [ -f $FILE ] ; then
             # Unset save function
             unset -f script_save
             # Load source
@@ -140,8 +147,7 @@ modules_isInList()
 {
     IFS=':' read -ra MODULE <<< "$MODULES_LIST"
     for mod in "${MODULE[@]}"; do
-        if [ "$mod" == $1 ]
-        then
+        if [ "$mod" == $1 ] ; then
             echo "1"
             return
         fi
@@ -152,94 +158,39 @@ modules_isInList()
 
 modules_add()
 {
-    if [ ! -z $MODULES_LIST ]
-    then
-        local NEW_MODULES_LIST=""
-        if [ $(modules_isInList $1) == "0" ]
-        then
-            local mod
-            local one_add="0"
-            echo "Add new module $1"
-            local IDX=$( echo $1 | cut -f1 -d "-" )
-            # Build a reverse list
-            local REVERSE_MODULES_LIST=$(echo $MODULES_LIST | awk -F ':' '{ for (i=NF; i>1; i--) printf("%s:",$i); print $1; }')
-            # Build a new list add add in sequence
-            IFS=':' read -ra MODULE <<< "$REVERSE_MODULES_LIST"
-            for mod in "${MODULE[@]}"; do
-                # Get counter index
-                local COUNTER=$( echo $mod | cut -f1 -d "-" )
-                # echo "$IDX - $COUNTER"
-                if [ "$IDX" -ge "$COUNTER" ] && [ $one_add == "0" ]
-                then
-                    NEW_MODULES_LIST+="$1:$mod:"
-                    # Add one time
-                    one_add="1"
-                elif [ "$IDX" -le "$COUNTER" ] && [ $one_add == "0" ]
-                then
-                    # Add before
-                    NEW_MODULES_LIST+="$mod:$1:"
-                    # Add one time
-                    one_add="1"
-                else
-                    NEW_MODULES_LIST+="$mod:"
-                fi
-            done
-            # Reoder list
-            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | awk -F ':' '{ for (i=NF; i>1; i--) printf("%s:",$i); print $1; }')
-            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | cut -f2- -d ":")
-            #Update module list
-            MODULES_LIST=$NEW_MODULES_LIST
-        else
-            echo "Module $1 is already in list"
-        fi
-    else
-        # Add in list the first element
+    # Check if the module is in list otherwise add the new module
+    echo $MODULES_LIST
+    echo $1
+    if [[ $MODULES_LIST != *"$1"* ]] ; then
+        # Add new element
         echo "Add new module $1"
-        MODULES_LIST+="$1"
+        MODULES_LIST+=":$1"
+        # Sort all modules
+        modules_sort
+    else
+        echo "Module $1 is already in list"
     fi
 }
 
 modules_remove()
 {
-    if [ ! -z $MODULES_LIST ]
-    then
-        if [ $(modules_isInList $1) != "0" ]
-        then
-            local mod
-            local NEW_MODULES_LIST=""
-            echo "Remove module $1"
-            # Build a new list add add in sequence
-            IFS=':' read -ra MODULE <<< "$MODULES_LIST"
-            for mod in "${MODULE[@]}"; do
-                if [ $mod != $1 ]
-                then
-                    NEW_MODULES_LIST+=":$mod"
-                fi
-            done
-            NEW_MODULES_LIST=$(echo $NEW_MODULES_LIST | cut -f2- -d ":")
-            #Update module list
-            MODULES_LIST=$NEW_MODULES_LIST
-        else
-            echo "Module $1 doesn't exist"
-        fi
-    else
-        echo "Module $1 doesn't exist"
-    fi
+    # Remove from list
+    MODULES_LIST=$(echo $MODULES_LIST | sed -e "s/$1//g")
+    # Sort all modules
+    modules_sort
 }
 
 modules_run()
 {
     source include/exesudo.sh
     
-    if [ ! -z $MODULES_LIST ]
-    then
+    if [ ! -z $MODULES_LIST ] ; then
         echo "Start install script..."
         IFS=':' read -ra MODULE <<< "$MODULES_LIST"
         for mod in "${MODULE[@]}"; do
             # Check if exist the same file with the name of the folder
             local FILE="$MODULES_FOLDER/$mod/$mod.sh"
-            if [ -f $FILE ]
-            then
+            if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_run
                 # Load source
@@ -263,8 +214,7 @@ modules_run()
 
 modules_require_reboot()
 {
-    if [ -f /var/run/reboot-required ] || [ ! -z ${MODULES_REQUIRE_REBOOT+x} ]
-    then
+    if [ -f /var/run/reboot-required ] || [ ! -z ${MODULES_REQUIRE_REBOOT+x} ] ; then
         echo "1"
     else
         echo "0"
