@@ -46,6 +46,44 @@ pkgs_is_enabled()
     fi
 }
 
+# Reference
+# https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+vercomp()
+{
+    if [[ $1 == $2 ]]
+    then
+        echo "0"
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0vercomp
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            echo "1"
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            echo "2"
+            return 2
+        fi
+    done
+    echo "0"
+    return 0
+}
+
 script_run()
 {
     echo "Install standard packages"
@@ -79,10 +117,11 @@ script_run()
                 JETSON_NAME="tegrax1"
             elif [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
                 JETSON_NAME="tegrax2"
+                
                 # Check which release of cuda has installed
-                if [ $JETSON_CUDA = "9" ] ; then
+                if [ $(vercomp $JETSON_CUDA "9") = "0" ] ; then
                     JETSON_NAME+="_jp32"
-                elif [ $JETSON_CUDA = "8" ] ; then
+                elif [ $(vercomp $JETSON_CUDA "8") = "0" ] ; then
                     JETSON_NAME+="_jp31"
                 fi
             fi
