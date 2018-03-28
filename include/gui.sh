@@ -357,7 +357,7 @@ menu_launch_run()
 {
     # Check if the root password if good
     sudo -k # make sure to ask for password on next sudo
-    if $(echo $MODULE_PASSWORD | sudo -S -i true); then
+    if $(echo $1 | sudo -S -i true); then
         # Run module
         modules_run
         # Move to recap menu
@@ -373,17 +373,15 @@ menu_install()
         #Password If
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
-            # Save password
-            MODULE_PASSWORD=$psw
             # Launch run
-            menu_launch_run
+            menu_launch_run $psw
         else
             #Execute configuration menu
             MENU_SELECTION=menu_configuration
         fi
     else
         # Launch run
-        menu_launch_run
+        menu_launch_run $MODULE_PASSWORD
     fi
 }
 

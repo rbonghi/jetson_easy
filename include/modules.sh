@@ -227,15 +227,6 @@ modules_remove()
     fi
 }
 
-
-test_it_out ()
-{
-    local params=( "$@" )
-    echo "Hello "$( whoami )"!"
-    echo "You passed the following params:"
-    printf "%s\n" "${params[@]}" ## print array
-}
-
 modules_run()
 {
     source include/exesudo.sh
