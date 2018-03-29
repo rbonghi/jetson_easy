@@ -36,6 +36,9 @@
 # https://en.wikibooks.org/wiki/Bash_Shell_Scripting/Whiptail
 # http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
 
+# Variable to show the saved information status
+GUI_SAVED=0
+
 menu_title()
 {
     if [ ! -z ${DEBUG+x} ]
@@ -294,6 +297,19 @@ menu_load_list()
     MENU_LIST+=("Save" "Save configuration in $MODULES_CONFIG")
 }
 
+menu_configuration_menu()
+{
+    echo "You can configure your Jetson with different modules."
+    if [ $GUI_SAVED = 1 ] ; then
+        echo "-- Configuration stored in $MODULES_CONFIG!"
+    else
+        echo ""
+    fi
+    echo "Choose your option:"
+    # Clear GUI status information
+    GUI_SAVED=0
+}
+
 menu_configuration()
 {
     # Load menu
@@ -306,7 +322,7 @@ menu_configuration()
         local ARLENGTH
         let ARLENGTH=${#repoar[@]}
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "Choose your option" 20 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
@@ -315,6 +331,7 @@ menu_configuration()
             then
                 # Save modification
                 modules_save $MODULES_CONFIG
+                GUI_SAVED=1
             elif [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
             then
                 submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
