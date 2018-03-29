@@ -78,7 +78,8 @@ usage()
     echo "   -h|--help   | This help"
     echo "   -s          | Launch the system in silent mode (Without GUI)"
     echo "   -c [file]   | Load configuration file from other reference [file]"
-    echo "   -p [passwd] |Load password without any other request from the script"
+    echo "   -p [passwd] | Load password without any other request from the script"
+    echo "   -r|--reboot | If required, force automatically the reboot"
 }
 
 loop_gui()
@@ -113,8 +114,22 @@ silent_mode()
     
     if [ $(modules_require_reboot) == "1" ]
     then
+        tput setaf 1
         echo "Reboot required!"
-        sudo reboot
+        tput sgr0
+
+        if [ -z ${MODULE_REBOOT+x} ] ; then
+            read -p "Do you want reboot? [Y/n]" -n 1 -r
+            echo    # (optional) move to a new line
+            if [[ $REPLY =~ ^[Yy]$ ]]
+            then
+                echo "REBOOOT"
+                sudo reboot
+            fi
+        else
+            echo "REBOOOT"
+            sudo reboot
+        fi
     fi
 }
 
@@ -140,6 +155,10 @@ main()
                 # Load help
 			    usage
 			    exit 0
+			    ;;
+			-r|-reboot)
+			    # If required, force automatically the reboot
+			    MODULE_REBOOT=1
 			    ;;
 		    *)
 		        usage "Unknown option: $1"
