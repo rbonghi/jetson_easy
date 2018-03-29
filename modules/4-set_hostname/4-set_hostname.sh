@@ -86,6 +86,7 @@ new_hostname()
         NEW_HOSTNAME=$HOSTNAME
     fi
     
+    local HOSTNAME_TMP_VALUE
     HOSTNAME_TMP_VALUE=$(whiptail --inputbox "Set new hostname" 8 78 $NEW_HOSTNAME --title "New hostname" 3>&1 1>&2 2>&3)
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
