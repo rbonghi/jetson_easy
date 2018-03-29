@@ -40,7 +40,7 @@ menu_title()
 {
     if [ ! -z ${DEBUG+x} ]
     then
-        echo "DEBUG MODE -"
+        echo "DEBUG MODE - "
     else
         echo ""
     fi
@@ -238,7 +238,10 @@ submenu_configuration()
     # echo "Return value: $STATUS"
     # Add or remove the module in list
     case $STATUS in
-        "1") modules_add $NAME ;;
+        "1") # Add module
+             modules_add $NAME
+             # Load default variables
+             script_load_default ;;
         "0") modules_remove $NAME ;;
         *) ;;
     esac
@@ -327,7 +330,7 @@ menu_configuration()
             MENU_SELECTION=menu_information
             ;;
         "Start-->")
-            MENU_SELECTION=menu_install
+            MENU_SELECTION=menu_recap
             ;;
         *)
             MENU_SELECTION=menu_information
@@ -361,7 +364,7 @@ menu_launch_run()
         # Run module
         modules_run
         # Move to recap menu
-        MENU_SELECTION=menu_recap
+        MENU_SELECTION=menu_end
     fi
 }
 
@@ -400,10 +403,18 @@ menu_list_installed()
         then
             if [ $(modules_isInList $FILE_NAME) == "1" ]
             then
+                # Unset save function
+                unset -f script_info
                 # Load source
                 source "$FILE"
                 # Add element in menu
                 echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
+                # Check if exist the function
+                if type script_info &>/dev/null
+                then
+                    # run script
+                    script_info
+                fi
             fi
         fi
       fi
@@ -418,6 +429,19 @@ menu_list_installed()
 }
 
 menu_recap()
+{
+    # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
+    if (whiptail --title "$(menu_title)Recap" --yes-button "INSTALL" --no-button "exit" --yesno "$(menu_list_installed)" 22 60) then
+        # Launch installer
+        MENU_SELECTION=menu_install
+    else
+        # Launch installer
+        MENU_SELECTION=menu_configuration
+    fi
+
+}
+
+menu_end()
 {
     if [ $(modules_require_reboot) == "1" ]
     then

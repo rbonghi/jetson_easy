@@ -239,6 +239,12 @@ script_save()
     fi
 }
 
+script_info()
+{
+    echo " - Download KERNEL sources in $KERNEL_DOWNLOAD_FOLDER"
+    echo " - Will be patch with: $KERNEL_PATCH_LIST"
+}
+
 set_kernel_patch()
 {
     if [ -z ${KERNEL_PATCH_LIST+x} ]

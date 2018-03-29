@@ -36,10 +36,8 @@ MODULE_SUBMENU=("Write new hostname:new_hostname")
 
 script_run()
 {
-    if [ ! -z ${NEW_HOSTNAME+x} ]
-    then
-        if [ $NEW_HOSTNAME != $HOSTNAME ]
-        then
+    if [ ! -z ${NEW_HOSTNAME+x} ] ; then
+        if [ $NEW_HOSTNAME != $HOSTNAME ] ; then
             echo "Change hostname in /etc/hostname"
             echo "$NEW_HOSTNAME" | sudo tee /etc/hostname
             echo "Change hostname in /etc/hosts"
@@ -59,8 +57,7 @@ script_run()
 
 script_load_default()
 {
-    if [ -z ${NEW_HOSTNAME+x} ]
-    then
+    if [ -z ${NEW_HOSTNAME+x} ] ; then
         # Write hostname
         NEW_HOSTNAME=$HOSTNAME
     fi
@@ -68,20 +65,26 @@ script_load_default()
 
 script_save()
 {
-    if [ ! -z ${NEW_HOSTNAME+x} ]
-    then
-        if [ $NEW_HOSTNAME != $HOSTNAME ]
-        then
+    if [ ! -z ${NEW_HOSTNAME+x} ] ; then
+        if [ $NEW_HOSTNAME != $HOSTNAME ] ; then
             echo "NEW_HOSTNAME=\"$NEW_HOSTNAME\"" >> $1
         fi
         echo "Saved Hostname"
     fi
 }
 
+script_info()
+{
+    if [ ! -z ${NEW_HOSTNAME+x} ] ; then
+        if [ $NEW_HOSTNAME != $HOSTNAME ] ; then
+            echo " - New hostname: $NEW_HOSTNAME"
+        fi
+    fi
+}
+
 new_hostname()
 {
-    if [ -z ${NEW_HOSTNAME+x} ]
-    then
+    if [ -z ${NEW_HOSTNAME+x} ] ; then
         # Write hostname
         NEW_HOSTNAME=$HOSTNAME
     fi

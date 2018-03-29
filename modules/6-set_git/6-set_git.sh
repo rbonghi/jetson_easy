@@ -42,10 +42,14 @@ script_run()
     echo "Install git"
     tput sgr0
     sudo apt-get install git -y
-    echo "git config --global user.name \"$NEW_GIT_USERNAME\""
-    git config --global user.name "$NEW_GIT_USERNAME"
-    echo "git config --global user.email $NEW_GIT_EMAIL"
-    git config --global user.email $NEW_GIT_EMAIL
+    if [ -z ${NEW_GIT_USERNAME+x} ] ; then
+        echo "git config --global user.name \"$NEW_GIT_USERNAME\""
+        git config --global user.name "$NEW_GIT_USERNAME"
+    fi
+    if [ -z ${NEW_GIT_EMAIL+x} ] ; then
+        echo "git config --global user.email $NEW_GIT_EMAIL"
+        git config --global user.email $NEW_GIT_EMAIL
+    fi
 }
 
 script_load_user()
@@ -96,6 +100,20 @@ script_save()
     fi
     echo "Saved GIT parameters"
     
+}
+
+script_info()
+{
+    if [ ! -z ${NEW_GIT_USERNAME+x} ] ; then
+        if [ $NEW_GIT_USERNAME != $(git config user.name) ] ; then
+            echo " - Git user.name=\"$NEW_GIT_USERNAME\""
+        fi
+    fi
+    if [ ! -z ${NEW_GIT_EMAIL+x} ] ; then
+        if [ $NEW_GIT_EMAIL != $(git config user.email) ] ; then
+            echo " - Git user.email=\"$NEW_GIT_EMAIL\""
+        fi
+    fi
 }
 
 set_user_name()

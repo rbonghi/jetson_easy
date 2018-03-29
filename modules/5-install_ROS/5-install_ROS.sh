@@ -279,7 +279,7 @@ script_save()
     
     # Write new ROS_NEW_MASTER_URI
     if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
-        if [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
+        if [ "$ROS_NEW_MASTER_URI" != "$ROS_MASTER_URI" ] ; then
             echo "ROS_NEW_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $1
         fi
     fi
@@ -288,6 +288,22 @@ script_save()
     echo "ROS_NEW_HOSTNAME=\"$ROS_NEW_HOSTNAME\"" >> $1
     
     echo "Saved ROS parameters"
+}
+
+script_info()
+{
+    if [ $ROS_NEW_WORKSPACE = 1 ] ; then
+        echo " - Add new workspace: $ROS_NEW_WS"
+    fi
+    
+    if [ $ROS_NEW_HOSTNAME = 1 ] ; then
+        echo " - ROS_MASTER_URI same $HOSTNAME"
+    fi
+    if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
+        if [ "$ROS_NEW_MASTER_URI" != "$ROS_MASTER_URI" ] ; then
+            echo " - New ROS_MASTER_URI: $ROS_NEW_MASTER_URI"
+        fi
+    fi
 }
 
 ros_load_check()

@@ -170,6 +170,11 @@ script_save()
     fi
 }
 
+script_info()
+{
+    echo " - Will be add this packages: $PKGS_PATCH_LIST"
+}
+
 set_pkgs()
 {
     if [ -z ${PKGS_PATCH_LIST+x} ]
