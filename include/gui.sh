@@ -445,12 +445,18 @@ menu_end()
 {
     if [ $(modules_require_reboot) == "1" ]
     then
-        # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
-        if (whiptail --title "$(menu_title)Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 22 60) then
+        if [ -z ${MODULE_REBOOT+x} ] ; then
+            # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
+            if (whiptail --title "$(menu_title)Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 22 60) then
+                echo "System rebotting ... "
+                sudo reboot
+            else
+                echo "System require a reboot!"
+            fi
+        else
+            whiptail --title "$(menu_title)Recap" --ok-button "REBOOT" --textbox /dev/stdin 22 60 <<< "$(menu_list_installed)"
             echo "System rebotting ... "
             sudo reboot
-        else
-            echo "System require a reboot!"
         fi
     else
         whiptail --title "$(menu_title)Recap" --textbox /dev/stdin 22 60 <<< "$(menu_list_installed)"
