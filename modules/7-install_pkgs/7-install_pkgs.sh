@@ -53,7 +53,7 @@ vercomp()
     if [[ $1 == $2 ]]
     then
         echo "0"
-        return 0
+        return
     fi
     local IFS=.
     local i ver1=($1) ver2=($2)
@@ -72,16 +72,16 @@ vercomp()
         if ((10#${ver1[i]} > 10#${ver2[i]}))
         then
             echo "1"
-            return 1
+            return
         fi
         if ((10#${ver1[i]} < 10#${ver2[i]}))
         then
-            echo "2"
-            return 2
+            echo "-1"
+            return
         fi
     done
     echo "0"
-    return 0
+    return
 }
 
 script_run()
@@ -119,9 +119,9 @@ script_run()
                 JETSON_NAME="tegrax2"
                 
                 # Check which release of cuda has installed
-                if [ $(vercomp $JETSON_CUDA "9") = "0" ] ; then
+                if [ $(vercomp $JETSON_CUDA "9") -ge "0" ] ; then
                     JETSON_NAME+="_jp32"
-                elif [ $(vercomp $JETSON_CUDA "8") = "0" ] ; then
+                elif [ $(vercomp $JETSON_CUDA "8") -ge "0" ] ; then
                     JETSON_NAME+="_jp31"
                 fi
             fi
@@ -130,8 +130,19 @@ script_run()
             echo "Download https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME"
             tput sgr0
             
+            # Local folder
+            local LOCAL_FOLDER=$(pwd)
+            # Move in temporary folder
+            cd /tmp
+            
+            # Download ZED drivers
+            # wget --output-document zed_driver.run https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME
+            
             # TODO check how to install silent the ZED sdk
-            # wget https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME
+            ###
+            
+            # Restore previuous folder
+            cd $LOCAL_FOLDER
         else
             tput setaf 1
             echo "I can't install the ZED drivers CUDA is not installed!"
