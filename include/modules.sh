@@ -191,10 +191,13 @@ modules_run()
         IFS=':' read -ra MODULE <<< "$MODULES_LIST"
         for mod in "${MODULE[@]}"; do
             # Check if exist the same file with the name of the folder
-            local FILE="$MODULES_FOLDER/$mod/$mod.sh"
+            local FOLDER="$MODULES_FOLDER/$mod"
+            local FILE="$FOLDER/$mod.sh"
             if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_run
+                # Local folder
+                local LOCAL_FOLDER=$(pwd)
                 # Load source
                 source "$FILE"
                 # Write name module
@@ -202,10 +205,14 @@ modules_run()
                 # Check if exist the function
                 if type script_run &>/dev/null
                 then
+                    # Move to same folder
+                    cd $FOLDER
                     # run script
                     # exesudo script_run
                     script_run
                 fi
+                # Restore previuous folder
+                cd $LOCAL_FOLDER
             fi
         done
         echo "... Done"

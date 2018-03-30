@@ -244,7 +244,8 @@ submenu_configuration()
         "1") # Add module
              modules_add $NAME
              # Load default variables
-             script_load_default ;;
+             # script_load_default 
+             ;;
         "0") modules_remove $NAME ;;
         *) ;;
     esac

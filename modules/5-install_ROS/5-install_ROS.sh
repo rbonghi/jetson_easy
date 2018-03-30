@@ -218,9 +218,11 @@ script_run()
     fi
     
     if [ ! -z ${ROS_DISTRO+x} ] ; then
+        # Check if empty the ROS_MASTER_URI
         if [ -z $ROS_NEW_MASTER_URI ] && [ $ROS_NEW_HOSTNAME=1 ] ; then
             ROS_NEW_MASTER_URI="http://$HOSTNAME.local:11311"
         fi
+        # Update the ROS_MASTER_URI
         if [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ]; then
             tput setaf 6
             echo "Add new ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\""
@@ -264,11 +266,11 @@ script_load_default()
     ROS_NEW_HOSTNAME=0
     
     # Write new ROS_NEW_MASTER_URI
-    if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
-        ROS_NEW_MASTER_URI=$ROS_MASTER_URI
-    else
-        ROS_NEW_MASTER_URI="http://localhost:11311"
-    fi
+    #if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
+    #    ROS_NEW_MASTER_URI=$ROS_MASTER_URI
+    #else
+    #    ROS_NEW_MASTER_URI="http://localhost:11311"
+    #fi
 }
 
 script_save()
@@ -277,15 +279,15 @@ script_save()
     echo "ROS_NEW_WS=\"$ROS_NEW_WS\"" >> $1
     echo "ROS_NEW_WORKSPACE=\"$ROS_NEW_WORKSPACE\"" >> $1
     
+    # Write new ROS_NEW_HOSTNAME
+    echo "ROS_NEW_HOSTNAME=\"$ROS_NEW_HOSTNAME\"" >> $1
+    
     # Write new ROS_NEW_MASTER_URI
     if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
         if [ "$ROS_NEW_MASTER_URI" != "$ROS_MASTER_URI" ] ; then
             echo "ROS_NEW_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $1
         fi
     fi
-
-    # Write new ROS_NEW_HOSTNAME
-    echo "ROS_NEW_HOSTNAME=\"$ROS_NEW_HOSTNAME\"" >> $1
     
     echo "Saved ROS parameters"
 }
