@@ -40,7 +40,23 @@ FTDI driver converter
 ACM driver"
 MODULE_DEFAULT=0
 
-MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch")
+
+
+kernel_has_removed()
+{
+    if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then 
+        echo "X"
+    else
+        echo " "
+    fi 
+}
+
+if [ -z ${KERNEL_REMOVE_FOLDER+x} ] ; then
+    MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch" "[ ] Remove install after patching:kernel_is_removed")
+else
+    MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch" "[$(kernel_has_removed)] Remove install after patching:kernel_is_removed")
+fi
+
 
 KERNEL_FOLDER="kernel/kernel-4.4"
 KERNEL_CONFIG_FILE=".config"
@@ -194,6 +210,13 @@ script_run()
         # Copy images
         #copy_images
         
+        if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
+            tput setaf 1
+            echo "Removing folder $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER"
+            tput sgr0
+            # sudo rm -R $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
+        fi
+        
         # Require reboot
         tput setaf 1
         echo "Enable require reboot"
@@ -218,6 +241,11 @@ script_load_default()
         # Empty kernel patch list 
         KERNEL_PATCH_LIST="\"\""
     fi
+    
+    if [ -z ${KERNEL_REMOVE_FOLDER+x} ] ; then
+        # Default configuration, after install the kernel sources will be removed 
+        KERNEL_REMOVE_FOLDER="YES"
+    fi
 }
 
 script_save()
@@ -237,12 +265,48 @@ script_save()
         fi
         echo "Saved kernel path folder"
     fi
+    
+    if [ ! -z ${KERNEL_REMOVE_FOLDER+x} ] ; then
+        if [ $KERNEL_REMOVE_FOLDER != "YES" ]
+        then
+            echo "KERNEL_REMOVE_FOLDER=\"$KERNEL_REMOVE_FOLDER\"" >> $1
+        fi
+    fi
 }
 
 script_info()
 {
     echo " - Download KERNEL sources in $KERNEL_DOWNLOAD_FOLDER"
     echo " - Will be patch with: $KERNEL_PATCH_LIST"
+    if [ $KERNEL_REMOVE_FOLDER != "yes" ] ; then
+        echo " - The kernel sources is saved in $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER"
+    else
+        echo " - After install the $KERNEL_FOLDER will be removed from $KERNEL_DOWNLOAD_FOLDER"
+    fi
+}
+
+kernel_remove_check()
+{
+    if [ $1 == $2 ] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
+kernel_is_removed()
+{
+    local KERNEL_REMOVE_FOLDER_TMP_VALUE
+    KERNEL_REMOVE_FOLDER_TMP_VALUE=$(whiptail --title "$MODULE_NAME" --radiolist \
+    "Do you want remove sources after install?" 15 60 2 \
+    "YES" "The folder will be removed" $(kernel_remove_check "YES" $KERNEL_REMOVE_FOLDER) \
+    "NO" "The folder is not removed" $(kernel_remove_check "NO" $KERNEL_REMOVE_FOLDER) 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        KERNEL_REMOVE_FOLDER=$KERNEL_REMOVE_FOLDER_TMP_VALUE
+    fi
+    
 }
 
 set_kernel_patch()
