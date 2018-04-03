@@ -237,10 +237,12 @@ script_run()
                 grep -q -F "export ROS_HOSTNAME=\"$HOSTNAME\"" $HOME/.bashrc || echo "export ROS_HOSTNAME=\"$HOSTNAME\"" >> $HOME/.bashrc
             fi
             
-            tput setaf 6
-            echo "Re run $USER bashrc in $HOME"
-            tput sgr0
-            source $HOME/.bashrc
+            #tput setaf 6
+            #echo "Re run $USER bashrc in $HOME"
+            #tput sgr0
+            #source $HOME/.bashrc
+            echo $(pwd)
+            . update_bash.bash
         fi
     fi
 }

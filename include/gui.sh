@@ -280,15 +280,19 @@ menu_load_list()
         # Check if exist the same file with the name of the folder
         local FILE_NAME=$(echo $folder | cut -f2 -d "/")
         local FILE="$folder"/$FILE_NAME.sh
-        if [ -f $FILE ]
-        then
+        if [ -f $FILE ] ; then
+            # unload variables
+            unset MODULE_DEFAULT
             # Load source
             source "$FILE"
-            # Add element in menu
-            MENU_LIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
-            MENU_REFERENCE+=("$COUNTER" "$FILE")
-            #Increase counter
-            COUNTER=$((COUNTER+1))
+            # Add only all modules without MODULE_DEFAULT=-1
+            if [ $MODULE_DEFAULT -ne -1 ] ; then
+                # Add element in menu
+                MENU_LIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
+                MENU_REFERENCE+=("$COUNTER" "$FILE")
+                #Increase counter
+                COUNTER=$((COUNTER+1))
+            fi
         fi
       fi
     done

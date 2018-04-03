@@ -28,10 +28,14 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Patch the board from knowed errors
-
 MODULE_NAME="Patch $JETSON_DESCRIPTION from known errors"
 MODULE_DESCRIPTION="Patch $JETSON_DESCRIPTION from known errors"
-MODULE_DEFAULT=1
+# Add show option only with Jetpack 3.2
+if [ $(jetson_vercomp $JETSON_JETPACK "3.2") == "0" ] ; then
+    MODULE_DEFAULT=1
+else
+    MODULE_DEFAULT=-1
+fi
 
 script_run()
 {

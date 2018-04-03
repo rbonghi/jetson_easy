@@ -68,7 +68,7 @@ modules_load_default()
                 then
                     script_load_default
                     # Load initialization variable function
-                    echo "Load Default variable for: $MODULE_NAME"
+                    # echo "Load Default variable for: $MODULE_NAME"
                 fi
             fi
         fi
@@ -196,23 +196,27 @@ modules_run()
             if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_run
+                unset MODULE_DEFAULT
                 # Local folder
                 local LOCAL_FOLDER=$(pwd)
                 # Load source
                 source "$FILE"
-                # Write name module
-                echo "Running module - $MODULE_NAME"
-                # Check if exist the function
-                if type script_run &>/dev/null
-                then
-                    # Move to same folder
-                    cd $FOLDER
-                    # run script
-                    # exesudo script_run
-                    script_run
+                # Add only all modules without MODULE_DEFAULT=-1
+                if [ $MODULE_DEFAULT -ne -1 ] ; then
+                    # Write name module
+                    echo "Running module - $MODULE_NAME"
+                    # Check if exist the function
+                    if type script_run &>/dev/null
+                    then
+                        # Move to same folder
+                        cd $FOLDER
+                        # run script
+                        # exesudo script_run
+                        script_run
+                    fi
+                    # Restore previuous folder
+                    cd $LOCAL_FOLDER
                 fi
-                # Restore previuous folder
-                cd $LOCAL_FOLDER
             fi
         done
         echo "... Done"
