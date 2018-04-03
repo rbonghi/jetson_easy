@@ -281,7 +281,7 @@ script_info()
     if [ $KERNEL_REMOVE_FOLDER != "yes" ] ; then
         echo " - The kernel sources is saved in $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER"
     else
-        echo " - After install the $KERNEL_FOLDER will be removed from $KERNEL_DOWNLOAD_FOLDER"
+        echo " - After install will be removed the $KERNEL_FOLDER from sources $KERNEL_DOWNLOAD_FOLDER"
     fi
 }
 
