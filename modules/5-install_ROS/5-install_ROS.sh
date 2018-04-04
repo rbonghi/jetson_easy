@@ -74,6 +74,16 @@ fi
 
 install_ros()
 {
+    # Automatically update all packages
+    tput setaf 6
+    echo 'APT Set repository [universe, multiverse, restricted]'
+    tput sgr0
+    
+    # Configure repositories
+    sudo apt-add-repository universe
+    sudo apt-add-repository multiverse
+    sudo apt-add-repository restricted
+
     # Setup sources.lst
     tput setaf 6
     echo 'Setup sources.lst'

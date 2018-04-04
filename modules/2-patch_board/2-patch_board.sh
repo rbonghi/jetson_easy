@@ -37,6 +37,11 @@ else
     MODULE_DEFAULT=-1
 fi
 
+# Know errors for Jetpack 3.2
+# https://devtalk.nvidia.com/default/topic/1031736/jetson-tx2/cuda-9-0-samples-do-not-build-with-jetpack-3-2/
+# https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
+
+
 script_run()
 {
     tput setaf 6
