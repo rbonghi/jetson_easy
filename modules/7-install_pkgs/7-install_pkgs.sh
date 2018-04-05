@@ -149,8 +149,8 @@ set_pkgs()
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
     "Which new packages do you want add?" 15 60 3 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
-    "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
-    "ZED" "Install ZED driver" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
+    "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") 3>&1 1>&2 2>&3)
+#    "ZED" "Install ZED driver" $(pkgs_is_enabled "ZED") \
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
