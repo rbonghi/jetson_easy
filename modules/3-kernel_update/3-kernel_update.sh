@@ -217,8 +217,12 @@ get_kernel_sources()
     fi
     
     cd $KERNEL_FOLDER
-    zcat /proc/config.gz > $KERNEL_CONFIG_FILE
-    
+    if [ ! -f $KERNEL_CONFIG_FILE ]; then
+        tput setaf 6
+        echo "Copy config folder /proc/config.gz in $KERNEL_CONFIG_FILE"
+        tput sgr0
+        sudo zcat /proc/config.gz > $KERNEL_CONFIG_FILE
+    fi
     # Ready to configure kernel
     #make xconfig
     
