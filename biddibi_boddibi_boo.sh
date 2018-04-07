@@ -168,6 +168,11 @@ main()
 		shift 1
 	done
 	
+	# Check if the code run in NVIDIA Jetson or in remote
+	if [ -z $JETSON_BOARD ] ; then
+	    MODULE_REMOTE=1
+	fi
+	
 	if [ ! -z $IS_SILENT ] ; then
 	    unset IS_SILENT
         # Launch the system in silent mode (Without GUI)

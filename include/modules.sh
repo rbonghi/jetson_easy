@@ -30,6 +30,8 @@
 MODULES_LIST=""
 MODULES_FOLDER="modules"
 MODULES_CONFIG="setup.txt"
+# Default configuration this code start not in remote mode
+MODULE_REMOTE=0
 
 # --------------------------------
 # LOAD_MODULES
