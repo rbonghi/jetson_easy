@@ -300,8 +300,6 @@ script_save()
             echo "ROS_NEW_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $1
         fi
     fi
-    
-    echo "Saved ROS parameters"
 }
 
 script_info()

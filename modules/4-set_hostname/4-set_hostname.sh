@@ -69,7 +69,6 @@ script_save()
         if [ $NEW_HOSTNAME != $HOSTNAME ] ; then
             echo "NEW_HOSTNAME=\"$NEW_HOSTNAME\"" >> $1
         fi
-        echo "Saved Hostname"
     fi
 }
 

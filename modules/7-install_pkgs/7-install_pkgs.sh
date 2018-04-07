@@ -179,7 +179,6 @@ script_save()
         then
             echo "PKGS_PATCH_LIST=\"$PKGS_PATCH_LIST\"" >> $1
         fi
-        echo "Saved packages list"
     fi
 }
 

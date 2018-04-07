@@ -98,8 +98,6 @@ script_save()
     if [ ! -z ${NEW_GIT_EMAIL+x} ] ; then
         echo "NEW_GIT_EMAIL=\"$NEW_GIT_EMAIL\"" >> $1
     fi
-    echo "Saved GIT parameters"
-    
 }
 
 script_info()
@@ -120,7 +118,6 @@ set_user_name()
 {
     # Load default user
     script_load_user
-    
     
     local NEW_GIT_USERNAME_TMP_VALUE
     NEW_GIT_USERNAME_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set user name" 8 78 $NEW_GIT_USERNAME --title "Set user.name" 3>&1 1>&2 2>&3)
