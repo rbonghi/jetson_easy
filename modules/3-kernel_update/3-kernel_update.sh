@@ -237,11 +237,11 @@ script_run()
     tput sgr0
     
     if [ $JETSON_L4T == "27.1" ] || [ $JETSON_L4T == "28.1" ] || [ $JETSON_L4T == "28.2" ] ; then
-        # Run get kernel sources
-        get_kernel_sources 
-        
         # Edit, make and copy only if the list is not empty    
         if [ "$KERNEL_PATCH_LIST" != "" ] ; then
+            # Run get kernel sources
+            get_kernel_sources 
+
             echo "Patch kernel and add: $KERNEL_PATCH_LIST"
             # Patch the kernel
             edit_kernel
