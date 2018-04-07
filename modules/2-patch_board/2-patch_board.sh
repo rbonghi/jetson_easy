@@ -27,6 +27,58 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
+# Reference
+# https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+jetson_vercomp()
+{
+    if [[ $1 == $2 ]]
+    then
+        echo "0"
+        return
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # Check if the versions are number
+    re='^[0-9]+$'
+    if ! [[ $ver1 =~ $re ]] ; then
+       #echo "$ver1 error: Not a number" >&2
+       echo "NaN"
+       return
+    fi
+    if ! [[ $ver2 =~ $re ]] ; then
+       #echo "$ver2 error: Not a number" >&2
+       echo "NaN"
+       return
+    fi
+    
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0vercomp
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            echo "1"
+            return
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            echo "-1"
+            return
+        fi
+    done
+    echo "0"
+    return
+}
+
 # Patch the board from knowed errors
 MODULE_NAME="Patch $JETSON_DESCRIPTION from known errors"
 MODULE_DESCRIPTION="Patch $JETSON_DESCRIPTION from known errors"

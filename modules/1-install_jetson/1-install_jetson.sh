@@ -39,10 +39,8 @@ script_run()
     echo "Uninstall previous version of jetson_easy"
     tput sgr0
     
-    local LOCAL_FOLDER=$(pwd)
-    
     # Move in jetson folder
-    cd $(pwd)/jetson
+    cd ../../jetson
 
     # Launch uninstaller jetson_easy
     . uninstall_jetson_easy.sh
@@ -53,8 +51,6 @@ script_run()
     
     # Launch installer jetson_easy
     . install_jetson_easy.sh
-    
-    cd $LOCAL_FOLDER
     
     tput setaf 6
     echo "Complete!"
