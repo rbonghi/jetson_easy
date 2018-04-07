@@ -57,7 +57,7 @@ else
     MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch" "[$(kernel_has_removed)] Remove install after patching:kernel_is_removed")
 fi
 
-
+KERNEL_SRC_FOLDER="/usr/src"
 KERNEL_FOLDER="kernel/kernel-4.4"
 KERNEL_CONFIG_FILE=".config"
 
@@ -76,19 +76,22 @@ edit_kernel()
     local LOCAL_FOLDER=$(pwd)
     
     # Move to the kernel folder
-    #cd $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
-    
-    echo "List: $KERNEL_PATCH_LIST"
+    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
     if [ $(kernel_is_enabled "FTDI") == "ON" ] ; then
-        echo "TODO - Patch with FTDI"
         # Patch the config file
-        # https://github.com/NVIDIA-Jetson/jetson-trashformers/wiki/Re-configuring-the-Jetson-TX2-Kernel
-        sudo sed -i 's/.*CONFIG_USB_ACM.*/CONFIG_USB_ACM=y/' $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
+        tput setaf 6
+        echo "Add in kernel FTDI driver"
+        tput sgr0
+        
     fi
     
     if [ $(kernel_is_enabled "ACM") == "ON" ] ; then
-        echo "TODO - Patch with ACM"
+        tput setaf 6
+        echo "Add in kernel ACM driver"
+        tput sgr0
+        # https://github.com/NVIDIA-Jetson/jetson-trashformers/wiki/Re-configuring-the-Jetson-TX2-Kernel
+        sudo sed -i 's/.*CONFIG_USB_ACM.*/CONFIG_USB_ACM=y/' $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
     fi
     
     # Restore previuous folder
@@ -99,20 +102,20 @@ make_kernel()
 {
     # Local folder
     local LOCAL_FOLDER=$(pwd)
-    
+        
     tput setaf 6
     echo "Make kernel"
     tput sgr0
     
     # Builds the kernel and modules
     # Assumes that the .config file is available
-    cd $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
+    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
-    make prepare
-    make modules_prepare
-    make -j6
-    make modules
-    make modules_install
+    sudo make prepare
+    sudo make modules_prepare
+    sudo make -j6
+    sudo make modules
+    sudo make modules_install
     
     # Restore previuous folder
     cd $LOCAL_FOLDER
@@ -124,19 +127,22 @@ copy_images()
     local LOCAL_FOLDER=$(pwd)
     
     tput setaf 6
-    echo "Copy images"
+    echo "Copy image in /boot/Image"
     tput sgr0
     
-    cd $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
+    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
-    sudo cp arch/arm64/boot/zImage /boot/zImage
+    #sudo cp arch/arm64/boot/zImage /boot/zImage
     sudo cp arch/arm64/boot/Image /boot/Image
     
     # Restore previuous folder
     cd $LOCAL_FOLDER
     
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
+    # Require reboot
+    tput setaf 1
+    echo "Require reboot"
+    tput sgr0
+    MODULES_REQUIRE_REBOOT=1
 }
 
 get_kernel_sources()
@@ -146,43 +152,72 @@ get_kernel_sources()
 
     # List of kernel link
     local KERNEL_LINK=""
+    local KERNEL_INTERNAL_FOLDER=""
     if [ $JETSON_L4T == "28.2" ] ; then
         KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/BSP/source_release.tbz2"
+        KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
     elif [ $JETSON_L4T == "28.1" ] ; then
         KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
+        KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
     elif [ $JETSON_L4T == "27.1" ] ; then
         KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r27_Release_v1.0/BSP/r27.1.0_sources.tbz2"
+        KERNEL_INTERNAL_FOLDER="kernel_src.tbz2"
     fi
-    # Variable kernel file
-    local KERNEL_FILE=$(basename "${KERNEL_LINK}")
 
-    # Install qt5-default and pkg-config
-    sudo apt-get install qt5-default pkg-config -y
+    # Install pkg-config
+    sudo apt-get install pkg-config -y
     
     tput setaf 6
-    echo "Move in download folder: $KERNEL_DOWNLOAD_FOLDER"
+    echo "Move in download folder: $KERNEL_SRC_FOLDER"
     tput sgr0
     # Move in jetson folder
-    cd $KERNEL_DOWNLOAD_FOLDER
+    cd $KERNEL_SRC_FOLDER
     
-    # Download kernel
-    tput setaf 6
-    echo "Download source kernel $JETSON_L4T"
-    tput sgr0
-    # wget $KERNEL_LINK
+    # Check if the folder Kernel folder exist
+    if [ ! -d "$KERNEL_FOLDER" ]; then
     
-    tput setaf 6
-    echo "Extracting $KERNEL_FILE from source release"
-    tput sgr0
-    #tar -xvf $KERNEL_FILE public_release/kernel_src.tbz2
-
-    tput setaf 6
-    echo 'Expanding kernel_src.tbz2'
-    tput sgr0
-    #tar -xvf public_release/kernel_src.tbz2
+        # Variable kernel file
+        local KERNEL_FILE="source_release.tbz2"
     
-    #cd $KERNEL_FOLDER
-    #zcat /proc/config.gz > $KERNEL_CONFIG_FILE
+        if [ ! -f $KERNEL_FILE ]; then
+            # Download kernel
+            tput setaf 6
+            echo "Download source kernel $JETSON_L4T"
+            tput sgr0
+            sudo wget --output-document $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE $KERNEL_LINK
+        fi
+        
+        if [ ! -f $KERNEL_INTERNAL_FOLDER ]; then
+            tput setaf 6
+            echo "Extracting $KERNEL_FILE from $KERNEL_INTERNAL_FOLDER source"
+            tput sgr0
+            sudo tar -xvf $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE $KERNEL_INTERNAL_FOLDER
+        fi
+        
+        tput setaf 6
+        echo "Expanding $KERNEL_INTERNAL_FOLDER"
+        tput sgr0
+        sudo tar -xf $KERNEL_INTERNAL_FOLDER
+        
+        local kernel_dir="$(dirname $KERNEL_INTERNAL_FOLDER)"
+        if [ $kernel_dir == "." ] ; then
+            echo "no folder"
+        else
+            echo "Remove folder $kernel_dir"
+            sudo rm -r $kernel_dir
+        fi
+        
+        # Remove source file
+        if [ -f $KERNEL_FILE ]; then
+            tput setaf 6
+            echo "Remove $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE kernel source"
+            tput sgr0
+            sudo rm -r $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE
+        fi
+    fi
+    
+    cd $KERNEL_FOLDER
+    zcat /proc/config.gz > $KERNEL_CONFIG_FILE
     
     # Ready to configure kernel
     #make xconfig
@@ -201,27 +236,29 @@ script_run()
         # Run get kernel sources
         get_kernel_sources 
         
-        # Patch the kernel
-        edit_kernel
-        
-        # Make the kernel
-        #make_kernel
-        
-        # Copy images
-        #copy_images
+        # Edit, make and copy only if the list is not empty    
+        if [ "$KERNEL_PATCH_LIST" != "" ] ; then
+            echo "Patch kernel and add: $KERNEL_PATCH_LIST"
+            # Patch the kernel
+            edit_kernel
+            
+            # Make the kernel
+            make_kernel
+            
+            # Copy images
+            copy_images
+        else
+            tput setaf 1
+            echo "No patch in list!"
+            tput sgr0
+        fi
         
         if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
             tput setaf 1
-            echo "Removing folder $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER"
+            echo "Removing folder $KERNEL_SRC_FOLDER/$KERNEL_FOLDER"
             tput sgr0
-            # sudo rm -R $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FOLDER
+            sudo rm -R $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
         fi
-        
-        # Require reboot
-        tput setaf 1
-        echo "Enable require reboot"
-        tput sgr0
-        #MODULES_REQUIRE_REBOOT=1
         
     else
         tput setaf 1
@@ -255,15 +292,13 @@ script_save()
         then
             echo "KERNEL_DOWNLOAD_FOLDER=\"$KERNEL_DOWNLOAD_FOLDER\"" >> $1
         fi
-        echo "Saved kernel path folder"
     fi
     
     if [ ! -z ${KERNEL_PATCH_LIST+x} ] ; then
-        if [ $KERNEL_PATCH_LIST != "\"\"" ]
+        if [ $KERNEL_PATCH_LIST != "" ]
         then
             echo "KERNEL_PATCH_LIST=\"$KERNEL_PATCH_LIST\"" >> $1
         fi
-        echo "Saved kernel path folder"
     fi
     
     if [ ! -z ${KERNEL_REMOVE_FOLDER+x} ] ; then
@@ -314,7 +349,7 @@ set_kernel_patch()
     if [ -z ${KERNEL_PATCH_LIST+x} ]
     then
         # Empty kernel patch list
-        KERNEL_PATCH_LIST="\"\""
+        KERNEL_PATCH_LIST=""
     fi
     
     local KERNEL_PATCH_TMP
