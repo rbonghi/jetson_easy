@@ -47,7 +47,9 @@ source jetson/jetson_variables
 
 # Load user interface
 source include/modules.sh
-
+# Load remote sources
+source include/remote.sh
+        
 # To Enable the debug mode
 if [ -f DEBUG ]; then
     # Set in debug mode
@@ -75,60 +77,95 @@ usage()
     echo "Usage:"
     echo "$0 [options]"
     echo "options,"
-    echo "   -h|--help   | This help"
-    echo "   -s          | Launch the system in silent mode (Without GUI)"
-    echo "   -c [file]   | Load configuration file from other reference [file]"
-    echo "   -p [passwd] | Load password without any other request from the script"
-    echo "   -r|--reboot | If required, force automatically the reboot"
+    echo "   -h|--help      | This help"
+    echo "   -s             | Launch the system in silent mode (Without GUI)"
+    echo "   -c [file]      | Load configuration file from other reference [file]"
+    echo "   -p [passwd]    | Load password without any other request from the script"
+    echo "   -r|--reboot    | If required, force automatically the reboot"
+    echo "   -m [user@host] | Remote connection with NVIDIA Jetson host"
 }
 
 loop_gui()
 {
     # Load user interface
     source include/gui.sh
-    
+
     # Load all modules
     modules_load
-    # Load GUI menu loop
-	menu_loop
+    
+    if [ $MODULE_REMOTE == "1" ] ; then
+        # Load remote gui interface sources
+        source include/remote_gui.sh
+        # Load remote menu
+        menu_remote
+    else
+        # Load GUI menu loop
+	    menu_loop
+    fi
 }
 
 silent_mode()
 {
     # Load all modules
     modules_load
-    
-    # All modules are in MODULES_LIST
-    echo "Module loaded:"
-    echo $MODULES_LIST
-    
-	if [ ! -z $MODULE_PASSWORD ] ; then
-	    # Pass set
-	    $(echo $MODULE_PASSWORD | sudo -S -i true)
-	    
-	fi
-    
-    # Run installer script
-    echo "Module run:"
-    modules_run
-    
-    if [ $(modules_require_reboot) == "1" ]
-    then
-        tput setaf 1
-        echo "Reboot required!"
-        tput sgr0
 
-        if [ -z ${MODULE_REBOOT+x} ] ; then
-            read -p "Do you want reboot? [Y/n]" -n 1 -r
-            echo    # (optional) move to a new line
-            if [[ $REPLY =~ ^[Yy]$ ]]
-            then
+    if [ $MODULE_REMOTE == "1" ] ; then
+
+        if [ -z $MODULE_REMOTE_USER ] ; then
+            echo "empty user"
+            
+            local USER_HOST=""
+            echo "Write the user@remote for your board?: "
+            read USER_HOST
+            remote_get_user_host $USER_HOST
+        fi
+        
+        if [ -z $MODULE_PASSWORD ] ; then
+            echo "empty password"
+            
+            echo "What is the password?: "
+            read -s MODULE_PASSWORD
+        fi
+        
+        # Check connection
+        local CONNECTION=$(remote_check_host $MODULE_PASSWORD)
+        
+        if [ $CONNECTION == "YES" ] ; then
+            # Load system and connect
+            remote_connect $MODULE_PASSWORD -s
+        fi        
+    else
+        # All modules are in MODULES_LIST
+        echo "Module loaded:"
+        echo $MODULES_LIST
+        
+	    if [ ! -z $MODULE_PASSWORD ] ; then
+	        # Pass set
+	        $(echo $MODULE_PASSWORD | sudo -S -i true)
+	    fi
+        
+        # Run installer script
+        echo "Module run:"
+        modules_run
+        
+        if [ $(modules_require_reboot) == "1" ]
+        then
+            tput setaf 1
+            echo "Reboot required!"
+            tput sgr0
+
+            if [ -z ${MODULE_REBOOT+x} ] ; then
+                read -p "Do you want reboot? [Y/n]" -n 1 -r
+                echo    # (optional) move to a new line
+                if [[ $REPLY =~ ^[Yy]$ ]]
+                then
+                    echo "REBOOOT"
+                    sudo reboot
+                fi
+            else
                 echo "REBOOOT"
                 sudo reboot
             fi
-        else
-            echo "REBOOOT"
-            sudo reboot
         fi
     fi
 }
@@ -160,6 +197,12 @@ main()
 			    # If required, force automatically the reboot
 			    MODULE_REBOOT=1
 			    ;;
+			-m) # Load user and HOST
+			    remote_get_user_host "$2"
+			    # Set anyway in Remote mode
+			    MODULE_REMOTE=1
+			    shift 1
+			    ;;
 		    *)
 		        usage "Unknown option: $1"
 		        exit 1
@@ -170,6 +213,7 @@ main()
 	
 	# Check if the code run in NVIDIA Jetson or in remote
 	if [ -z $JETSON_BOARD ] ; then
+	    # Set in Remote mode
 	    MODULE_REMOTE=1
 	fi
 	

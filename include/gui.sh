@@ -364,7 +364,7 @@ menu_information()
 {
     # Check if is a Jetson
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
-        if (whiptail --title "$(menu_title)Recap" --yes-button "Setup" --no-button "ESC" --yesno "$(system_info)" 22 60) then
+        if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yes-button "Setup" --no-button "ESC" --yesno "$(system_info)" 22 60) then
             #Execute configuration menu
             MENU_SELECTION=menu_configuration
         else
@@ -487,74 +487,14 @@ menu_end()
     MENU_SELECTION=0
 }
 
-menu_remote_pass()
-{
-    #Password Input
-    psw=$(whiptail --title "$(menu_title)Remote Password" --passwordbox "Enter your password for and choose Ok to continue.
-    
-user: $MODULE_USER
-host: $MODULE_HOST" 10 60 3>&1 1>&2 2>&3)
-    #Password
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Save password
-        MODULE_PASSWORD=$psw
-        # Quit
-        MENU_SELECTION=0
-    else
-        # Initialize remote menu
-        MENU_SELECTION=menu_remote_user_host
-    fi
-}
-
-menu_remote_user_host()
-{
-    # Load user and host reference
-    local host_reference_tmp
-    
-    if [ -z ${MODULE_USER+x} ] ; then
-        MODULE_USER="user"
-    fi
-    
-    if [ -z ${MODULE_HOST+x} ] ; then
-        MODULE_HOST="remote"
-    fi
-    
-    local pre_data=""
-    if [ $MODULE_USER != "user" ] || [ $MODULE_HOST != "remote" ] ; then
-        pre_data="$MODULE_USER@$MODULE_HOST"
-    fi
-    
-    host_reference_tmp=$(whiptail --inputbox "Write the remote reference of your jetson with:
-$MODULE_USER@$MODULE_HOST" 8 78 "$pre_data" --title "$(menu_title)Remote Address" 3>&1 1>&2 2>&3)
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Write the new hostname
-        MODULE_USER=$(echo "$host_reference_tmp" |  cut -f1 -d "@" )
-        MODULE_HOST=$(echo "$host_reference_tmp" |  cut -f2 -d "@" )
-        # Request pass
-        MENU_SELECTION=menu_remote_pass
-    else
-        # Quit
-        MENU_SELECTION=0
-    fi
-}
-
 menu_loop()
 {
-    if [ $MODULE_REMOTE == 1 ] ; then
-        # Initialize remote menu
-        MENU_SELECTION=menu_remote_user_host
-    fi
-    
     # Loop menu
     while [ $MENU_SELECTION != 0 ]
     do  
         # Load Menu
         ${MENU_SELECTION}
     done
-    
-    echo "User $MODULE_USER - Pass: $MODULE_PASSWORD - Host $MODULE_HOST"
 }
 
 

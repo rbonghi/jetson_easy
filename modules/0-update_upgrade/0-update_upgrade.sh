@@ -38,6 +38,18 @@ MODULE_DEFAULT=1
 
 script_run()
 {
+    # Automatically update keys
+    tput setaf 6
+    echo 'APT KEY update starting...'
+    tput sgr0
+    sudo apt-key update
+
+    # Automatically clean
+    tput setaf 6
+    echo 'APT clean starting...'
+    tput sgr0
+    sudo apt-get clean
+
     # Automatically update all packages
     tput setaf 6
     echo 'APT update starting...'
@@ -48,7 +60,7 @@ script_run()
     tput setaf 6
     echo 'APT distributive upgrade starting...'
     tput sgr0
-    sudo apt-get -y dist-upgrade
+    sudo apt-get -y dist-upgrade --allow-unauthenticated
     
     # Automatically upgrade all packages
     tput setaf 6
@@ -60,7 +72,7 @@ script_run()
     tput setaf 6
     echo 'APT autoremove starting...'
     tput sgr0
-    sudo apt-get -y autoremove
+    sudo apt-get -y autoremove --allow-unauthenticated
     
     tput setaf 6
     echo 'END'
