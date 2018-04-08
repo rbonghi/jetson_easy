@@ -61,6 +61,7 @@ jetson_status()
     echo "    - Board: $JETSON_DESCRIPTION"
     echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
     echo "    - CUDA: $JETSON_CUDA"
+    echo "    - OpenCV: $JETSON_OPENCV"
 }
 
 ros_status()
