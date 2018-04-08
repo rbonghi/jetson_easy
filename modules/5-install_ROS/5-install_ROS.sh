@@ -153,11 +153,6 @@ install_ros()
 install_workspace()
 {
     if [ ! -z ${ROS_NEW_WS+x} ] ; then
-        # Load sources
-        tput setaf 6
-        echo "Load ROS sources"
-        tput sgr0
-        source /opt/ros/$ROS_NEW_DISTRO/setup.bash
         # Build default dir location
         local DEFAULTDIR=$HOME/$NEW_ROS_WS
         if [ ! -e "$DEFAULTDIR" ] ; then
@@ -184,7 +179,7 @@ install_workspace()
             source $HOME/.bashrc
         else
             tput setaf 1
-            echo "Folder $DEFAULTDIR already exists; no action!"
+            echo "Folder $NEW_ROS_WS already exists!"
             tput sgr0
         fi
     else
@@ -194,31 +189,18 @@ install_workspace()
 
 script_run()
 {
-    if [ ! -z ${ROS_NEW_DISTRO+x} ]
-    then
-        tput setaf 6
-        echo "Install ROS $ROS_NEW_DISTRO"
-        tput sgr0
-        if [ -z ${ROS_DISTRO+x} ]
-        then
+    # ROS Distro installer
+    if [ ! -z ${ROS_NEW_DISTRO+x} ] ; then
+        # Check if is already installed another ROS VERSION
+        if [ -z ${ROS_DISTRO+x} ] ; then
+            tput setaf 6
+            echo "Install ROS $ROS_NEW_DISTRO"
+            tput sgr0
             # Launch ROS installer
             install_ros
-        fi
-        
-        if [ $ROS_NEW_DISTRO == $ROS_DISTRO ]
-        then
-            tput setaf 2
-            echo "Same ROS $ROS_NEW_DISTRO is installed"
-            tput sgr0
-            if [ ! -z ${ROS_NEW_WORKSPACE+x} ] ; then
-                if [ $ROS_NEW_WORKSPACE == "1" ] ; then
-                    # Launch New workspace installer
-                    install_workspace
-                fi
-            fi
         else
             tput setaf 1
-            echo "Another ROS Distro is installed: $ROS_DISTRO"
+            echo "ROS $ROS_DISTRO is already installed"
             tput sgr0
         fi
     else
@@ -227,6 +209,23 @@ script_run()
         tput sgr0
     fi
     
+    # ROS workspace installer
+    if [ ! -z ${ROS_NEW_WORKSPACE+x} ] ; then
+        if [ $ROS_NEW_WORKSPACE == "1" ] ; then
+            tput setaf 6
+            echo "Build new ROS workspace $NEW_ROS_WS"
+            tput sgr0
+            
+            if [ -z $NEW_ROS_WS ] ; then
+                NEW_ROS_WS="catkin_ws"
+            fi
+            
+            # Launch New workspace installer
+            install_workspace
+        fi
+    fi
+    
+    # ROS Variables
     if [ ! -z ${ROS_DISTRO+x} ] ; then
         # Check if empty the ROS_MASTER_URI
         if [ -z $ROS_NEW_MASTER_URI ] && [ $ROS_NEW_HOSTNAME=1 ] ; then
@@ -247,12 +246,10 @@ script_run()
                 grep -q -F "export ROS_HOSTNAME=\"$HOSTNAME\"" $HOME/.bashrc || echo "export ROS_HOSTNAME=\"$HOSTNAME\"" >> $HOME/.bashrc
             fi
             
-            #tput setaf 6
-            #echo "Re run $USER bashrc in $HOME"
-            #tput sgr0
-            #source $HOME/.bashrc
-            echo $(pwd)
-            . update_bash.bash
+            tput setaf 6
+            echo "Re run $USER bashrc in $HOME"
+            tput sgr0
+            source $HOME/.bashrc
         fi
     fi
 }
