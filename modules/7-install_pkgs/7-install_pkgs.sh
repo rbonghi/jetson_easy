@@ -151,8 +151,14 @@ script_run()
             # Download ZED drivers
             # wget --output-document zed_driver.run https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME
             
-            # TODO check how to install silent the ZED sdk
-            ###
+            # Set executable launcher
+            # chmod +x zed_driver.run
+            
+            # TODO Wait fix silent the ZED sdk
+            #./zed_driver.run --quiet -- "silent"
+            
+            # Remove zed driver
+            # rm zed_driver.run
             
             # Restore previuous folder
             cd $LOCAL_FOLDER
