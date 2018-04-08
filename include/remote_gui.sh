@@ -111,8 +111,7 @@ menu_remote_user_host()
         pre_data="$MODULE_REMOTE_USER@$MODULE_REMOTE_HOST"
     fi
     
-    host_reference_tmp=$(whiptail --inputbox "Write the remote reference of your jetson with:
-$MODULE_REMOTE_USER@$MODULE_REMOTE_HOST" 8 78 "$pre_data" --title "Remote Address" 3>&1 1>&2 2>&3)
+    host_reference_tmp=$(whiptail --inputbox "Write the remote reference of your jetson follow user@host" 8 78 "$pre_data" --title "Remote Address" 3>&1 1>&2 2>&3)
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Write the new hostname

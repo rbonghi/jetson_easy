@@ -86,7 +86,7 @@ modules_load()
     fi
     
     if [ -f $MODULES_CONFIG ] ; then
-        echo "Setup \"$MODULES_CONFIG\" found!"
+        # echo "Setup \"$MODULES_CONFIG\" found!"
         # Load all default values
         modules_load_default
         # Load and overwrite with setup file
@@ -94,7 +94,7 @@ modules_load()
         # Sort all modules
         modules_sort
     else
-        echo "Setup \"$MODULES_CONFIG\" NOT found! Load default"
+        # echo "Setup \"$MODULES_CONFIG\" NOT found! Load default"
         modules_load_default
     fi
 }
@@ -111,6 +111,15 @@ modules_save()
     echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG
     echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG
     echo "" >> $MODULES_CONFIG
+    
+    # Add remote information
+    if [ ! -z $MODULE_REMOTE_USER ] || [ ! -z $MODULE_REMOTE_HOST ]; then
+        echo "# Remote information" >> $MODULES_CONFIG
+        echo "MODULE_REMOTE_USER=\"$MODULE_REMOTE_USER\"" >> $MODULES_CONFIG
+        echo "MODULE_PASSWORD=\"$MODULE_PASSWORD\"" >> $MODULES_CONFIG
+        echo "MODULE_REMOTE_HOST=\"$MODULE_REMOTE_HOST\"" >> $MODULES_CONFIG
+        echo "" >> $MODULES_CONFIG
+    fi
     
     echo "# List of availables modules" >> $MODULES_CONFIG
     echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG
@@ -143,8 +152,8 @@ modules_save()
         fi
       fi
     done
-    
-    echo "Save in $MODULES_CONFIG"
+        
+    # echo "Save in $MODULES_CONFIG"
 }
 
 modules_isInList()
@@ -163,16 +172,14 @@ modules_isInList()
 modules_add()
 {
     # Check if the module is in list otherwise add the new module
-    echo $MODULES_LIST
-    echo $1
     if [[ $MODULES_LIST != *"$1"* ]] ; then
         # Add new element
-        echo "Add new module $1"
+        # echo "Add new module $1"
         MODULES_LIST+=":$1"
         # Sort all modules
         modules_sort
-    else
-        echo "Module $1 is already in list"
+    #else
+    #    echo "Module $1 is already in list"
     fi
 }
 

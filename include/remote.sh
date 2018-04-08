@@ -35,6 +35,19 @@
 MODULE_REMOTE_USER=""
 MODULE_REMOTE_HOST=""
 
+remote_get_config()
+{
+    if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/setup.txt \> /dev/null 2\>\&1
+    then
+        # Get back the remote config
+        sshpass -p "$MODULE_PASSWORD" scp $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy/setup.txt $MODULES_CONFIG
+        # Execute load configuration
+        modules_load
+        # Save new setup
+        modules_save
+    fi
+}
+
 remote_get_user_host()
 {
     MODULE_REMOTE_USER=$(echo "$1" |  cut -f1 -d "@" )
@@ -58,6 +71,9 @@ remote_check_host()
 
 remote_from_host()
 {
+    # Save the last config to server
+    remote_get_config
+    # Remove the folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
 }
 

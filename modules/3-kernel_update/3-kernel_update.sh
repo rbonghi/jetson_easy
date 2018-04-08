@@ -280,7 +280,7 @@ script_load_default()
     
     if [ -z ${KERNEL_PATCH_LIST+x} ] ; then
         # Empty kernel patch list 
-        KERNEL_PATCH_LIST="\"\""
+        KERNEL_PATCH_LIST=""
     fi
     
     if [ -z ${KERNEL_REMOVE_FOLDER+x} ] ; then
@@ -299,7 +299,7 @@ script_save()
     fi
     
     if [ ! -z ${KERNEL_PATCH_LIST+x} ] ; then
-        if [ $KERNEL_PATCH_LIST != "" ]
+        if [ ! -z $KERNEL_PATCH_LIST ]
         then
             echo "KERNEL_PATCH_LIST=\"$KERNEL_PATCH_LIST\"" >> $1
         fi
