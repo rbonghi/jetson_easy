@@ -40,12 +40,16 @@ remote_get_user_host()
     MODULE_REMOTE_USER=$(echo "$1" |  cut -f1 -d "@" )
     MODULE_REMOTE_HOST=$(echo "$1" |  cut -f2 -d "@" )
     
+    if [ $MODULE_REMOTE_USER == $MODULE_REMOTE_HOST ] ; then
+        MODULE_REMOTE_USER=$USER
+    fi
+    
     echo "User: $MODULE_REMOTE_USER - Host: $MODULE_REMOTE_HOST"
 }
 
 remote_check_host()
 {
-    if (sshpass -p "$MODULE_PASSWORD" ssh -q $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST exit) ; then
+    if (sshpass -p "$MODULE_PASSWORD" ssh -q -o "StrictHostKeyChecking no" $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST exit) ; then
         echo "YES"
     else
         echo "NO"
@@ -54,15 +58,19 @@ remote_check_host()
 
 remote_from_host()
 {
-    local PASSWORD=$1
-    
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
 }
 
 remote_load_to_host()
 {
+    local REFERENCE_CONFIG=""
+    # Copy reference only if exist the file
+    if [ -f $MODULES_CONFIG ] ; then
+        REFERENCE_CONFIG=$MODULES_CONFIG
+    fi
+    
     # Tar all selected files
-    tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md
+    tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md $REFERENCE_CONFIG
 
     # Create folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
@@ -82,6 +90,8 @@ tar -xf jetson_easy.tar.gz
 # remove tar file
 rm jetson_easy.tar.gz
 '
+    # Remote temp file
+    rm /tmp/jetson_easy.tar.gz
 }
 
 remote_load_to_host_all()
@@ -122,10 +132,11 @@ remote_connect()
     # Load all script in remote board
     remote_load_to_host $MODULE_PASSWORD
     
+    # Start in remote the biddibi_boddibi_boo script
     sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -c "'
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
-
+# Launch biddibi_boddibi_boo in remote
 ./biddibi_boddibi_boo.sh -p $MODULE_PASSWORD $OPTIONS
 
 '"

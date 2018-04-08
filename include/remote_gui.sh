@@ -37,7 +37,7 @@ menu_remote_connect()
     # Check if load start
     if [ $REMOTE == "YES" ] ; then
         # Load system and connect
-        remote_connect
+        remote_connect    
         # After exit remove the files
         remote_from_host
         # Quit the system
@@ -45,6 +45,31 @@ menu_remote_connect()
     else
         # Initialize remote menu
         MENU_REMOTE_SELECTION=menu_remote_user_host
+    fi
+}
+
+menu_remote_message()
+{
+    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 10 50 <<< "You are connected with:
+
+host: $MODULE_REMOTE_HOST
+user: $MODULE_REMOTE_USER
+"
+}
+
+menu_remote_info()
+{
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yesno "Remote connection
+
+host: $MODULE_REMOTE_HOST
+user: $MODULE_REMOTE_USER
+
+Do you want continue?" 12 50) then
+        #Execute configuration menu
+        MENU_REMOTE_SELECTION=menu_remote_connect
+    else
+        #Exit from menu
+        MENU_REMOTE_SELECTION=0
     fi
 }
 
@@ -104,7 +129,7 @@ menu_remote()
 {
     # If all parameters are written the remote connection skip to the connection
     if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
-        MENU_REMOTE_SELECTION=menu_remote_connect
+        MENU_REMOTE_SELECTION=menu_remote_info
     fi
     # Loop menu
     while [ $MENU_REMOTE_SELECTION != 0 ]

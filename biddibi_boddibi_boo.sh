@@ -79,10 +79,10 @@ usage()
     echo "options,"
     echo "   -h|--help      | This help"
     echo "   -s             | Launch the system in silent mode (Without GUI)"
+    echo "   -r|--reboot    | If required, force automatically the reboot"
     echo "   -c [file]      | Load configuration file from other reference [file]"
     echo "   -m [user@host] | Remote connection with NVIDIA Jetson host"
     echo "   -p [passwd]    | Load password without any other request from the script"
-    echo "   -r|--reboot    | If required, force automatically the reboot"
 }
 
 loop_gui()
