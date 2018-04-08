@@ -42,12 +42,17 @@ script_run()
     echo "Install git"
     tput sgr0
     sudo apt-get install git -y
-    if [ -z ${NEW_GIT_USERNAME+x} ] ; then
+    
+    if [ ! -z ${NEW_GIT_USERNAME+x} ] ; then
+        tput setaf 6
         echo "git config --global user.name \"$NEW_GIT_USERNAME\""
+        tput sgr0
         git config --global user.name "$NEW_GIT_USERNAME"
     fi
-    if [ -z ${NEW_GIT_EMAIL+x} ] ; then
+    if [ ! -z ${NEW_GIT_EMAIL+x} ] ; then
+        tput setaf 6
         echo "git config --global user.email $NEW_GIT_EMAIL"
+        tput sgr0
         git config --global user.email $NEW_GIT_EMAIL
     fi
 }
