@@ -149,7 +149,7 @@ remote_connect()
     remote_load_to_host $MODULE_PASSWORD
     
     # Start in remote the biddibi_boddibi_boo script
-    sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -c "'
+    sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -ic "'
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
 # Launch biddibi_boddibi_boo in remote
