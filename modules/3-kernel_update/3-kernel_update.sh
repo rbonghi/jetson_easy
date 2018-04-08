@@ -102,9 +102,10 @@ make_kernel()
 {
     # Local folder
     local LOCAL_FOLDER=$(pwd)
-        
+    local NUM_CPU=$(nproc)
+    
     tput setaf 6
-    echo "Make kernel"
+    echo "Make kernel with $NUM_CPU CPU"
     tput sgr0
     
     # Builds the kernel and modules
@@ -113,7 +114,7 @@ make_kernel()
     
     sudo make prepare
     sudo make modules_prepare
-    sudo make -j6
+    sudo make -j$NUM_CPU Image
     sudo make modules
     sudo make modules_install
     
