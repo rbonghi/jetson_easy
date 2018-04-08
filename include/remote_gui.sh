@@ -30,6 +30,24 @@
 # Start menu
 MENU_REMOTE_SELECTION=menu_remote_user_host
 
+menu_remote_connect()
+{
+    # Load to host
+    local REMOTE=$(remote_check_host)
+    # Check if load start
+    if [ $REMOTE == "YES" ] ; then
+        # Load system and connect
+        remote_connect
+        # After exit remove the files
+        remote_from_host
+        # Quit the system
+        MENU_REMOTE_SELECTION=0
+    else
+        # Initialize remote menu
+        MENU_REMOTE_SELECTION=menu_remote_user_host
+    fi
+}
+
 menu_remote_pass()
 {
     #Password Input
@@ -42,19 +60,8 @@ host: $MODULE_REMOTE_HOST" 10 60 3>&1 1>&2 2>&3)
     if [ $exitstatus = 0 ]; then
         # Save password
         MODULE_PASSWORD=$psw
-        
-        # Load to host
-        local REMOTE=$(remote_check_host $MODULE_PASSWORD)
-        # Check if load start
-        if [ $REMOTE == "YES" ] ; then
-            # Load system and connect
-            remote_connect $MODULE_PASSWORD
-            # Quit the system
-            MENU_REMOTE_SELECTION=0
-        else
-            # Initialize remote menu
-            MENU_REMOTE_SELECTION=menu_remote_user_host
-        fi
+        # Connect remotely
+        menu_remote_connect
     else
         # Initialize remote menu
         MENU_REMOTE_SELECTION=menu_remote_user_host
@@ -94,7 +101,11 @@ $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST" 8 78 "$pre_data" --title "Remote Addres
 }
 
 menu_remote()
-{    
+{
+    # If all parameters are written the remote connection skip to the connection
+    if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
+        MENU_REMOTE_SELECTION=menu_remote_connect
+    fi
     # Loop menu
     while [ $MENU_REMOTE_SELECTION != 0 ]
     do  

@@ -33,7 +33,6 @@
 # https://stackoverflow.com/questions/22078806/checking-ssh-failure-in-a-script?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 
 MODULE_REMOTE_USER=""
-MODULE_REMOTE_PASSWORD=""
 MODULE_REMOTE_HOST=""
 
 remote_get_user_host()
@@ -46,9 +45,7 @@ remote_get_user_host()
 
 remote_check_host()
 {
-    local PASSWORD=$1
-    
-    if (sshpass -p "$PASSWORD" ssh -q $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST exit) ; then
+    if (sshpass -p "$MODULE_PASSWORD" ssh -q $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST exit) ; then
         echo "YES"
     else
         echo "NO"
@@ -59,17 +56,15 @@ remote_from_host()
 {
     local PASSWORD=$1
     
-    sshpass -p "$PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
+    sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
 }
 
 remote_load_to_host()
 {
-    local PASSWORD=$1
-
     local CHECK=0
     
     while [ $CHECK != 1 ] ; do
-        sshpass -p "$PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
+        sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
             if [ -d /tmp/jetson_easy ] ; then
                 exit 0
             else
@@ -78,10 +73,10 @@ remote_load_to_host()
         '
         case $? in
             0) echo "Remove old folder"
-               remote_from_host $PASSWORD
+               remote_from_host
                ;;
             1) echo "Copy this folder"
-               sshpass -p "$PASSWORD" scp -r . $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy
+               sshpass -p "$MODULE_PASSWORD" scp -r . $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy
                CHECK=1
                ;;
            *) echo "Error connection"
@@ -94,21 +89,19 @@ remote_load_to_host()
 
 remote_connect()
 {
-    local PASSWORD=$1
     # Get all other options
-    shift 1
     local OPTIONS=$@
     
     #echo "./biddibi_boddibi_boo.sh -p $PASSWORD $OPTIONS"
     
     # Load all script in remote board
-    remote_load_to_host $PASSWORD
+    remote_load_to_host $MODULE_PASSWORD
     
-    sshpass -p "$PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -c "'
+    sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -c "'
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
 
-./biddibi_boddibi_boo.sh -p $PASSWORD $OPTIONS
+./biddibi_boddibi_boo.sh -p $MODULE_PASSWORD $OPTIONS
 
 '"
 }

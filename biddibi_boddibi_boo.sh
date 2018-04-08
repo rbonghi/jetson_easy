@@ -80,9 +80,9 @@ usage()
     echo "   -h|--help      | This help"
     echo "   -s             | Launch the system in silent mode (Without GUI)"
     echo "   -c [file]      | Load configuration file from other reference [file]"
+    echo "   -m [user@host] | Remote connection with NVIDIA Jetson host"
     echo "   -p [passwd]    | Load password without any other request from the script"
     echo "   -r|--reboot    | If required, force automatically the reboot"
-    echo "   -m [user@host] | Remote connection with NVIDIA Jetson host"
 }
 
 loop_gui()
@@ -128,11 +128,11 @@ silent_mode()
         fi
         
         # Check connection
-        local CONNECTION=$(remote_check_host $MODULE_PASSWORD)
+        local CONNECTION=$(remote_check_host)
         
         if [ $CONNECTION == "YES" ] ; then
             # Load system and connect
-            remote_connect $MODULE_PASSWORD -s
+            remote_connect -s
         fi        
     else
         # All modules are in MODULES_LIST
