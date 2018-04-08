@@ -203,23 +203,23 @@ script_run()
         then
             # Launch ROS installer
             install_ros
-        else
-            if [ $ROS_NEW_DISTRO == $ROS_DISTRO ]
-            then
-                tput setaf 2
-                echo "Same ROS $ROS_NEW_DISTRO is installed"
-                tput sgr0
-                if [ ! -z ${ROS_NEW_WORKSPACE+x} ] ; then
-                    if [ $ROS_NEW_WORKSPACE == "1" ] ; then
-                        # Launch New workspace installer
-                        install_workspace
-                    fi
+        fi
+        
+        if [ $ROS_NEW_DISTRO == $ROS_DISTRO ]
+        then
+            tput setaf 2
+            echo "Same ROS $ROS_NEW_DISTRO is installed"
+            tput sgr0
+            if [ ! -z ${ROS_NEW_WORKSPACE+x} ] ; then
+                if [ $ROS_NEW_WORKSPACE == "1" ] ; then
+                    # Launch New workspace installer
+                    install_workspace
                 fi
-            else
-                tput setaf 1
-                echo "Another ROS Distro is installed: $ROS_DISTRO"
-                tput sgr0
             fi
+        else
+            tput setaf 1
+            echo "Another ROS Distro is installed: $ROS_DISTRO"
+            tput sgr0
         fi
     else
         tput setaf 1

@@ -103,12 +103,12 @@ script_save()
 script_info()
 {
     if [ ! -z ${NEW_GIT_USERNAME+x} ] ; then
-        if [ $NEW_GIT_USERNAME != $(git config user.name) ] ; then
+        if [ $NEW_GIT_USERNAME != "$(git config user.name)" ] ; then
             echo " - Git user.name=\"$NEW_GIT_USERNAME\""
         fi
     fi
     if [ ! -z ${NEW_GIT_EMAIL+x} ] ; then
-        if [ $NEW_GIT_EMAIL != $(git config user.email) ] ; then
+        if [ $NEW_GIT_EMAIL != "$(git config user.email)" ] ; then
             echo " - Git user.email=\"$NEW_GIT_EMAIL\""
         fi
     fi
