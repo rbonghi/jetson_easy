@@ -59,7 +59,7 @@ user: $MODULE_REMOTE_USER
 
 menu_remote_info()
 {
-    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yesno "Remote connection
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --no-button "edit" --yesno "Remote connection
 
 host: $MODULE_REMOTE_HOST
 user: $MODULE_REMOTE_USER
