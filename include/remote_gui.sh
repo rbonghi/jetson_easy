@@ -69,7 +69,7 @@ Do you want continue?" 12 50) then
         MENU_REMOTE_SELECTION=menu_remote_connect
     else
         #Exit from menu
-        MENU_REMOTE_SELECTION=0
+        MENU_REMOTE_SELECTION=menu_remote_user_host
     fi
 }
 
