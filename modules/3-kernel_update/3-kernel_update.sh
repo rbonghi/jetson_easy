@@ -87,6 +87,25 @@ kernel_get_config()
     done
 }
 
+kernel_check_source()
+{
+    local config_file="/tmp/config"
+    zcat /proc/config.gz > $config_file
+
+    IFS=' ' read -a LIST <<< "$KERNEL_PATCH_LIST"
+    for sub_element in "${LIST[@]}"
+    do
+        local config=$(kernel_get_config $sub_element)
+        
+        if [ $(check_kernel_variable $config "y" $config_file) == "OFF" ] ; then
+            echo "1"
+            return
+        fi
+    done
+    
+    echo "0"
+}
+
 edit_kernel()
 {
     # Local folder
@@ -137,9 +156,7 @@ check_drivers_installed()
 {
     local config_file="/tmp/config"
     # Extract config file in tmp if doesn't exist
-    if [ ! -f "/tmp/config" ] ; then
-        zcat /proc/config.gz > $config_file
-    fi
+    zcat /proc/config.gz > $config_file
     
     KERNEL_CHECK_RADIO=()
     local sub_element
@@ -148,7 +165,15 @@ check_drivers_installed()
         local name=$(echo $sub_element | cut -f1 -d ":")
         local config=$(echo $sub_element | cut -f2 -d ":")
         local description=$(echo $sub_element | cut -f3 -d ":")
-        KERNEL_CHECK_RADIO+=($name "$description" $(check_kernel_variable $config "y" $config_file))
+        
+        local status="OFF"
+        if [ $(kernel_is_enabled $name) == "ON" ] || [ $(check_kernel_variable $config "y" $config_file) == "ON" ] ; then
+            status="ON"
+        else
+            status="OFF"
+        fi
+        
+        KERNEL_CHECK_RADIO+=($name "$description" $status)
     done
 }
 
@@ -312,10 +337,7 @@ get_kernel_sources()
 }
 
 script_run()
-{   
-
-edit_kernel
-return
+{
 
     tput setaf 6
     echo "Update the NVIDIA Jetson Kernel $(uname -r)"
@@ -323,7 +345,7 @@ return
     
     if [ $JETSON_L4T == "27.1" ] || [ $JETSON_L4T == "28.1" ] || [ $JETSON_L4T == "28.2" ] ; then
         # Edit, make and copy only if the list is not empty    
-        if [ "$KERNEL_PATCH_LIST" != "" ] ; then
+        if [ "$KERNEL_PATCH_LIST" != "" ] && [ $(kernel_check_source) == "1" ]; then
             # Run get kernel sources
             get_kernel_sources 
 
@@ -337,8 +359,8 @@ return
             # Copy images
             copy_images
         else
-            tput setaf 1
-            echo "No patch in list!"
+            tput setaf 3
+            echo "No kernel update in list!"
             tput sgr0
         fi
         
