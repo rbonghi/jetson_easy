@@ -40,6 +40,8 @@ FTDI driver converter
 ACM driver"
 MODULE_DEFAULT=0
 
+# Kernel driver list to check and add
+KERNEL_CHECK_LIST=("FTDI:CONFIG_USB_SERIAL_FTDI_SIO:kernel FTDI driver" "ACM:CONFIG_USB_ACM:kernel ACM driver")
 
 
 kernel_has_removed()
@@ -70,32 +72,107 @@ kernel_is_enabled()
     fi
 }
 
+kernel_get_config()
+{
+    for sub_element in "${KERNEL_CHECK_LIST[@]}"
+    do
+        local name=$(echo $sub_element | cut -f1 -d ":")
+        local config=$(echo $sub_element | cut -f2 -d ":")
+        local description=$(echo $sub_element | cut -f3 -d ":")
+        # Check if the name is equal
+        if [ $name == $1 ] ; then
+            echo "$config"
+            return        
+        fi
+    done
+}
+
 edit_kernel()
 {
     # Local folder
     local LOCAL_FOLDER=$(pwd)
-    
+
     # Move to the kernel folder
     cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
-    if [ $(kernel_is_enabled "FTDI") == "ON" ] ; then
-        # Patch the config file
-        tput setaf 6
-        echo "Add in kernel FTDI driver"
-        tput sgr0
+    local config_file=$KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
+
+    IFS=' ' read -a LIST <<< "$KERNEL_PATCH_LIST"
+    for sub_element in "${LIST[@]}"
+    do
+        local config=$(kernel_get_config $sub_element)
         
-    fi
-    
-    if [ $(kernel_is_enabled "ACM") == "ON" ] ; then
-        tput setaf 6
-        echo "Add in kernel ACM driver"
-        tput sgr0
-        # https://github.com/NVIDIA-Jetson/jetson-trashformers/wiki/Re-configuring-the-Jetson-TX2-Kernel
-        sudo sed -i 's/.*CONFIG_USB_ACM.*/CONFIG_USB_ACM=y/' $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
-    fi
+        if [ $(check_kernel_variable $config "y" $config_file) == "OFF" ] ; then
+            # Patch the config file
+            tput setaf 6
+            echo "Update kernel with $sub_element driver"
+            tput sgr0
+            # Update kernel
+            sudo sed -i "s/.*$config.*/$config=y/" $config_file
+        else
+            tput setaf 3
+            echo "$sub_element driver is already configured!"
+            tput sgr0
+        fi
+    done
     
     # Restore previuous folder
     cd $LOCAL_FOLDER
+}
+
+check_kernel_variable()
+{
+    local PARAMETER=$1 # Example CONFIG_USB_ACM
+    local PARAMATER_STATUS="$2"
+    local FILE=$3
+    
+    if [ $(grep -F "$PARAMETER" $FILE) == "$PARAMETER=$PARAMATER_STATUS" ] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
+check_drivers_installed()
+{
+    local config_file="/tmp/config"
+    # Extract config file in tmp if doesn't exist
+    if [ ! -f "/tmp/config" ] ; then
+        zcat /proc/config.gz > $config_file
+    fi
+    
+    KERNEL_CHECK_RADIO=()
+    local sub_element
+    for sub_element in "${KERNEL_CHECK_LIST[@]}"
+    do
+        local name=$(echo $sub_element | cut -f1 -d ":")
+        local config=$(echo $sub_element | cut -f2 -d ":")
+        local description=$(echo $sub_element | cut -f3 -d ":")
+        KERNEL_CHECK_RADIO+=($name "$description" $(check_kernel_variable $config "y" $config_file))
+    done
+}
+
+set_kernel_patch()
+{
+    if [ -z ${KERNEL_PATCH_LIST+x} ]
+    then
+        # Empty kernel patch list
+        KERNEL_PATCH_LIST=""
+    fi
+    
+    # Run check list
+    check_drivers_installed
+    # Length list drivers
+    local LENGTH=${#KERNEL_CHECK_LIST[@]}
+    
+    local KERNEL_PATCH_TMP
+    KERNEL_PATCH_TMP=$(whiptail --title "$MODULE_NAME" --checklist "Which kernel patch do you want add?" 15 60 $LENGTH "${KERNEL_CHECK_RADIO[@]}" 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save list of new element to patch
+        KERNEL_PATCH_LIST=$KERNEL_PATCH_TMP
+    fi
 }
 
 make_kernel()
@@ -111,6 +188,9 @@ make_kernel()
     # Builds the kernel and modules
     # Assumes that the .config file is available
     cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
+    
+    # Fix CONFIG_TEGRA_THROUGHPUT in Jetpack 3.2
+    # CONFIG_TEGRA_THROUGHPUT=y
     
     sudo make prepare
     sudo make modules_prepare
@@ -233,6 +313,10 @@ get_kernel_sources()
 
 script_run()
 {   
+
+edit_kernel
+return
+
     tput setaf 6
     echo "Update the NVIDIA Jetson Kernel $(uname -r)"
     tput sgr0
@@ -345,28 +429,6 @@ kernel_is_removed()
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
         KERNEL_REMOVE_FOLDER=$KERNEL_REMOVE_FOLDER_TMP_VALUE
-    fi
-    
-}
-
-set_kernel_patch()
-{
-    if [ -z ${KERNEL_PATCH_LIST+x} ]
-    then
-        # Empty kernel patch list
-        KERNEL_PATCH_LIST=""
-    fi
-    
-    local KERNEL_PATCH_TMP
-    KERNEL_PATCH_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which kernel patch do you want add?" 15 60 2 \
-    "FTDI" "Enable FTDI driver" $(kernel_is_enabled "FTDI") \
-    "ACM" "Enable ACM driver" $(kernel_is_enabled "ACM") 3>&1 1>&2 2>&3)
-     
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Save list of new element to patch
-        KERNEL_PATCH_LIST="$KERNEL_PATCH_TMP"
     fi
     
 }
