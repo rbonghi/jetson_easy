@@ -52,24 +52,33 @@ menu_title()
 menu_header()
 {
     echo "NVIDIA Jetson Easy setup script"
-    echo "Author: Raffaello Bonghi     email: raffaello@rnext.it"
+    echo "Author: Raffaello Bonghi"
+    echo "email: raffaello@rnext.it"
 }
 
 jetson_status()
 {
-    echo "(*) NVIDIA embedded:"
-    echo "    - Board: $JETSON_DESCRIPTION"
-    echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
-    echo "    - CUDA: $JETSON_CUDA"
-    echo "    - OpenCV: $JETSON_OPENCV"
+    if [ ! -z ${JETSON_BOARD+x} ] ; then
+        echo "(*) NVIDIA embedded:"
+        echo "    - Board: $JETSON_DESCRIPTION"
+        echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
+        echo "    - CUDA: $JETSON_CUDA"
+        echo "    - OpenCV: $JETSON_OPENCV"
+    else
+        echo "(*) It isn't an NVIDIA Jetson"
+    fi
 }
 
 ros_status()
 {
-    echo "(*) ROS $ROS_DISTRO:"
-    echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
-    if [ ! -z ${ROS_HOSTNAME+x} ] ; then
-        echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
+    if [ ! -z ${ROS_DISTRO+x} ] ; then
+        echo "(*) ROS $ROS_DISTRO:"
+        echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
+        if [ ! -z ${ROS_HOSTNAME+x} ] ; then
+            echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
+        fi
+    else
+        echo "(*) ROS Not installed!"
     fi
 }
 
@@ -95,19 +104,13 @@ system_info()
     echo "    - Kernel: $OS_KERNEL"
     
     # NVIDIA Jetson status
-    if [ -z ${JETSON_DESCRIPTION+x} ] ; 
-    then
-        echo "This is not a Jetson Board"
-        echo "Please copy this repository in your Jetson board"
-    else
-        jetson_status
-    fi
+    jetson_status
     
-    # Add ROS information
-    if [ ! -z ${ROS_DISTRO+x} ]
-    then
-        ros_status
-    fi
+    # Show Driver list
+    kernel_driver_list
+    
+    # ROS information
+    ros_status
 }
 
 # Start menu
@@ -365,7 +368,7 @@ menu_information()
 {
     # Check if is a Jetson
     if [ ! -z ${JETSON_DESCRIPTION+x} ] || [ ! -z ${DEBUG+x} ] ; then
-        if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --yes-button "Setup" --no-button "ESC" --yesno "$(system_info)" 22 60) then
+        if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "Setup" --no-button "ESC" --yesno "$(system_info)" 22 60 3>&1 1>&2 2>&3) then
             #Execute configuration menu
             MENU_SELECTION=menu_configuration
         else

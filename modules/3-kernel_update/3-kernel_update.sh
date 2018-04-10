@@ -40,10 +40,6 @@ FTDI driver converter
 ACM driver"
 MODULE_DEFAULT=0
 
-# Kernel driver list to check and add
-KERNEL_CHECK_LIST=("FTDI:CONFIG_USB_SERIAL_FTDI_SIO:kernel FTDI driver" "ACM:CONFIG_USB_ACM:kernel ACM driver")
-
-
 kernel_has_removed()
 {
     if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then 
@@ -59,9 +55,25 @@ else
     MODULE_SUBMENU=("Set folder kernel:set_path" "Add kernel patchs:set_kernel_patch" "[$(kernel_has_removed)] Remove install after patching:kernel_is_removed")
 fi
 
+##################################################################
+
+KERNEL_SRC_CONFIG="/proc/config.gz"
 KERNEL_SRC_FOLDER="/usr/src"
-KERNEL_FOLDER="kernel/kernel-4.4"
 KERNEL_CONFIG_FILE=".config"
+
+# Kernel driver list to check and add
+KERNEL_DRIVER_LIST=("FTDI:CONFIG_USB_SERIAL_FTDI_SIO:Driver for FTDI converter" "ACM:CONFIG_USB_ACM:Driver for ACM peripherals")
+
+##################################################################
+
+kernel_extract_config()
+{
+    local config_file=$1
+    # Extract config file in tmp if doesn't exist
+    if [ ! -f $config_file ] ; then
+        zcat $KERNEL_SRC_CONFIG > $config_file
+    fi
+}
 
 kernel_is_enabled()
 {
@@ -72,74 +84,7 @@ kernel_is_enabled()
     fi
 }
 
-kernel_get_config()
-{
-    for sub_element in "${KERNEL_CHECK_LIST[@]}"
-    do
-        local name=$(echo $sub_element | cut -f1 -d ":")
-        local config=$(echo $sub_element | cut -f2 -d ":")
-        local description=$(echo $sub_element | cut -f3 -d ":")
-        # Check if the name is equal
-        if [ $name == $1 ] ; then
-            echo "$config"
-            return        
-        fi
-    done
-}
-
-kernel_check_source()
-{
-    local config_file="/tmp/config"
-    zcat /proc/config.gz > $config_file
-
-    IFS=' ' read -a LIST <<< "$KERNEL_PATCH_LIST"
-    for sub_element in "${LIST[@]}"
-    do
-        local config=$(kernel_get_config $sub_element)
-        
-        if [ $(check_kernel_variable $config "y" $config_file) == "OFF" ] ; then
-            echo "1"
-            return
-        fi
-    done
-    
-    echo "0"
-}
-
-edit_kernel()
-{
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-
-    # Move to the kernel folder
-    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
-    
-    local config_file=$KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
-
-    IFS=' ' read -a LIST <<< "$KERNEL_PATCH_LIST"
-    for sub_element in "${LIST[@]}"
-    do
-        local config=$(kernel_get_config $sub_element)
-        
-        if [ $(check_kernel_variable $config "y" $config_file) == "OFF" ] ; then
-            # Patch the config file
-            tput setaf 6
-            echo "Update kernel with $sub_element driver"
-            tput sgr0
-            # Update kernel
-            sudo sed -i "s/.*$config.*/$config=y/" $config_file
-        else
-            tput setaf 3
-            echo "$sub_element driver is already configured!"
-            tput sgr0
-        fi
-    done
-    
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
-}
-
-check_kernel_variable()
+kernel_check_isconfig()
 {
     local PARAMETER=$1 # Example CONFIG_USB_ACM
     local PARAMATER_STATUS="$2"
@@ -152,22 +97,184 @@ check_kernel_variable()
     fi
 }
 
+# Return the configuration name
+kernel_get_config()
+{
+    for sub_element in "${KERNEL_DRIVER_LIST[@]}"
+    do
+        local name=$(echo $sub_element | cut -f1 -d ":")
+        local config=$(echo $sub_element | cut -f2 -d ":")
+        local description=$(echo $sub_element | cut -f3 -d ":")
+        # Check if the name is equal
+        if [ $name == $1 ] ; then
+            echo "$config"
+            return        
+        fi
+    done
+}
+
+# Print configuration driver on NVIDIA Jetson
+kernel_driver_list()
+{
+    # Show list only if exist the file
+    if [ -f $KERNEL_SRC_CONFIG ] ; then
+        local config_file="/tmp/config"
+        # Extract config file in tmp if doesn't exist
+        kernel_extract_config $config_file
+        
+        echo "(*) Installed drivers:"
+        
+        local sub_element
+        for sub_element in "${KERNEL_DRIVER_LIST[@]}"
+        do
+            local name=$(echo $sub_element | cut -f1 -d ":")
+            local config=$(echo $sub_element | cut -f2 -d ":")
+            local description=$(echo $sub_element | cut -f3 -d ":")
+            
+            if [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
+                echo "    - [X] $name - $description"
+            else
+                echo "    - [ ] $name - $description"
+            fi
+        done
+    else
+        echo "(*) $KERNEL_SRC_CONFIG doesn't exist"
+    fi
+}
+
+kernel_installer_list()
+{
+    local config_file="/tmp/config"
+    # Extract config file in tmp if doesn't exist
+    kernel_extract_config $config_file
+
+    local NEW_LIST=""
+    
+    local LIST
+    IFS=' ' read -a LIST <<< "$KERNEL_PATCH_LIST"
+    for name in "${LIST[@]}"
+    do
+        # Get config name
+        local config=$(kernel_get_config $name)
+        # Check if is not in kernel config
+        if [ $(kernel_check_isconfig $config "y" $config_file) == "OFF" ] ; then
+            NEW_LIST+="$name "
+        fi
+    done
+    # Return the new list
+    echo $NEW_LIST
+}
+
+# Installer script
+script_run()
+{
+    # List of kernel link
+    local KERNEL_LINK=""
+    local KERNEL_INTERNAL_FOLDER=""
+    local KERNEL_FOLDER=""
+    if [ $JETSON_L4T == "28.2" ] ; then
+        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/BSP/source_release.tbz2"
+        KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
+        KERNEL_FOLDER="kernel/kernel-4.4"
+    elif [ $JETSON_L4T == "28.1" ] ; then
+        #KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
+        # Fix https://devtalk.nvidia.com/default/topic/1019687/jetson-tx2/jetpack-3-1-kernel-source-tag-problem/
+        # in drivers/devfreq/governor_pod_scaling.c:54:22: fatal error
+        KERNEL_LINK="https://developer.nvidia.com/embedded/dlc/l4t-sources-28-1"
+        KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
+        KERNEL_FOLDER="kernel/kernel-4.4"
+    elif [ $JETSON_L4T == "27.1" ] ; then
+        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r27_Release_v1.0/BSP/r27.1.0_sources.tbz2"
+        KERNEL_INTERNAL_FOLDER="kernel_src.tbz2"
+        KERNEL_FOLDER="kernel/kernel-4.4"
+    fi
+    
+    # List of driver to install
+    local NEW_LIST=$(kernel_installer_list)
+        
+    # Check if is selected the right link version
+    if [ ! -z $KERNEL_LINK ] ; then
+    
+        # Load installer functions
+        source kernel_installer.sh
+            
+        if [ ! -z $NEW_LIST ] ; then
+        
+            tput setaf 6
+            echo "Update the NVIDIA Jetson Kernel $(uname -r)"
+            tput sgr0
+            
+            # Get sources
+            kernel_get_sources $KERNEL_LINK $KERNEL_INTERNAL_FOLDER $KERNEL_FOLDER
+            # Edit kernel
+            kernel_edit $KERNEL_FOLDER $NEW_LIST
+            # Make kernel
+            kernel_make $KERNEL_FOLDER
+            
+            # Check if Image is generated
+            if [ -f $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/arch/arm64/boot/Image ] ; then
+            
+                # Copy kernel
+                kernel_copy_images $KERNEL_FOLDER
+            
+                if [ -d $KERNEL_SRC_FOLDER/$KERNEL_FOLDER ] ; then
+                    tput setaf 6
+                    echo "Removing folder $KERNEL_SRC_FOLDER/$KERNEL_FOLDER"
+                    tput sgr0
+                    sudo rm -R $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
+                else
+                    tput setaf 3
+                    echo "Source kernel folder $KERNEL_SRC_FOLDER/$KERNEL_FOLDER has removed!"
+                    tput sgr0
+                fi
+            else
+                tput setaf 1
+                echo "Image is not built! Check Error in Kernel make!"
+                tput sgr0
+            fi
+        else
+            tput setaf 3
+            echo "You don't have any driver to fix"
+            tput sgr0
+        fi
+
+        if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
+            if ! kernel_has_sources ; then
+                tput setaf 1
+                echo "Removing folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)"
+                tput sgr0
+                sudo rm -R $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)
+            else
+                tput setaf 3
+                echo "The folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name) is already removed "
+                tput sgr0
+            fi
+        fi
+        
+    else
+        tput setaf 1
+        echo "This driver kernel update is not available for your L4T $JETSON_L4T!"
+        tput sgr0
+    fi
+
+}
+
 check_drivers_installed()
 {
     local config_file="/tmp/config"
     # Extract config file in tmp if doesn't exist
-    zcat /proc/config.gz > $config_file
+    kernel_extract_config $config_file
     
     KERNEL_CHECK_RADIO=()
     local sub_element
-    for sub_element in "${KERNEL_CHECK_LIST[@]}"
+    for sub_element in "${KERNEL_DRIVER_LIST[@]}"
     do
         local name=$(echo $sub_element | cut -f1 -d ":")
         local config=$(echo $sub_element | cut -f2 -d ":")
         local description=$(echo $sub_element | cut -f3 -d ":")
         
         local status="OFF"
-        if [ $(kernel_is_enabled $name) == "ON" ] || [ $(check_kernel_variable $config "y" $config_file) == "ON" ] ; then
+        if [ $(kernel_is_enabled $name) == "ON" ] || [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
             status="ON"
         else
             status="OFF"
@@ -179,16 +286,10 @@ check_drivers_installed()
 
 set_kernel_patch()
 {
-    if [ -z ${KERNEL_PATCH_LIST+x} ]
-    then
-        # Empty kernel patch list
-        KERNEL_PATCH_LIST=""
-    fi
-    
     # Run check list
     check_drivers_installed
     # Length list drivers
-    local LENGTH=${#KERNEL_CHECK_LIST[@]}
+    local LENGTH=${#KERNEL_DRIVER_LIST[@]}
     
     local KERNEL_PATCH_TMP
     KERNEL_PATCH_TMP=$(whiptail --title "$MODULE_NAME" --checklist "Which kernel patch do you want add?" 15 60 $LENGTH "${KERNEL_CHECK_RADIO[@]}" 3>&1 1>&2 2>&3)
@@ -197,189 +298,6 @@ set_kernel_patch()
     if [ $exitstatus = 0 ]; then
         # Save list of new element to patch
         KERNEL_PATCH_LIST=$KERNEL_PATCH_TMP
-    fi
-}
-
-make_kernel()
-{
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-    local NUM_CPU=$(nproc)
-    
-    tput setaf 6
-    echo "Make kernel with $NUM_CPU CPU"
-    tput sgr0
-    
-    # Builds the kernel and modules
-    # Assumes that the .config file is available
-    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
-    
-    # Fix CONFIG_TEGRA_THROUGHPUT in Jetpack 3.2
-    if [ $JETSON_JETPACK == "3.2" ] ; then
-        tput setaf 1
-        echo "Fix with CONFIG_TEGRA_THROUGHPUT=n in Jetpack $JETSON_JETPACK"
-        tput sgr0
-        echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
-    fi
-    
-    sudo make prepare
-    sudo make modules_prepare
-    sudo make -j$NUM_CPU Image
-    sudo make modules
-    sudo make modules_install
-    
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
-}
-
-copy_images()
-{
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-    
-    tput setaf 6
-    echo "Copy image in /boot/Image"
-    tput sgr0
-    
-    cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
-    
-    #sudo cp arch/arm64/boot/zImage /boot/zImage
-    sudo cp arch/arm64/boot/Image /boot/Image
-    
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
-    
-    # Require reboot
-    tput setaf 1
-    echo "Require reboot"
-    tput sgr0
-    MODULES_REQUIRE_REBOOT=1
-}
-
-get_kernel_sources()
-{
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-
-    # List of kernel link
-    local KERNEL_LINK=""
-    local KERNEL_INTERNAL_FOLDER=""
-    if [ $JETSON_L4T == "28.2" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/BSP/source_release.tbz2"
-        KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
-    elif [ $JETSON_L4T == "28.1" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
-        KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
-    elif [ $JETSON_L4T == "27.1" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r27_Release_v1.0/BSP/r27.1.0_sources.tbz2"
-        KERNEL_INTERNAL_FOLDER="kernel_src.tbz2"
-    fi
-
-    # Install pkg-config
-    sudo apt-get install pkg-config -y
-    
-    tput setaf 6
-    echo "Move in download folder: $KERNEL_SRC_FOLDER"
-    tput sgr0
-    # Move in jetson folder
-    cd $KERNEL_SRC_FOLDER
-    
-    # Check if the folder Kernel folder exist
-    if [ ! -d "$KERNEL_FOLDER" ]; then
-    
-        # Variable kernel file
-        local KERNEL_FILE="source_release.tbz2"
-    
-        if [ ! -f $KERNEL_FILE ]; then
-            # Download kernel
-            tput setaf 6
-            echo "Download source kernel $JETSON_L4T"
-            tput sgr0
-            sudo wget --output-document $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE $KERNEL_LINK
-        fi
-        
-        if [ ! -f $KERNEL_INTERNAL_FOLDER ]; then
-            tput setaf 6
-            echo "Extracting $KERNEL_FILE from $KERNEL_INTERNAL_FOLDER source"
-            tput sgr0
-            sudo tar -xvf $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE $KERNEL_INTERNAL_FOLDER
-        fi
-        
-        tput setaf 6
-        echo "Expanding $KERNEL_INTERNAL_FOLDER"
-        tput sgr0
-        sudo tar -xf $KERNEL_INTERNAL_FOLDER
-        
-        local kernel_dir="$(dirname $KERNEL_INTERNAL_FOLDER)"
-        if [ $kernel_dir == "." ] ; then
-            echo "no folder"
-        else
-            echo "Remove folder $kernel_dir"
-            sudo rm -r $kernel_dir
-        fi
-        
-        # Remove source file
-        if [ -f $KERNEL_FILE ]; then
-            tput setaf 6
-            echo "Remove $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE kernel source"
-            tput sgr0
-            sudo rm -r $KERNEL_DOWNLOAD_FOLDER/$KERNEL_FILE
-        fi
-    fi
-    
-    cd $KERNEL_FOLDER
-    if [ ! -f $KERNEL_CONFIG_FILE ]; then
-        tput setaf 6
-        echo "Copy config folder /proc/config.gz in $KERNEL_CONFIG_FILE"
-        tput sgr0
-        sudo zcat /proc/config.gz > $KERNEL_CONFIG_FILE
-    fi
-    # Ready to configure kernel
-    #make xconfig
-    
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
-}
-
-script_run()
-{
-
-    tput setaf 6
-    echo "Update the NVIDIA Jetson Kernel $(uname -r)"
-    tput sgr0
-    
-    if [ $JETSON_L4T == "27.1" ] || [ $JETSON_L4T == "28.1" ] || [ $JETSON_L4T == "28.2" ] ; then
-        # Edit, make and copy only if the list is not empty    
-        if [ "$KERNEL_PATCH_LIST" != "" ] && [ $(kernel_check_source) == "1" ]; then
-            # Run get kernel sources
-            get_kernel_sources 
-
-            echo "Patch kernel and add: $KERNEL_PATCH_LIST"
-            # Patch the kernel
-            edit_kernel
-            
-            # Make the kernel
-            make_kernel
-            
-            # Copy images
-            copy_images
-        else
-            tput setaf 3
-            echo "No kernel update in list!"
-            tput sgr0
-        fi
-        
-        if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
-            tput setaf 1
-            echo "Removing folder $KERNEL_SRC_FOLDER/$KERNEL_FOLDER"
-            tput sgr0
-            sudo rm -R $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
-        fi
-        
-    else
-        tput setaf 1
-        echo "This kernel updater doesn't work with this Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
-        tput sgr0
     fi
 }
 
@@ -476,4 +394,3 @@ set_path()
         KERNEL_DOWNLOAD_FOLDER=$KERNEL_DOWNLOAD_FOLDER_TMP
     fi
 }
-
