@@ -203,6 +203,20 @@ script_run()
             
             # Get sources
             kernel_get_sources $KERNEL_LINK $KERNEL_INTERNAL_FOLDER $KERNEL_FOLDER
+            
+            if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
+                if ! kernel_has_sources ; then
+                    tput setaf 1
+                    echo "Removing folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)"
+                    tput sgr0
+                    sudo rm -R $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)
+                else
+                    tput setaf 3
+                    echo "The folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name) is already removed "
+                    tput sgr0
+                fi
+            fi
+            
             # Edit kernel
             kernel_edit $KERNEL_FOLDER $NEW_LIST
             # Make kernel
@@ -233,19 +247,6 @@ script_run()
             tput setaf 3
             echo "You don't have any driver to fix"
             tput sgr0
-        fi
-
-        if [ $KERNEL_REMOVE_FOLDER == "YES" ] ; then
-            if ! kernel_has_sources ; then
-                tput setaf 1
-                echo "Removing folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)"
-                tput sgr0
-                sudo rm -R $KERNEL_SRC_FOLDER/$(kernel_has_sources_name)
-            else
-                tput setaf 3
-                echo "The folder $KERNEL_SRC_FOLDER/$(kernel_has_sources_name) is already removed "
-                tput sgr0
-            fi
         fi
         
     else
