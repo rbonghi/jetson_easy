@@ -130,10 +130,14 @@ silent_mode()
         # Check connection
         local CONNECTION=$(remote_check_host)
         
+        echo "Connection to ..."
+        echo "User: $MODULE_REMOTE_USER"
+        echo "Host: $MODULE_REMOTE_HOST"
+        
         if [ $CONNECTION == "YES" ] ; then
             # Load system and connect
             remote_connect -s
-        fi        
+        fi
     else
         # All modules are in MODULES_LIST
         echo "Module loaded:"

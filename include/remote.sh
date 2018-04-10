@@ -56,8 +56,6 @@ remote_get_user_host()
     if [ $MODULE_REMOTE_USER == $MODULE_REMOTE_HOST ] ; then
         MODULE_REMOTE_USER=$USER
     fi
-    
-    echo "User: $MODULE_REMOTE_USER - Host: $MODULE_REMOTE_HOST"
 }
 
 remote_check_host()
