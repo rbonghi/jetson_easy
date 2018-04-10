@@ -217,16 +217,16 @@ kernel_fix_makefile()
         echo "Fix the Makefiles so that they compile on the device with kernel $JETSON_L4T"
         tput sgr0
         # Fix the Makefiles so that they compile on the device
-        patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile ./diffs/devfreq/devfreq.patch
-        patch $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile ./diffs/nvgpu/nvgpu.patch
+        sudo patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile ./diffs/devfreq/devfreq.patch
+        sudo patch $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile ./diffs/nvgpu/nvgpu.patch
         
         # The Jetson TX2 requires the following; Not needed for the Jetson TX1
         if [ $JETSON_BOARD == "TX2" ] ; then
-            patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile ./diffs/tegra-alt/tegra-alt.patch
+            sudo patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile ./diffs/tegra-alt/tegra-alt.patch
         fi
         
         # vmipi is in a sub directory without a Makefile, there was an include problem
-        cp $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/mipi_cal.h $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/vmipi/mipi_cal.h
+        sudo cp $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/mipi_cal.h $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/vmipi/mipi_cal.h
     
     # Fix CONFIG_TEGRA_THROUGHPUT in L4T 28.2
     elif [ $JETSON_L4T == "28.2" ] ; then
