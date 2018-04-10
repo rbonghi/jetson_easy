@@ -215,7 +215,12 @@ make_kernel()
     cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
     # Fix CONFIG_TEGRA_THROUGHPUT in Jetpack 3.2
-    # CONFIG_TEGRA_THROUGHPUT=y
+    if [ $JETSON_JETPACK == "3.2" ] ; then
+        tput setaf 1
+        echo "Fix with CONFIG_TEGRA_THROUGHPUT=n in Jetpack $JETSON_JETPACK"
+        tput sgr0
+        echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
+    fi
     
     sudo make prepare
     sudo make modules_prepare
