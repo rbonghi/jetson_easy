@@ -177,10 +177,7 @@ script_run()
         KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
         KERNEL_FOLDER="kernel/kernel-4.4"
     elif [ $JETSON_L4T == "28.1" ] ; then
-        #KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
-        # Fix https://devtalk.nvidia.com/default/topic/1019687/jetson-tx2/jetpack-3-1-kernel-source-tag-problem/
-        # in drivers/devfreq/governor_pod_scaling.c:54:22: fatal error
-        KERNEL_LINK="https://developer.nvidia.com/embedded/dlc/l4t-sources-28-1"
+        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
         KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
         KERNEL_FOLDER="kernel/kernel-4.4"
     elif [ $JETSON_L4T == "27.1" ] ; then

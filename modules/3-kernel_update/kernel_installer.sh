@@ -205,6 +205,38 @@ kernel_edit()
     cd $LOCAL_FOLDER
 }
 
+kernel_fix_makefile()
+{
+    local KERNEL_FOLDER=$1
+    
+    # Fix errors install
+    # Thx from @jetsonhacks
+    # https://github.com/jetsonhacks/buildJetsonTX1Kernel.git
+    if [ $JETSON_L4T == "28.1" ] ; then
+        tput setaf 1
+        echo "Fix the Makefiles so that they compile on the device with kernel $JETSON_L4T"
+        tput sgr0
+        # Fix the Makefiles so that they compile on the device
+        patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile ./diffs/devfreq/devfreq.patch
+        patch $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile ./diffs/nvgpu/nvgpu.patch
+        
+        # The Jetson TX2 requires the following; Not needed for the Jetson TX1
+        if [ $JETSON_BOARD == "TX2" ] ; then
+            patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile ./diffs/tegra-alt/tegra-alt.patch
+        fi
+        
+        # vmipi is in a sub directory without a Makefile, there was an include problem
+        cp $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/mipi_cal.h $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/vmipi/mipi_cal.h
+    
+    # Fix CONFIG_TEGRA_THROUGHPUT in L4T 28.2
+    elif [ $JETSON_L4T == "28.2" ] ; then
+        tput setaf 1
+        echo "Fix with \"CONFIG_TEGRA_THROUGHPUT=n\" in kernel $JETSON_L4T"
+        tput sgr0
+        echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
+    fi
+}
+
 kernel_make()
 {
     local KERNEL_FOLDER=$1
@@ -220,13 +252,8 @@ kernel_make()
     # Assumes that the .config file is available
     cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
-    # Fix CONFIG_TEGRA_THROUGHPUT in Jetpack 3.2
-    if [ $JETSON_JETPACK == "3.2" ] ; then
-        tput setaf 1
-        echo "Fix with \"CONFIG_TEGRA_THROUGHPUT=n\" in Jetpack $JETSON_JETPACK"
-        tput sgr0
-        echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
-    fi
+    # Fix makefile errors
+    kernel_fix_makefile $KERNEL_FOLDER
     
     sudo make prepare
     sudo make modules_prepare

@@ -1,0 +1,6 @@
+8a9
+> ccflags-y += -I./$(src)/
+14a16,18
+> 
+> ccflags-y += -I$(src)
+> 
