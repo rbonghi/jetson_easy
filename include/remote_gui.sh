@@ -37,7 +37,7 @@ menu_remote_connect()
     # Check if load start
     if [ $REMOTE == "YES" ] ; then
         # Load system and connect
-        remote_connect    
+        remote_connect
         # After exit remove the files
         remote_from_host
         # Quit the system

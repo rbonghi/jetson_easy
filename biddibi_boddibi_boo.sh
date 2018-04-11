@@ -217,11 +217,19 @@ main()
 		shift 1
 	done
 	
+	local mytitle="Jetson Easy"
+	
 	# Check if the code run in NVIDIA Jetson or in remote
 	if [ -z $JETSON_BOARD ] ; then
 	    # Set in Remote mode
 	    MODULE_REMOTE=1
+	    mytitle="Jetson Easy - Remote connection"
+	else
+	    mytitle="Jetson Easy on $USER@$HOSTNAME"
 	fi
+	
+    # Set title shellbash
+    echo -e '\033]2;'$mytitle'\007'
 	
 	if [ ! -z $IS_SILENT ] ; then
 	    unset IS_SILENT
