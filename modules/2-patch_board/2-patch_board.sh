@@ -103,7 +103,7 @@ script_run()
     if [ $JETSON_JETPACK == "3.2" ] ; then
         echo "Pach opencv in $JETSON_JETPACK"
         # Load source
-        source jp32_patch.sh
+        source jp32/patch.sh
         # Run patcher
         #jp32_patch_opencv3
     fi

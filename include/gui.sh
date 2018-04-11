@@ -39,69 +39,14 @@
 # Variable to show the saved information status
 GUI_SAVED=0
 
-menu_title()
-{
-    if [ ! -z ${DEBUG+x} ]
-    then
-        echo "DEBUG MODE - "
-    else
-        echo ""
-    fi
-}
-
-menu_header()
-{
-    echo "NVIDIA Jetson Easy setup script"
-    echo "Author: Raffaello Bonghi"
-    echo "email: raffaello@rnext.it"
-}
-
-jetson_status()
-{
-    if [ ! -z ${JETSON_BOARD+x} ] ; then
-        echo "(*) NVIDIA embedded:"
-        echo "    - Board: $JETSON_DESCRIPTION"
-        echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
-        echo "    - CUDA: $JETSON_CUDA"
-        echo "    - OpenCV: $JETSON_OPENCV"
-    else
-        echo "(*) It isn't an NVIDIA Jetson"
-    fi
-}
-
-ros_status()
-{
-    if [ ! -z ${ROS_DISTRO+x} ] ; then
-        echo "(*) ROS $ROS_DISTRO:"
-        echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
-        if [ ! -z ${ROS_HOSTNAME+x} ] ; then
-            echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
-        fi
-    else
-        echo "(*) ROS Not installed!"
-    fi
-}
-
 system_info()
 {
+    # Header
     menu_header
     echo ""
-    echo "(*) System:"
-    echo "    - User: $USER"
-    if [ ! -z ${NEW_HOSTNAME+x} ]
-    then
-        if [ $NEW_HOSTNAME != $HOSTNAME ]
-        then
-            echo "    - Hostname: $HOSTNAME -> $NEW_HOSTNAME"
-        else
-            echo "    - Hostname: $HOSTNAME"         
-        fi
-    else
-        echo "    - Hostname: $HOSTNAME"
-    fi
-    echo "    - OS: $DISTRIB_DESCRIPTION - $DISTRIB_CODENAME"
-    echo "    - Architecture: $OS_ARCHITECTURE"
-    echo "    - Kernel: $OS_KERNEL"
+    
+    # Information about board
+    menu_info
     
     # NVIDIA Jetson status
     jetson_status

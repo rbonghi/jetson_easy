@@ -33,13 +33,14 @@
 
 jp32_patch_opencv3()
 {
-    # Check if is correctly installed opencv3
     if ! jp32_opencv3_check ; then
+        echo "TODO Install OpenCV with CUDA"
         # Remove old opencv3 configuration
-        jp32_patch_opencv3_installer
+        #jp32_patch_opencv3_installer
+        
     else
         tput setaf 3
-        echo "Correctly installed OpenCV3 with CUDA"
+        echo "Correctly installed OpenCV3 $JETSON_OPENCV with CUDA"
         tput sgr0
     fi
 }
@@ -47,10 +48,52 @@ jp32_patch_opencv3()
 jp32_opencv3_check()
 {
     # 0 = true - 1 = false
-    return 1 
+    
+    local OPENCV_VERSION_VERBOSE=""
+    if hash opencv_version 2>/dev/null; then
+        # Red if use CUDA or not
+        OPENCV_VERSION_VERBOSE=$(opencv_version --verbose | grep "Usea Cuda" )
+        
+        if [[ !  -z  $OPENCV_VERSION_VERBOSE  ]] ; then
+
+            local OPENCV_CUDA_FLAG=$(echo $OPENCV_VERSION_VERBOSE | cut -f2 -d ':')
+            
+            if [ $OPENCV_CUDA_FLAG == "NO" ] ; then
+                tput setaf 3
+                echo "OpenCV Cuda not installed"
+                tput sgr0
+                
+                false
+            else
+                tput setaf 3
+                echo "OpenCV Cuda installed"
+                tput sgr0
+                
+                return 0
+            fi
+
+        else
+            # read NVIDIA CUDA version
+            OPENCV_VERSION_VERBOSE=$(opencv_version --verbose | grep "NVIDIA CUDA" )
+            # get information
+            OPENCV_CUDA_FLAG=$(echo $OPENCV_VERSION_VERBOSE | cut -f2 -d ':')
+
+            tput setaf 3
+            echo "OpenCV with CUDA is installed correctly - $OPENCV_CUDA_FLAG"
+            tput sgr0
+            
+            return 0
+        fi
+    else
+        tput setaf 1
+        echo "OpenCV not installed"
+        tput sgr0
+        
+        return 1
+    fi
 }
 
-jp32_patch_opencv3_installer()
+jp32_patch_opencv3_patcher()
 {
     ### Remove all old opencv stuffs installed by JetPack (or OpenCV4Tegra)
     tput setaf 6
@@ -58,17 +101,6 @@ jp32_patch_opencv3_installer()
     tput sgr0
     
     sudo apt-get purge libopencv* -y
-    ### I prefer using newer version of numpy (installed with pip), so
-    ### I'd remove this python-numpy apt package as well
-    tput setaf 6
-    echo "Remove python-numpy"
-    tput sgr0
-    
-    sudo apt-get purge python-numpy -y
-    ### Remove other unused apt packages
-    tput setaf 6
-    echo "Remove other unused apt packages"
-    tput sgr0
 
     sudo apt autoremove -y
 
@@ -122,6 +154,107 @@ jp32_patch_opencv3_installer()
     tput sgr0
     
     sudo apt-get install qt5-default -y
+    
+    ### Patch OpenCV3
+    # https://devtalk.nvidia.com/default/topic/1007290/jetson-tx2/building-opencv-with-opengl-support-/post/5141945/#5141945
+    tput setaf 6
+    echo "Patching cuda_gl_interop.h"
+    tput sgr0
+    
+    #https://www.thegeekstuff.com/2014/12/patch-command-examples
+    sudo patch /usr/local/cuda/include/cuda_gl_interop.h jp32/cuda_gl_interop.patch
+    
+    ### Fix the symbolic link of libGL.so
+    tput setaf 6
+    echo "Fix the symbolic link of libGL.so"
+    tput sgr0
+    
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
+    cd /usr/lib/aarch64-linux-gnu/
+    
+    sudo ln -sf tegra/libGL.so libGL.so
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
+}
+
+jp32_patch_opencv3_installer()
+{
+    local NUM_CPU=$(nproc)
+    local opencv_version="opencv-3.4.0"
+    
+    local cuda_arch=""
+    if [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
+        cuda_arch="6.2"
+    elif [ $JETSON_BOARD == "TX1" ] ; then
+        cuda_arch="5.3"
+    else
+        tput setaf 1
+        echo "This patch doesn't work for your $JETSON_DESCRIPTION!"
+        tput sgr0
+        # Return error
+        return 1
+    fi
+    
+    ### Download opencv-3.4.0 source code
+    tput setaf 6
+    echo "Download $opencv_version source code"
+    tput sgr0
+    
+    mkdir -p ~/src
+    cd ~/src
+    wget https://github.com/opencv/opencv/archive/3.4.0.zip -O $opencv_version.zip
+    unzip $opencv_version.zip
+    
+    ### Build opencv (CUDA_ARCH_BIN="6.2" for TX2, or "5.3" for TX1)
+    tput setaf 6
+    echo "Build openCV with CUDA_ARCH_BIN=\"$cuda_arch\" for your $JETSON_DESCRIPTION"
+    tput sgr0
+    
+    cd ~/src/$opencv_version
+    mkdir build
+    cd build
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+          -D WITH_CUDA=ON -D CUDA_ARCH_BIN=$cuda_arch -D CUDA_ARCH_PTX="" \
+          -D WITH_CUBLAS=ON -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON \
+          -D ENABLE_NEON=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=OFF \
+          -D BUILD_PERF_TESTS=OFF -D BUILD_EXAMPLES=OFF \
+          -D WITH_QT=ON -D WITH_OPENGL=ON ..
+
+    tput setaf 6
+    echo "Make openCV with $NUM_CPU CPU"
+    tput sgr0
+    make -j$NUM_CPU
+    
+    tput setaf 6
+    echo "Make install openCV"
+    tput sgr0
+    sudo make install
+    
+    tput setaf 6
+    echo "Remove $opencv_version source code"
+    tput sgr0
+    
+    
+}
+
+jp32_patch_mathplotlib()
+{
+    ### I prefer using newer version of numpy (installed with pip), so
+    ### I'd remove this python-numpy apt package as well
+    tput setaf 6
+    echo "Remove python-numpy"
+    tput sgr0
+    
+    sudo apt-get purge python-numpy -y
+    ### Remove other unused apt packages
+    tput setaf 6
+    echo "Remove other unused apt packages"
+    tput sgr0
+
+    sudo apt autoremove -y
     
     ### Install dependencies for python3
     tput setaf 6

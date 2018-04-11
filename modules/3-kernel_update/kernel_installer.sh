@@ -246,19 +246,34 @@ kernel_make()
     
     # Fix makefile errors
     kernel_fix_makefile $KERNEL_FOLDER
-
-    tput setaf 6
-    echo "Make kernel with $NUM_CPU CPU"
-    tput sgr0
     
     # Builds the kernel and modules
     # Assumes that the .config file is available
     cd $KERNEL_SRC_FOLDER/$KERNEL_FOLDER
     
+    tput setaf 6
+    echo "Make prepare"
+    tput sgr0
     sudo make prepare
+    
+    tput setaf 6
+    echo "Make modules_prepare"
+    tput sgr0
     sudo make modules_prepare
+    
+    tput setaf 6
+    echo "Make kernel Image with $NUM_CPU CPU"
+    tput sgr0
     sudo make -j$NUM_CPU Image
+    
+    tput setaf 6
+    echo "Make modules"
+    tput sgr0
     sudo make modules
+    
+    tput setaf 6
+    echo "Make modules_install"
+    tput sgr0
     sudo make modules_install
     
     # Restore previuous folder

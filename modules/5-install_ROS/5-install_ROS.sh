@@ -72,6 +72,23 @@ else
     MODULE_SUBMENU=("Set distro $(ros_load_version $ROS_NEW_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $ROS_NEW_WORKSPACE)] Install workspace:write_workspace" "[$(ros_is_check $ROS_NEW_HOSTNAME)] Set hostname:set_ros_hostname" "Set ROS_MASTER_URI:set_master_uri")
 fi
 
+##################################################
+
+ros_status()
+{
+    if [ ! -z ${ROS_DISTRO+x} ] ; then
+        echo "(*) ROS $ROS_DISTRO:"
+        echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
+        if [ ! -z ${ROS_HOSTNAME+x} ] ; then
+            echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
+        fi
+    else
+        echo "(*) ROS Not installed!"
+    fi
+}
+
+##################################################
+
 install_ros()
 {
     # Automatically update all packages

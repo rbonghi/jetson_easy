@@ -45,6 +45,8 @@ OS_KERNEL=$(uname -r)
 # - JETSON_CUDA
 source jetson/jetson_variables
 
+# Load common script filed
+source include/common.sh
 # Load user interface
 source include/modules.sh
 # Load remote sources
