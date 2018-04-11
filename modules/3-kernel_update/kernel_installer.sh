@@ -217,12 +217,49 @@ kernel_fix_makefile()
         echo "Fix the Makefiles so that they compile on the device with kernel $JETSON_L4T"
         tput sgr0
         # Fix the Makefiles so that they compile on the device
-        sudo patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile diffs/devfreq/devfreq.patch
-        sudo patch $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile diffs/nvgpu/nvgpu.patch
+        sudo patch -p0 -N --dry-run --silent $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile diffs/devfreq/devfreq.patch 2>/dev/null
+        #If the patch has not been applied then the $? which is the exit status 
+        #for last command would have a success status code = 0
+        if [ $? -eq 0 ];
+        then
+            #apply the patch
+
+            sudo patch -N $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/devfreq/Makefile diffs/devfreq/devfreq.patch
+        else
+            tput setaf 3
+            echo "devfreq.patch has already patched"
+            tput sgr0
+        fi
+                
+        sudo patch -p0 -N --dry-run --silent $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile diffs/nvgpu/nvgpu.patch 2>/dev/null
+        #If the patch has not been applied then the $? which is the exit status 
+        #for last command would have a success status code = 0
+        if [ $? -eq 0 ];
+        then
+            #apply the patch
+
+            sudo patch -N $KERNEL_SRC_FOLDER/kernel/nvgpu/drivers/gpu/nvgpu/Makefile diffs/nvgpu/nvgpu.patch
+        else
+            tput setaf 3
+            echo "nvgpu/nvgpu.patch has already patched"
+            tput sgr0
+        fi
         
         # The Jetson TX2 requires the following; Not needed for the Jetson TX1
         if [ $JETSON_BOARD == "TX2" ] ; then
-            sudo patch $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile diffs/tegra-alt/tegra-alt.patch
+            sudo patch -p0 -N --dry-run --silent $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile diffs/tegra-alt/tegra-alt.patch 2>/dev/null
+            #If the patch has not been applied then the $? which is the exit status 
+            #for last command would have a success status code = 0
+            if [ $? -eq 0 ];
+            then
+                #apply the patch
+
+                sudo patch -N $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/sound/soc/tegra-alt/Makefile diffs/tegra-alt/tegra-alt.patch
+            else
+                tput setaf 3
+                echo "tegra-alt/tegra-alt.patch has already patched"
+                tput sgr0
+            fi
         fi
         
         # vmipi is in a sub directory without a Makefile, there was an include problem

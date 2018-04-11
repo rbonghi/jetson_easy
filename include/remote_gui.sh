@@ -28,7 +28,18 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Start menu
-MENU_REMOTE_SELECTION=menu_remote_user_host
+MENU_REMOTE_SELECTION=menu_remote_license
+
+menu_remote_license()
+{
+    menu_message_license
+    # If all parameters are written the remote connection skip to the connection
+    if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
+        MENU_REMOTE_SELECTION=menu_remote_info
+    else
+        MENU_SELECTION=menu_remote_user_host
+    fi  
+}
 
 menu_remote_connect()
 {
@@ -126,10 +137,6 @@ menu_remote_user_host()
 
 menu_remote()
 {
-    # If all parameters are written the remote connection skip to the connection
-    if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
-        MENU_REMOTE_SELECTION=menu_remote_info
-    fi
     # Loop menu
     while [ $MENU_REMOTE_SELECTION != 0 ]
     do  

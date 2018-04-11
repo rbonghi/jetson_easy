@@ -151,7 +151,7 @@ remote_connect()
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
 # Launch biddibi_boddibi_boo in remote
-./biddibi_boddibi_boo.sh -p $MODULE_PASSWORD $OPTIONS
+./biddibi_boddibi_boo.sh -x -p $MODULE_PASSWORD $OPTIONS
 
 '"
 }

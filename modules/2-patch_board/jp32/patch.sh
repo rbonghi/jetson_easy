@@ -30,6 +30,51 @@
 # https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
 # https://jkjung-avt.github.io/opencv3-on-tx2/
 
+# Following
+# https://devtalk.nvidia.com/default/topic/1031736/jetson-tx2/cuda-9-0-samples-do-not-build-with-jetpack-3-2/
+jp32_patch_cuda_examples()
+{
+    if [ -d $HOME/NVIDIA_CUDA-9.0_Samples ] ; then
+        sudo patch -p0 -N --dry-run --silent $HOME/NVIDIA_CUDA-9.0_Samples/6_Advanced/cdpLUDecomposition/Makefile jp32/cuda_sample.patch 2>/dev/null
+        #If the patch has not been applied then the $? which is the exit status 
+        #for last command would have a success status code = 0
+        if [ $? -eq 0 ];
+        then
+            #apply the patch
+            tput setaf 6
+            echo "Patching CUDA example in $HOME/NVIDIA_CUDA-9.0_Samples"
+            tput sgr0
+            sudo patch -N $HOME/NVIDIA_CUDA-9.0_Samples/6_Advanced/cdpLUDecomposition/Makefile jp32/cuda_sample.patch
+        else
+            tput setaf 3
+            echo "CUDA example in /usr/local/cuda-9.0/samples has already patched!"
+            tput sgr0
+        fi
+    fi
+    
+    if [ -d /usr/local/cuda-9.0/samples ] ; then
+        tput setaf 6
+        echo "Patching CUDA example in /usr/local/cuda-9.0/samples"
+        tput sgr0
+        
+        sudo patch -p0 -N --dry-run --silent /usr/local/cuda-9.0/samples/6_Advanced/cdpLUDecomposition/Makefile jp32/cuda_sample.patch 2>/dev/null
+        #If the patch has not been applied then the $? which is the exit status 
+        #for last command would have a success status code = 0
+        if [ $? -eq 0 ];
+        then
+            #apply the patch
+            tput setaf 6
+            echo "Patching CUDA example in /usr/local/cuda-9.0/samples"
+            tput sgr0
+        
+            sudo patch -N /usr/local/cuda-9.0/samples/6_Advanced/cdpLUDecomposition/Makefile jp32/cuda_sample.patch
+        else
+            tput setaf 3
+            echo "CUDA example in /usr/local/cuda-9.0/samples has already patched!"
+            tput sgr0
+        fi
+    fi
+}
 
 jp32_patch_opencv3()
 {

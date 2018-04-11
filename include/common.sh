@@ -40,6 +40,9 @@ menu_title()
 menu_header()
 {
     echo "NVIDIA Jetson Easy setup script"
+    echo ""
+    echo "An easy installer for your NVIDIA Jetson"
+    echo ""
     echo "Author: Raffaello Bonghi"
     echo "email: raffaello@rnext.it"
 }
@@ -76,3 +79,9 @@ jetson_status()
         echo "(*) It isn't an NVIDIA Jetson"
     fi
 }
+
+menu_message_license()
+{
+    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 12 45 <<< "$(menu_header)"
+}
+

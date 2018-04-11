@@ -1,5 +1,5 @@
---- cuda_gl_interop.h	2018-02-28 01:21:11.000000000 +0000
-+++ cuda_gl_interop_new.h	2018-04-11 08:27:58.729531489 +0000
+--- cuda_gl_interop.h
++++ cuda_gl_interop.h
 @@ -59,13 +59,13 @@
  
  #else /* __APPLE__ */

@@ -100,10 +100,12 @@ script_run()
     echo "Patch $JETSON_DESCRIPTION from known errors"
     tput sgr0
     
-    if [ $JETSON_JETPACK == "3.2" ] ; then
-        echo "Pach opencv in $JETSON_JETPACK"
+    if [ $JETSON_JETPACK == "3.2" ] ; then        
         # Load source
         source jp32/patch.sh
+        # Run cuda examples patch
+        jp32_patch_cuda_examples
+        echo "Pach opencv in $JETSON_JETPACK"
         # Run patcher
         jp32_patch_opencv3
     fi

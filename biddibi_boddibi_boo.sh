@@ -209,6 +209,9 @@ main()
 			    MODULE_REMOTE=1
 			    shift 1
 			    ;;
+			-x) # Internal option in remote mode
+			    MODULE_IM_HOST=1
+			    ;;
 		    *)
 		        usage "Unknown option: $1"
 		        exit 1
@@ -229,7 +232,7 @@ main()
 	fi
 	
     # Set title shellbash
-    echo -e '\033]2;'$mytitle'\007'
+    echo -ne '\033]2;'$mytitle'\007'
 	
 	if [ ! -z $IS_SILENT ] ; then
 	    unset IS_SILENT

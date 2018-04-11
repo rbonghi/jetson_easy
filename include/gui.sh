@@ -39,12 +39,10 @@
 # Variable to show the saved information status
 GUI_SAVED=0
 
+
+
 system_info()
 {
-    # Header
-    menu_header
-    echo ""
-    
     # Information about board
     menu_info
     
@@ -59,7 +57,17 @@ system_info()
 }
 
 # Start menu
-MENU_SELECTION=menu_information
+MENU_SELECTION=menu_license
+
+menu_license()
+{
+    # Skip show license if is the host in remote connection
+    if [ -z $MODULE_IM_HOST ] ; then
+        menu_message_license
+    fi
+    # Load information
+    MENU_SELECTION=menu_information
+}
 
 submenu_load_check()
 {
