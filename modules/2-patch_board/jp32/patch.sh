@@ -34,13 +34,35 @@
 jp32_patch_opencv3()
 {
     if ! jp32_opencv3_check ; then
-        echo "TODO Install OpenCV with CUDA"
+        tput setaf 6
+        echo "Fix OpenCV $JETSON_OPENCV with CUDA"
+        tput sgr0
+        # Check if installed libvisionworks
+        local lib_visionworks="NO"
+        if dpkg -s "libvisionworks" >/dev/null ; then
+            tput setaf 3
+            echo "libvisionworks is installed."
+            tput sgr0
+            
+            lib_visionworks="YES"
+        fi
         # Remove old opencv3 configuration
-        #jp32_patch_opencv3_installer
-        
+        jp32_patch_opencv3_patcher
+        # Install from source OpenCV
+        jp32_patch_opencv3_installer
+        # reinstall again all visionworks libraries
+        if [ $lib_visionworks == "YES" ] ; then
+            tput setaf 3
+            echo "Reinstall libvisionworks"
+            tput sgr0
+            
+            sudo apt install -y libvisionworks-samples* libvisionworks-sfm-dev* libvisionworks-tracking-dev*
+        fi
+        # Check status installation
+        jp32_opencv3_check
     else
         tput setaf 3
-        echo "Correctly installed OpenCV3 $JETSON_OPENCV with CUDA"
+        echo "Skip OpenCV3 with CUDA patcher"
         tput sgr0
     fi
 }
@@ -52,21 +74,23 @@ jp32_opencv3_check()
     local OPENCV_VERSION_VERBOSE=""
     if hash opencv_version 2>/dev/null; then
         # Red if use CUDA or not
-        OPENCV_VERSION_VERBOSE=$(opencv_version --verbose | grep "Usea Cuda" )
+        OPENCV_VERSION_VERBOSE=$(opencv_version --verbose | grep "Use Cuda" )
         
         if [[ !  -z  $OPENCV_VERSION_VERBOSE  ]] ; then
-
-            local OPENCV_CUDA_FLAG=$(echo $OPENCV_VERSION_VERBOSE | cut -f2 -d ':')
+            # Read status of CUDA
+            local OPENCV_CUDA_FLAG=$(echo $OPENCV_VERSION_VERBOSE | cut -f2 -d ':' )
+            # Remvoe all spaces
+            OPENCV_CUDA_FLAG=${OPENCV_CUDA_FLAG//[[:blank:]]/}
             
             if [ $OPENCV_CUDA_FLAG == "NO" ] ; then
                 tput setaf 3
-                echo "OpenCV Cuda not installed"
+                echo "OpenCV $JETSON_OPENCV Cuda not installed"
                 tput sgr0
                 
                 false
             else
                 tput setaf 3
-                echo "OpenCV Cuda installed"
+                echo "OpenCV $JETSON_OPENCV Cuda installed"
                 tput sgr0
                 
                 return 0
@@ -77,19 +101,20 @@ jp32_opencv3_check()
             OPENCV_VERSION_VERBOSE=$(opencv_version --verbose | grep "NVIDIA CUDA" )
             # get information
             OPENCV_CUDA_FLAG=$(echo $OPENCV_VERSION_VERBOSE | cut -f2 -d ':')
-
+            OPENCV_CUDA_FLAG=${OPENCV_CUDA_FLAG//[[:blank:]]/}
+            
             tput setaf 3
-            echo "OpenCV with CUDA is installed correctly - $OPENCV_CUDA_FLAG"
+            echo "OpenCV with CUDA is installed correctly - OpenCV $OPENCV_CUDA_FLAG"
             tput sgr0
             
             return 0
         fi
     else
-        tput setaf 1
-        echo "OpenCV not installed"
+        tput setaf 3
+        echo "OpenCV not installed not required to patch"
         tput sgr0
         
-        return 1
+        return 0
     fi
 }
 
@@ -182,8 +207,12 @@ jp32_patch_opencv3_patcher()
 
 jp32_patch_opencv3_installer()
 {
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
     local NUM_CPU=$(nproc)
     local opencv_version="opencv-3.4.0"
+    local opencv_source_folder="/tmp/$opencv_version"
     
     local cuda_arch=""
     if [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
@@ -203,8 +232,8 @@ jp32_patch_opencv3_installer()
     echo "Download $opencv_version source code"
     tput sgr0
     
-    mkdir -p ~/src
-    cd ~/src
+    mkdir -p $opencv_source_folder
+    cd $opencv_source_folder
     wget https://github.com/opencv/opencv/archive/3.4.0.zip -O $opencv_version.zip
     unzip $opencv_version.zip
     
@@ -213,9 +242,12 @@ jp32_patch_opencv3_installer()
     echo "Build openCV with CUDA_ARCH_BIN=\"$cuda_arch\" for your $JETSON_DESCRIPTION"
     tput sgr0
     
-    cd ~/src/$opencv_version
+    cd $opencv_source_folder/$opencv_version
+    
     mkdir build
+    
     cd build
+
     cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
           -D WITH_CUDA=ON -D CUDA_ARCH_BIN=$cuda_arch -D CUDA_ARCH_PTX="" \
           -D WITH_CUBLAS=ON -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON \
@@ -236,8 +268,15 @@ jp32_patch_opencv3_installer()
     tput setaf 6
     echo "Remove $opencv_version source code"
     tput sgr0
+    sudo rm -R $opencv_source_folder
     
+    tput setaf 6
+    echo "ldconfig"
+    tput sgr0
+    sudo ldconfig
     
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
 }
 
 jp32_patch_mathplotlib()

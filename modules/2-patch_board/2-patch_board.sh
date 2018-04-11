@@ -105,7 +105,7 @@ script_run()
         # Load source
         source jp32/patch.sh
         # Run patcher
-        #jp32_patch_opencv3
+        jp32_patch_opencv3
     fi
     
 }
