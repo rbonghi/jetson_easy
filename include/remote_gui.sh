@@ -28,16 +28,17 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Start menu
-MENU_REMOTE_SELECTION=menu_remote_user_host #menu_remote_license
+MENU_REMOTE_SELECTION=menu_remote_introduction
 
-menu_remote_license()
+menu_remote_introduction()
 {
-    #menu_message_license
+    # Intro message
+    menu_message_introduction
     # If all parameters are written the remote connection skip to the connection
     if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
         MENU_REMOTE_SELECTION=menu_remote_info
     else
-        MENU_SELECTION=menu_remote_user_host
+        MENU_REMOTE_SELECTION=menu_remote_user_host
     fi  
 }
 

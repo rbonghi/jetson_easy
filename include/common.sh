@@ -135,7 +135,7 @@ jetson_status()
     fi
 }
 
-menu_message_license()
+menu_message_introduction()
 {
     whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 12 45 <<< "$(menu_header)"
 }

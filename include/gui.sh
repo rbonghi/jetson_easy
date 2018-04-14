@@ -57,13 +57,13 @@ system_info()
 }
 
 # Start menu
-MENU_SELECTION=menu_license
+MENU_SELECTION=menu_introduction
 
-menu_license()
+menu_introduction()
 {
     # Skip show license if is the host in remote connection
     if [ -z $MODULE_IM_HOST ] ; then
-        menu_message_license
+        menu_message_introduction
     fi
     # Load information
     MENU_SELECTION=menu_information
