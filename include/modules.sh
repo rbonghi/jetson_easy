@@ -90,7 +90,7 @@ modules_load()
     if [ -f $MODULES_CONFIG ] ; then
         # echo "Setup \"$MODULES_CONFIG\" found!"
         # Load all default values
-        modules_load_default
+        #modules_load_default
         # Load and overwrite with setup file
         source $MODULES_CONFIG
         # Sort all modules

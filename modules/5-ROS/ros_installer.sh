@@ -107,50 +107,41 @@ ros_install()
 
 ros_install_workspace()
 {
-    if [ ! -z ${ROS_NEW_WS+x} ] ; then
-        # Build default dir location
-        local DEFAULTDIR=$HOME/$NEW_ROS_WS
-        
-        if [ ! -e "$DEFAULTDIR" ] ; then
-            tput setaf 6
-            echo "Creating Catkin Workspace: $DEFAULTDIR"
-            tput sgr0
-            mkdir -p "$DEFAULTDIR"/src
-            
-            tput setaf 6
-            echo "Load ROS environment"
-            tput sgr0
-            source /opt/ros/$ROS_NEW_DISTRO/setup.bash
-            
-            # store position
-            local LOCAL_FOLDER=$(pwd)
-            
-            # Move in jetson folder
-            cd "$DEFAULTDIR"/
-            
-            # Launch catkin_make
-            catkin_make
-            
-            # Go back in stored position
-            cd $LOCAL_FOLDER
-            
-            # Load sources
-            tput setaf 6
-            echo "Load sources in .bashrc"
-            tput sgr0
-            grep -q -F "source $DEFAULTDIR/devel/setup.bash" $HOME/.bashrc || echo "source $DEFAULTDIR/devel/setup.bash" >> $HOME/.bashrc
-            
-            tput setaf 6
-            echo "Re run $USER bashrc in $HOME"
-            tput sgr0
-            source $HOME/.bashrc
-        else
-            tput setaf 1
-            echo "Folder $NEW_ROS_WS already exists!"
-            tput sgr0
-        fi
-    else
-        echo "Any NEW_ROS_WS is setted"
-    fi
+    local NAME_WS=$1
+    local LOCAL_DISTRO=$2
+    
+    local DEFAULTDIR=$HOME/$NAME_WS
+    tput setaf 6
+    echo "Creating Catkin Workspace: $DEFAULTDIR"
+    tput sgr0
+    mkdir -p "$DEFAULTDIR"/src
+    
+    tput setaf 6
+    echo "Load ROS environment"
+    tput sgr0
+    source /opt/ros/$LOCAL_DISTRO/setup.bash
+    
+    # store position
+    local LOCAL_FOLDER=$(pwd)
+    
+    # Move in jetson folder
+    cd "$DEFAULTDIR"/
+    
+    # Launch catkin_make
+    catkin_make
+    
+    # Go back in stored position
+    cd $LOCAL_FOLDER
+    
+    # Load sources
+    tput setaf 6
+    echo "Load sources in .bashrc"
+    tput sgr0
+    grep -q -F "source $DEFAULTDIR/devel/setup.bash" $HOME/.bashrc || echo "source $DEFAULTDIR/devel/setup.bash" >> $HOME/.bashrc
+    
+    tput setaf 6
+    echo "Re run $USER bashrc in $HOME"
+    tput sgr0
+    source $HOME/.bashrc
 }
 

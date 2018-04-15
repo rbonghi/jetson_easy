@@ -114,7 +114,7 @@ kernel_get_config()
 }
 
 # Print configuration driver on NVIDIA Jetson
-kernel_driver_list()
+script_list()
 {
     # Show list only if exist the file
     if [ -f $KERNEL_SRC_CONFIG ] ; then

@@ -32,52 +32,13 @@
 # Thanks @jetsonhacks
 # https://github.com/jetsonhacks/installROSTX2/blob/master/installROS.sh
 
-ros_is_check()
-{
-    local VAR=$1
-    if [ -z ${VAR+x} ] ; then
-        echo " "
-    else
-        if [ $VAR == "1" ] ; then
-            echo "X"
-        else
-            echo " "
-        fi
-    fi
-}
-
-ros_load_version()
-{
-    local VAR=$1
-    if [ -z ${VAR+x} ] ; then
-        echo ""
-    else
-        echo "- $VAR"
-    fi
-}
-
-# Default variables load
-if [ -z ${ROS_NEW_DISTRO+x} ] ; then
-    MODULE_NAME="Install ROS"
-else
-    MODULE_NAME="Install ROS $(ros_load_version $ROS_NEW_DISTRO)"
-fi
-
-MODULE_DESCRIPTION="Install ROS, set a new hostname and set a new master uri"
-MODULE_DEFAULT=0
-
-if [ -z ${ROS_NEW_DISTRO+x} ] || [ -z ${ROS_NEW_WORKSPACE+x} ] || [ -z ${ROS_NEW_HOSTNAME+x} ] ; then
-    MODULE_SUBMENU=("Set distro:set_distro" "Set workspace:set_workspace" "[ ] Install workspace:write_workspace" "[ ] Set hostname:set_ros_hostname")
-else
-    MODULE_SUBMENU=("Set distro $(ros_load_version $ROS_NEW_DISTRO):set_distro" "Set workspace:set_workspace" "[$(ros_is_check $ROS_NEW_WORKSPACE)] Install workspace:write_workspace" "[$(ros_is_check $ROS_NEW_HOSTNAME)] Set hostname:set_ros_hostname" "Set ROS_MASTER_URI:set_master_uri")
-fi
-
 ##################################################
 
-ros_status()
+script_list()
 {
     if [ ! -z ${ROS_DISTRO+x} ] ; then
-        echo "(*) ROS $ROS_DISTRO:"
+        echo "(*) ROS:"
+        echo "    - Distro: $ROS_DISTRO"
         echo "    - ROS_MASTER_URI: $ROS_MASTER_URI"
         if [ ! -z ${ROS_HOSTNAME+x} ] ; then
             echo "    - ROS_HOSTNAME: $ROS_HOSTNAME"
@@ -87,7 +48,7 @@ ros_status()
     fi
 }
 
-##################################################
+################# RUN ############################
 
 script_run()
 {
@@ -103,10 +64,16 @@ script_run()
             tput sgr0
             # Launch ROS installer
             install_ros
-        else
-            tput setaf 1
-            echo "ROS $ROS_DISTRO is already installed"
-            tput sgr0
+        else            
+            if [ $ROS_NEW_DISTRO == $ROS_DISTRO ] ; then
+                tput setaf 3
+                echo "ROS $ROS_DISTRO is already installed"
+                tput sgr0
+            else
+                tput setaf 1
+                echo "ROS $ROS_NEW_DISTRO cannot installed. $ROS_DISTRO is already installed"
+                tput sgr0
+            fi
         fi
     else
         tput setaf 1
@@ -115,21 +82,27 @@ script_run()
     fi
     
     # ROS workspace installer
-    if [ ! -z ${ROS_NEW_WORKSPACE+x} ] ; then
-        if [ $ROS_NEW_WORKSPACE == "1" ] ; then
+    if [ ! -z ${ROS_SET_WORKSPACE+x} ] && [ $ROS_SET_WORKSPACE == "YES" ] ; then
+        # Load default value
+        if [ -z ${ROS_NAME_WS+x} ] || [ -z $ROS_NAME_WS ] ; then
+            ROS_NAME_WS="catkin_ws"
+        fi
+        # Check if the folrder exist
+        if [ ! -d $HOME/$ROS_NAME_WS ] ; then
             tput setaf 6
-            echo "Build new ROS workspace $NEW_ROS_WS"
+            echo "Build new ROS workspace $ROS_NAME_WS"
             tput sgr0
             
-            if [ -z $NEW_ROS_WS ] ; then
-                NEW_ROS_WS="catkin_ws"
-            fi
-            
             # Launch New workspace installer
-            install_workspace
+            #ros_install_workspace $ROS_NAME_WS $ROS_DISTRO
+        else
+            tput setaf 1
+            echo "Folder $ROS_NAME_WS exist! Stop!"
+            tput sgr0
         fi
     fi
     
+    ## TODO UPDATE
     # ROS Variables
     if [ ! -z ${ROS_DISTRO+x} ] ; then
         # Check if empty the ROS_MASTER_URI
@@ -159,182 +132,236 @@ script_run()
     fi
 }
 
+##################################################
+
 script_load_default()
 {
     # Write distribution
-    if [ -z ${ROS_NEW_DISTRO+x} ] ; then
-        ROS_NEW_DISTRO="kinetic"
+    #if [ -z ${ROS_NEW_DISTRO+x} ] ; then
+    #    ROS_NEW_DISTRO="kinetic"
+    #fi
+    
+    # Set default Distribution
+    if [ -z ${ROS_DISTRO_TYPE+x} ] ; then
+        ROS_DISTRO_TYPE="base"
     fi
     
     # Write default workspace
-    if [ -z ${ROS_NEW_WS+x} ] ; then
-        ROS_NEW_WS="catkin_ws"
+    if [ -z ${ROS_NAME_WS+x} ] ; then
+        ROS_NAME_WS="catkin_ws"
     fi
     
-    # Write is install workspace
-    if [ -z ${ROS_NEW_WORKSPACE+x} ] ; then
-        ROS_NEW_WORKSPACE=0
+    # Set is install workspace
+    if [ -z ${ROS_SET_WORKSPACE+x} ] ; then
+        ROS_SET_WORKSPACE="NO"
     fi
     
     # Write new ROS_NEW_HOSTNAME
-    ROS_NEW_HOSTNAME=0
+    ROS_SET_HOSTNAME="NO"
     
     # Write new ROS_NEW_MASTER_URI
-    #if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
-    #    ROS_NEW_MASTER_URI=$ROS_MASTER_URI
-    #else
-    #    ROS_NEW_MASTER_URI="http://localhost:11311"
-    #fi
+    if [ ! -z ${ROS_MASTER_URI+x} ] ; then
+        ROS_NEW_MASTER_URI=$ROS_MASTER_URI
+    else
+        ROS_NEW_MASTER_URI="http://localhost:11311"
+    fi
 }
 
 script_save()
 {
-    echo "ROS_NEW_DISTRO=\"$ROS_NEW_DISTRO\"" >> $1
-    echo "ROS_NEW_WS=\"$ROS_NEW_WS\"" >> $1
-    echo "ROS_NEW_WORKSPACE=\"$ROS_NEW_WORKSPACE\"" >> $1
+    # ROS Distribution name
+    if [ ! -z ${ROS_NEW_DISTRO+x} ] && [ ! -z $ROS_NEW_DISTRO ] ; then
+        echo "ROS_NEW_DISTRO=\"$ROS_NEW_DISTRO\"" >> $1
+    fi
+    
+    if [ ! -z ${ROS_DISTRO_TYPE+x} ] && [ $ROS_DISTRO_TYPE != "base" ] ; then
+        echo "ROS_DISTRO_TYPE=\"$ROS_DISTRO_TYPE\"" >> $1
+    fi
+    
+    # ROS name workspace
+    if [ ! -z ${ROS_NAME_WS+x} ] && [ $ROS_NAME_WS != "catkin_ws" ] ; then
+        echo "ROS_NAME_WS=\"$ROS_NAME_WS\"" >> $1
+    fi
+    
+    # ROS set workspace
+    if [ ! -z ${ROS_SET_WORKSPACE+x} ] && [ $ROS_SET_WORKSPACE != "NO" ] ; then
+        echo "ROS_SET_WORKSPACE=\"$ROS_SET_WORKSPACE\"" >> $1
+    fi
     
     # Write new ROS_NEW_HOSTNAME
-    echo "ROS_NEW_HOSTNAME=\"$ROS_NEW_HOSTNAME\"" >> $1
+    if [ ! -z ${ROS_SET_HOSTNAME+x} ] && [ $ROS_SET_HOSTNAME != "NO" ] ; then
+        echo "ROS_SET_HOSTNAME=\"$ROS_SET_HOSTNAME\"" >> $1
+    fi
     
     # Write new ROS_NEW_MASTER_URI
-    if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
-        if [ "$ROS_NEW_MASTER_URI" != "$ROS_MASTER_URI" ] ; then
-            echo "ROS_NEW_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $1
-        fi
+    if [ ! -z ${ROS_NEW_MASTER_URI+x} ] && 
+       [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && 
+       [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
+        echo "ROS_NEW_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $1
     fi
 }
 
-script_info()
-{
-    if [ $ROS_NEW_WORKSPACE = 1 ] ; then
-        echo " - Add new workspace: $ROS_NEW_WS"
-    fi
-    
-    if [ $ROS_NEW_HOSTNAME = 1 ] ; then
-        echo " - ROS_MASTER_URI same $HOSTNAME"
-    fi
-    if [ ! -z ${ROS_NEW_MASTER_URI+x} ] ; then
-        if [ "$ROS_NEW_MASTER_URI" != "$ROS_MASTER_URI" ] ; then
-            echo " - New ROS_MASTER_URI: $ROS_NEW_MASTER_URI"
-        fi
-    fi
-}
-
-ros_load_check()
-{
-    if [ $1 == "YES" ]
-    then
-        if [ $2 == "1" ]
-        then
-            echo "ON"
-        else
-            echo "OFF"
-        fi
-    else
-        if [ $2 == "0" ]
-        then
-            echo "ON"
-        else
-            echo "OFF"
-        fi
-    fi
-}
+#### COMMON FUNCTIONS ####
 
 ros_load_equal()
 {
-    if [ $1 == $2 ] ; then
+    if [ ! -z ${2+x} ] && [ $1 == $2 ] ; then
         echo "ON"
     else
         echo "OFF"
     fi
 }
 
-ros_get_check()
+ros_load_check()
 {
-    if [ $1 == "YES" ]
-    then
-        echo "1"
+    if [ ! -z ${1+x} ] ; then
+        if [ $1 == "YES" ] ; then
+            if [ ! -z ${2+x} ] && [ $2 == "YES" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        else
+            if [ ! -z ${2+x} ] && [ $2 == "NO" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        fi
     else
-        echo "0"
+        echo "OFF"
     fi
 }
 
-write_workspace()
-{
-    local ROS_NEW_WORKSPACE_TMP_VALUE
-    ROS_NEW_WORKSPACE_TMP_VALUE=$(whiptail --title "$MODULE_NAME" --radiolist \
-    "Do you want install the workspace?" 15 60 2 \
-    "YES" "Install the workspace" $(ros_load_check "YES" $ROS_NEW_WORKSPACE) \
-    "NO" "Skipp installation" $(ros_load_check "NO" $ROS_NEW_WORKSPACE) 3>&1 1>&2 2>&3)
-     
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        ROS_NEW_WORKSPACE=$(ros_get_check $ROS_NEW_WORKSPACE_TMP_VALUE)
-    fi
-    
-}
+#### SET DISTRIBUTION ####
 
-set_distro()
+ros_set_distro()
 {
-    local ROS_NEW_DISTRO_TMP_VALUE
-    ROS_NEW_DISTRO_TMP_VALUE=$(whiptail --title "Set distribution" --radiolist \
+    local ros_new_distro_temp=$(whiptail --title "Set distribution" --radiolist \
     "Set ROS distribution" 15 60 2 \
     "kinetic" "Install the workspace" $(ros_load_equal "kinetic" $ROS_NEW_DISTRO) \
     "lunar" "Skipp installation" $(ros_load_equal "lunar" $ROS_NEW_DISTRO) 3>&1 1>&2 2>&3)
      
-    exitstatus=$?
+    local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Write the new distribution
-        ROS_NEW_DISTRO=$ROS_NEW_DISTRO_TMP_VALUE
+        ROS_NEW_DISTRO=$ros_new_distro_temp
     fi
 }
 
-set_master_uri()
-{
-    # Write new ROS_NEW_MASTER_URI
-    if [ -z ${ROS_NEW_MASTER_URI+x} ] ; then
-        if [ -z ${ROS_MASTER_URI+x} ] ; then
-            ROS_NEW_MASTER_URI="http://localhost:11311"
-        else
-            ROS_NEW_MASTER_URI=$ROS_MASTER_URI
-        fi
-    fi
-    
-    if [ $ROS_NEW_HOSTNAME == 1 ] ; then
-        ROS_NEW_MASTER_URI="http://$HOSTNAME.local:11311"
-    fi
-    
-    local ROS_NEW_MASTER_URI_TMP
-    ROS_NEW_MASTER_URI_TMP=$(whiptail --inputbox "Set ROS_MASTER_URI" 8 78 $ROS_NEW_MASTER_URI --title "Set ROS_MASTER_URI" 3>&1 1>&2 2>&3)
-    exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Write new ROS_MASTER_URI
-        ROS_NEW_MASTER_URI=$ROS_NEW_MASTER_URI_TMP
-    fi
-}
+#### SET ROS DISTRO TYPE ####
 
-set_ros_hostname()
+ros_set_distro_type()
 {
-    local ROS_NEW_HOSTNAME_TMP_VALUE
-    ROS_NEW_HOSTNAME_TMP_VALUE=$(whiptail --title "$MODULE_NAME" --radiolist \
-    "Do you want use same hostname?" 15 60 2 \
-    "YES" "Use same hostname" $(ros_load_check "YES" $ROS_NEW_HOSTNAME) \
-    "NO" "Manual edit" $(ros_load_check "NO" $ROS_NEW_HOSTNAME) 3>&1 1>&2 2>&3)
+    local ros_distro_type_temp=$(whiptail --title "Set distribution" --radiolist \
+    "Select the ROS distribution" 15 60 3 \
+    "base" "ROS Base is the smallest version of ROS" $(ros_load_equal "base" $ROS_DISTRO_TYPE) \
+    "desktop" "ROS with GUI nodes" $(ros_load_equal "desktop" $ROS_DISTRO_TYPE) \
+    "full" "ROS with GUI and Gazebo" $(ros_load_equal "full" $ROS_DISTRO_TYPE) 3>&1 1>&2 2>&3)
      
-    exitstatus=$?
+    local exitstatus=$?
     if [ $exitstatus = 0 ]; then
-        ROS_NEW_HOSTNAME=$(ros_get_check $ROS_NEW_HOSTNAME_TMP_VALUE)
+        # Write the new distribution
+        ROS_DISTRO_TYPE=$ros_distro_type_temp
     fi
-    
 }
 
-set_workspace()
+#### SET WORKSPACE ####
+
+ros_set_workspace()
 {
-    local ROS_NEW_WS_TMP_VALUE
-    ROS_NEW_WS_TMP_VALUE=$(whiptail --inputbox "Set ROS workspace" 8 78 $ROS_NEW_WS --title "Set ROS workspace" 3>&1 1>&2 2>&3)
-    exitstatus=$?
+    local ros_set_workspace_temp=$(whiptail --title "$MODULE_NAME" --radiolist \
+    "Do you want install the workspace?" 15 60 2 \
+    "YES" "Install the workspace" $(ros_load_check "YES" $ROS_SET_WORKSPACE) \
+    "NO" "Skipp installation" $(ros_load_check "NO" $ROS_SET_WORKSPACE) 3>&1 1>&2 2>&3)
+    
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        ROS_SET_WORKSPACE=$ros_set_workspace_temp
+    fi
+}
+
+ros_name_workspace()
+{
+    local ros_name_workspace_temp=$(whiptail --inputbox "Set ROS workspace" 8 78 $ROS_NAME_WS --title "Set ROS workspace" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Write the new workspace
-        ROS_NEW_WS=$ROS_NEW_WS_TMP_VALUE
+        ROS_NAME_WS=$ros_name_workspace_temp
     fi
 }
+
+#### SET ROS_HOSTNAME ####
+
+ros_set_hostname()
+{
+    local ros_set_hostname_temp=$(whiptail --title "$MODULE_NAME - Set Hostname variable" --radiolist \
+    "Do you want use set hostname variable?" 15 60 2 \
+    "YES" "Use same hostname" $(ros_load_check "YES" $ROS_SET_HOSTNAME) \
+    "NO" "Manual edit" $(ros_load_check "NO" $ROS_SET_HOSTNAME) 3>&1 1>&2 2>&3)
+     
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        ROS_SET_HOSTNAME=$ros_set_hostname_temp
+    fi
+}
+
+#### SET ROS_MASTER_URI ####
+
+ros_set_master_uri()
+{
+    local ros_set_master_uri_temp=$(whiptail --inputbox "Set ROS_MASTER_URI" 8 78 $ROS_NEW_MASTER_URI --title "Set ROS_MASTER_URI" 3>&1 1>&2 2>&3)
+    
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write new ROS_MASTER_URI
+        ROS_NEW_MASTER_URI=$ros_set_master_uri_temp
+    fi
+}
+
+#### LOAD MODULE VARIABLES ####
+
+ros_load_version()
+{
+    if [ -z ${1+x} ] ; then
+        echo ""
+    else
+        echo "- $1"
+    fi
+}
+
+# Default variables load
+if [ -z ${ROS_NEW_DISTRO+x} ] ; then
+    MODULE_NAME="Install ROS"
+else
+    MODULE_NAME="Install ROS $(ros_load_version $ROS_NEW_DISTRO)"
+fi
+
+MODULE_DESCRIPTION="ROS - This module install the release of ROS, build a workspace, set a new hostname and set a new master uri"
+MODULE_DEFAULT=0
+
+ros_is_check()
+{
+    if [ ! -z ${1+x} ] && [ $1 == "YES" ] ; then
+        echo "X"
+    else
+        echo " "
+    fi
+}
+
+# SUB MENU Module
+MODULE_SUBMENU=("Set ROS distribution:ros_set_distro" "Type ROS distribution:ros_set_distro_type" "[$(ros_is_check $ROS_SET_WORKSPACE)] Install workspace:ros_set_workspace")
+# Add name ROS option
+if [ ! -z ${ROS_SET_WORKSPACE+x} ] ; then
+    if [ $ROS_SET_WORKSPACE == "YES" ] ; then
+        MODULE_SUBMENU+=(" - Set name workspace:ros_name_workspace")
+    fi
+fi 
+MODULE_SUBMENU+=("[$(ros_is_check $ROS_SET_HOSTNAME)] Set ROS_HOSTNAME:ros_set_hostname")
+# Enable name ROS option
+if [ ! -z ${ROS_SET_HOSTNAME+x} ] ; then
+    if [ $ROS_SET_HOSTNAME == "NO" ] ; then
+        MODULE_SUBMENU+=(" - Set ROS_MASTER_URI:ros_set_master_uri")
+    fi
+fi 
+

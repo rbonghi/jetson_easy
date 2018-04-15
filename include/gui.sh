@@ -49,11 +49,25 @@ system_info()
     # NVIDIA Jetson status
     jetson_status
     
-    # Show Driver list
-    kernel_driver_list
-    
-    # ROS information
-    ros_status
+    for folder in $MODULES_FOLDER/* ; do
+      if [ -d "$folder" ] ; then
+        # Check if exist the same file with the name of the folder
+        local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FILE="$folder"/$FILE_NAME.sh
+        if [ -f $FILE ] ; then
+            # Unset save function
+            unset -f script_list
+            # Load source
+            source "$FILE"
+            # Check if exist the function
+            if type script_list &>/dev/null
+            then
+                # run script
+                script_list
+            fi
+        fi
+      fi
+    done
 }
 
 # Start menu
