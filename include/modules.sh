@@ -27,11 +27,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# https://serverfault.com/questions/266039/temporarily-increasing-sudos-timeout-for-the-duration-of-an-install-script
-
 MODULES_LIST=""
 MODULES_FOLDER="modules"
 MODULES_CONFIG="setup.txt"
+MODULES_SUDO_ME_FILE="jetson_easy.sudo"
 # Default configuration this code start not in remote mode
 MODULE_REMOTE=0
 
@@ -193,11 +192,36 @@ modules_remove()
     modules_sort
 }
 
+# Modules check sudo
+# https://serverfault.com/questions/266039/temporarily-increasing-sudos-timeout-for-the-duration-of-an-install-script
+modules_sudo_me_start()
+{
+    # write sudo me file
+    touch $MODULES_SUDO_ME_FILE
+    # Loop script
+    while [ -f $MODULES_SUDO_ME_FILE ]; do
+        echo "checking $$ ...$(date)"
+        sudo -v
+        sleep 5
+    done &
+}
+
+modules_sudo_me_stop()
+{
+    # finish sudo loop
+    rm $MODULES_SUDO_ME_FILE
+}
+
 modules_run()
 {
-    source include/exesudo.sh
+    # Load exesudo
+    #source include/exesudo.sh
     
     if [ ! -z $MODULES_LIST ] ; then
+    
+        # Start sudo_me
+        modules_sudo_me_start
+    
         echo "Start install script..."
         IFS=':' read -ra MODULE <<< "$MODULES_LIST"
         for mod in "${MODULE[@]}"; do
@@ -231,6 +255,9 @@ modules_run()
             fi
         done
         echo "... Done"
+        
+        # Stop sudo_me 
+        modules_sudo_me_stop
     else
         echo "No modules"
     fi
