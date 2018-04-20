@@ -169,32 +169,24 @@ ros_add_inbashrc()
     fi
     
     if [ ! -z $ROS_NEW_MASTER_URI ] ; then
-        # Check if the ROS_MASTER_URI is different from the before written
-        if [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
-            # Remove old ROS_MASTER_URI if exist
-            local check_old_master_uri=$(ros_check_isinfile $HOME/.bashrc "export ROS_MASTER_URI=\"$ROS_MASTER_URI\"")
-            if [ $check_old_master_uri == "YES" ] ; then
-                tput setaf 3
-                echo "Remove old ROS_MASTER_URI=$ROS_MASTER_URI"
-                tput sgr0
-                sed -i '/export ROS_MASTER_URI=/d' $HOME/.bashrc
-            fi
-            # Add new ROS_MASTER_URI
-            tput setaf 6
-            echo "Add ROS_MASTER_URI=$ROS_NEW_MASTER_URI"
-            tput sgr0
-            grep -q -F "# ROS Configuration" $HOME/.bashrc || echo "# ROS Configuration" >> $HOME/.bashrc
-            grep -q -F "export ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" $HOME/.bashrc || echo "export ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $HOME/.bashrc
-            tput setaf 6
-            echo "Re run $USER bashrc in $HOME"
-            tput sgr0
-            source $HOME/.bashrc
-            
-        else
+        # Remove old ROS_MASTER_URI if exist
+        local check_old_master_uri=$(ros_check_isinfile $HOME/.bashrc "export ROS_MASTER_URI=\"$ROS_MASTER_URI\"")
+        if [ $check_old_master_uri == "YES" ] ; then
             tput setaf 3
-            echo "No update, $ROS_MASTER_URI is already set"
+            echo "Remove old ROS_MASTER_URI=$ROS_MASTER_URI"
             tput sgr0
+            sed -i '/export ROS_MASTER_URI=/d' $HOME/.bashrc
         fi
+        # Add new ROS_MASTER_URI
+        tput setaf 6
+        echo "Add ROS_MASTER_URI=$ROS_NEW_MASTER_URI"
+        tput sgr0
+        grep -q -F "# ROS Configuration" $HOME/.bashrc || echo "# ROS Configuration" >> $HOME/.bashrc
+        grep -q -F "export ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" $HOME/.bashrc || echo "export ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\"" >> $HOME/.bashrc
+        tput setaf 6
+        echo "Re run $USER bashrc in $HOME"
+        tput sgr0
+        source $HOME/.bashrc
     else
         tput setaf 3
         echo "No new ROS_MASTER_URI to update"
@@ -212,7 +204,7 @@ ros_add_inbashrc()
             grep -q -F "export ROS_HOSTNAME=\"$HOSTNAME\"" $HOME/.bashrc || echo "export ROS_HOSTNAME=\"$HOSTNAME\"" >> $HOME/.bashrc
         else
             tput setaf 3
-            echo "No update, ROS_HOSTNAME=$ROS_HOSTNAME is already set"
+            echo "No update, ROS_HOSTNAME=$HOSTNAME is already set"
             tput sgr0
         fi
     fi

@@ -94,7 +94,7 @@ script_run()
             tput sgr0
             
             # Launch New workspace installer
-            #ros_install_workspace $ROS_NAME_WS $ROS_DISTRO
+            ros_install_workspace $ROS_NAME_WS $ROS_DISTRO
         else
             tput setaf 1
             echo "Folder $ROS_NAME_WS exist! Stop!"
