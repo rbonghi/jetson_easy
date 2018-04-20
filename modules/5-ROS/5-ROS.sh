@@ -173,7 +173,39 @@ script_save()
     fi
 }
 
+script_info()
+{
+    if [ $ROS_SET_WORKSPACE == "YES" ] ; then
+        echo " - New workspace: $ROS_NAME_WS"
+    fi
+
+    if [ $ROS_SET_HOSTNAME == "YES" ] ; then
+        ROS_NEW_MASTER_URI="http://$HOSTNAME.local:11311"
+        local check_hostname=$(ros_check_isinfile $HOME/.bashrc "export ROS_HOSTNAME=\"$HOSTNAME\"")
+        if [ $check_hostname == "NO" ] ; then
+            echo " - Add in .bashrc: ROS_HOSTNAME=$HOSTNAME"
+        fi
+    fi
+
+    if [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
+        echo " - Add in .bashrc: ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\""
+    fi
+}
+
 #### COMMON FUNCTIONS ####
+
+ros_check_isinfile()
+{
+    local FILE=$1
+    local PARAMETER=$2
+    local find_data=$(find $FILE -type f -print | xargs grep "$PARAMETER")
+        
+    if [ ! -z "$find_data" ] && [ $find_data == "$PARAMETER" ] ; then
+        echo "YES"
+    else
+        echo "NO"
+    fi
+}
 
 ros_load_equal()
 {

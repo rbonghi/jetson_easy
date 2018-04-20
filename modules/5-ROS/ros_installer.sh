@@ -145,19 +145,6 @@ ros_install_workspace()
     source $HOME/.bashrc
 }
 
-ros_check_isinfile()
-{
-    local FILE=$1
-    local PARAMETER=$2
-    local find_data=$(find $FILE -type f -print | xargs grep "$PARAMETER")
-        
-    if [ ! -z "$find_data" ] && [ $find_data == "$PARAMETER" ] ; then
-        echo "YES"
-    else
-        echo "NO"
-    fi
-}
-
 ros_add_inbashrc()
 {
     # Check if empty the ROS_MASTER_URI
