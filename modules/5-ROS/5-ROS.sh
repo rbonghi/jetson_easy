@@ -63,7 +63,7 @@ script_run()
             echo "Install ROS $ROS_NEW_DISTRO"
             tput sgr0
             # Launch ROS installer
-            #ros_install
+            ros_install
         else            
             if [ $ROS_NEW_DISTRO == $ROS_DISTRO ] ; then
                 tput setaf 3

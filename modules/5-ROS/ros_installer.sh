@@ -148,11 +148,13 @@ ros_install_workspace()
 ros_add_inbashrc()
 {
     # Check if empty the ROS_MASTER_URI
-    if [ -z $ROS_NEW_MASTER_URI ] && [ $ROS_SET_HOSTNAME="YES" ] ; then
-        tput setaf 6
-        echo "Set same ROS_MASTER_URI and ROS_HOSTNAME"
-        tput sgr0
-        ROS_NEW_MASTER_URI="http://$HOSTNAME.local:11311"
+    if [ -z $ROS_NEW_MASTER_URI ] || [ $ROS_NEW_MASTER_URI="http://localhost:11311" ] ; then
+        if [ $ROS_SET_HOSTNAME="YES" ] ; then
+            tput setaf 6
+            echo "Set same ROS_MASTER_URI and ROS_HOSTNAME"
+            tput sgr0
+            ROS_NEW_MASTER_URI="http://$HOSTNAME.local:11311"
+        fi
     fi
     
     if [ ! -z $ROS_NEW_MASTER_URI ] ; then
