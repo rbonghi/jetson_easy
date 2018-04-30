@@ -200,9 +200,9 @@ modules_sudo_me_start()
     touch $MODULES_SUDO_ME_FILE
     # Loop script
     while [ -f $MODULES_SUDO_ME_FILE ]; do
-        echo "checking $$ ...$(date)"
+        #echo "checking $$ ...$(date)"
         sudo -v
-        sleep 5
+        sleep 10
     done &
 }
 
@@ -254,10 +254,12 @@ modules_run()
                 fi
             fi
         done
-        echo "... Done"
-        
+
         # Stop sudo_me 
         modules_sudo_me_stop
+
+        echo "... Done"        
+
     else
         echo "No modules"
     fi

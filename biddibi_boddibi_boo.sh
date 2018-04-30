@@ -80,8 +80,8 @@ usage()
     echo "$0 [options]"
     echo "options,"
     echo "   -h|--help      | This help"
-    echo "   -s             | Launch the system in silent mode (Without GUI)"
-    echo "   -r|--reboot    | If required, force automatically the reboot"
+    echo "   --nogui        | Launch the system in silent mode (Without GUI)"
+    echo "   -q|--quiet     | If required, force automatically the reboot"
     echo "   -c [file]      | Load configuration file from other reference [file]"
     echo "   -m [user@host] | Remote connection with NVIDIA Jetson host"
     echo "   -p [passwd]    | Load password without any other request from the script"
@@ -106,7 +106,7 @@ loop_gui()
     fi
 }
 
-silent_mode()
+no_gui()
 {
     # Load all modules
     modules_load
@@ -190,16 +190,16 @@ main()
 	            MODULES_CONFIG="$2"
 	            shift 1
 	            ;;
-	        -s)
+	        --nogui)
 	            # Launch the system in silent mode (Without GUI)
-	            IS_SILENT=1
+	            NO_GUI=1
 	            ;;
             -h|--help)
                 # Load help
 			    usage
 			    exit 0
 			    ;;
-			-r|-reboot)
+			-q|--quiet)
 			    # If required, force automatically the reboot
 			    MODULE_REBOOT=1
 			    ;;
@@ -234,10 +234,10 @@ main()
     # Set title shellbash
     echo -ne '\033]2;'$mytitle'\007'
 	
-	if [ ! -z $IS_SILENT ] ; then
-	    unset IS_SILENT
+	if [ ! -z $NO_GUI ] ; then
+	    unset NO_GUI
         # Launch the system in silent mode (Without GUI)
-        silent_mode
+        no_gui
 	else
         # Load GUI menu loop
         loop_gui
