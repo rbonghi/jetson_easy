@@ -107,6 +107,9 @@ ros_install()
 
 ros_install_workspace()
 {
+     # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
     local NAME_WS=$1
     local LOCAL_DISTRO=$2
     
@@ -143,6 +146,9 @@ ros_install_workspace()
     echo "Re run $USER bashrc in $HOME"
     tput sgr0
     source $HOME/.bashrc
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
 }
 
 ros_add_inbashrc()

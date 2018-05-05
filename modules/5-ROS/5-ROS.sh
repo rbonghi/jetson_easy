@@ -32,6 +32,23 @@
 # Thanks @jetsonhacks
 # https://github.com/jetsonhacks/installROSTX2/blob/master/installROS.sh
 
+ros_wstool_string()
+{
+    local regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+    if [[ $ROS_WSTOOL =~ $regex ]] ; then
+    
+        # Remove .rosinstall if written
+        local string=$(echo $(basename $ROS_WSTOOL) | cut -f1 -d ".")
+        # Is a weblink
+        echo "weblink $(basename $string)"
+    else
+        # Remove .rosinstall if written
+        local string=$(echo $ROS_WSTOOL | cut -f1 -d ".")
+        # Load from file
+        echo "file in config/$string"
+    fi
+}
+
 ##################################################
 
 script_list()
@@ -52,6 +69,8 @@ script_list()
 
 script_run()
 {
+    # Load home reference
+    local HOME_FOLDER=$1
     # Load ROS installer source
     source ros_installer.sh
     
@@ -100,6 +119,30 @@ script_run()
             echo "Folder $ROS_NAME_WS exist! Stop!"
             tput sgr0
         fi
+        
+        if [ ! -z $ROS_WSTOOL ] ; then
+            
+            local regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+            local path
+            
+            tput setaf 6
+            echo "Import all ROS workspace from $ROS_WSTOOL"
+            tput sgr0
+                                   
+            if [[ $ROS_WSTOOL =~ $regex ]] ; then
+                # the path is the same of loaded
+                path=$ROS_WSTOOL
+            else
+                # load from config
+                path="$HOME_FOLDER/config/$ROS_WSTOOL"
+            fi
+            
+            tput setaf 6
+            echo "Reference path is $path"
+            tput sgr0
+            
+            ./ros_wstool.sh -w $ROS_NAME_WS -r $path
+        fi
     fi
     
     # Add in ROS_MASTER_URI and ROS_HOSTNAME in bashrc
@@ -128,6 +171,11 @@ script_load_default()
     # Set is install workspace
     if [ -z ${ROS_SET_WORKSPACE+x} ] ; then
         ROS_SET_WORKSPACE="NO"
+    fi
+    
+    # Set dafault reference wstool file
+    if [ -z ${ROS_WSTOOL+x} ] ; then
+        ROS_WSTOOL=""
     fi
     
     # Write new ROS_NEW_HOSTNAME
@@ -162,6 +210,10 @@ script_save()
         echo "ROS_SET_WORKSPACE=\"$ROS_SET_WORKSPACE\"" >> $1
     fi
     
+    if [ ! -z $ROS_WSTOOL ] ; then
+        echo "ROS_WSTOOL=\"$ROS_WSTOOL\"" >> $1
+    fi
+    
     # Write new ROS_NEW_HOSTNAME
     if [ ! -z ${ROS_SET_HOSTNAME+x} ] && [ $ROS_SET_HOSTNAME != "NO" ] ; then
         echo "ROS_SET_HOSTNAME=\"$ROS_SET_HOSTNAME\"" >> $1
@@ -189,6 +241,11 @@ script_info()
     
     if [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && [ ! -z ${ROS_MASTER_URI+x} ] && [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
         echo " - Add in .bashrc: ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\""
+    fi
+    
+    if [ ! -z $ROS_WSTOOL ] ; then
+        # Add information about data
+        echo " - Add wstool from $(ros_wstool_string)"
     fi
 }
 
@@ -299,6 +356,17 @@ ros_name_workspace()
     fi
 }
 
+ros_wstool()
+{
+    local ros_wstool_temp
+    ros_wstool_temp=$(whiptail --inputbox "Set reference wstool" 8 78 $ROS_WSTOOL --title "Set reference wstool" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the wstool file reference
+        ROS_WSTOOL=$ros_wstool_temp
+    fi
+}
+
 #### SET ROS_HOSTNAME ####
 
 ros_set_hostname()
@@ -366,8 +434,15 @@ ros_is_check()
     fi
 }
 
+ros_string_wstool()
+{
+    if [ ! -z $ROS_WSTOOL ] ; then
+        echo "[$(ros_wstool_string)]"
+    fi
+}
+
 # SUB MENU Module
-## Name distibution
+## Name distribution
 MODULE_SUBMENU=("ROS disto $(ros_load_version $ROS_NEW_DISTRO 'SELECT DISTRO'):ros_set_distro" )
 ## Name type
 MODULE_SUBMENU+=("Install ROS $(ros_load_version $ROS_DISTRO_TYPE):ros_set_distro_type")
@@ -376,6 +451,7 @@ MODULE_SUBMENU+=("[$(ros_is_check $ROS_SET_WORKSPACE)] Install workspace $(ros_l
 # Add name ROS option
 if [ ! -z ${ROS_SET_WORKSPACE+x} ] && [ $ROS_SET_WORKSPACE == "YES" ] ; then
     MODULE_SUBMENU+=(" - Set name workspace:ros_name_workspace")
+    MODULE_SUBMENU+=(" - Set wstool $(ros_string_wstool):ros_wstool")
 fi 
 MODULE_SUBMENU+=("[$(ros_is_check $ROS_SET_HOSTNAME)] Set ROS_HOSTNAME:ros_set_hostname")
 # Enable name ROS option

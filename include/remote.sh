@@ -83,8 +83,14 @@ remote_load_to_host()
         REFERENCE_CONFIG=$MODULES_CONFIG
     fi
     
+    local CONFIG_FOLDER=""
+    # Copy reference only if exist the file
+    if [ -d config ] ; then
+        CONFIG_FOLDER="config"
+    fi
+    
     # Tar all selected files
-    tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md $REFERENCE_CONFIG
+    tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md $REFERENCE_CONFIG $CONFIG_FOLDER
 
     # Create folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '

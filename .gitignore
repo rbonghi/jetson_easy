@@ -1,4 +1,6 @@
 
 fix_wifi
+
+config
 DEBUG*
 setup*.txt
