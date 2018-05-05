@@ -186,8 +186,8 @@ script_info()
             echo " - Add in .bashrc: ROS_HOSTNAME=$HOSTNAME"
         fi
     fi
-
-    if [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
+    
+    if [ $ROS_NEW_MASTER_URI != "http://localhost:11311" ] && [ ! -z ${ROS_MASTER_URI+x} ] && [ $ROS_NEW_MASTER_URI != $ROS_MASTER_URI ] ; then
         echo " - Add in .bashrc: ROS_MASTER_URI=\"$ROS_NEW_MASTER_URI\""
     fi
 }
