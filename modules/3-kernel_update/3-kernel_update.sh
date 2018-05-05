@@ -173,7 +173,7 @@ script_run()
     local KERNEL_INTERNAL_FOLDER=""
     local KERNEL_FOLDER=""
     if [ $JETSON_L4T == "28.2" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/BSP/source_release.tbz2"
+        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/GA/BSP/$(echo "${JETSON_BOARD,,}")_sources.tbz2"
         KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
         KERNEL_FOLDER="kernel/kernel-4.4"
     elif [ $JETSON_L4T == "28.1" ] ; then

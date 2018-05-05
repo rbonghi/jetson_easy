@@ -266,11 +266,11 @@ kernel_fix_makefile()
         sudo cp $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/mipi_cal.h $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/drivers/media/platform/tegra/mipical/vmipi/mipi_cal.h
     
     # Fix CONFIG_TEGRA_THROUGHPUT in L4T 28.2
-    elif [ $JETSON_L4T == "28.2" ] ; then
-        tput setaf 1
-        echo "Fix with \"CONFIG_TEGRA_THROUGHPUT=n\" in kernel $JETSON_L4T"
-        tput sgr0
-        echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
+    #elif [ $JETSON_L4T == "28.2" ] ; then
+    #    tput setaf 1
+    #    echo "Fix with \"CONFIG_TEGRA_THROUGHPUT=n\" in kernel $JETSON_L4T"
+    #    tput sgr0
+    #    echo "CONFIG_TEGRA_THROUGHPUT=n" >> $KERNEL_SRC_FOLDER/$KERNEL_FOLDER/$KERNEL_CONFIG_FILE
     fi
 }
 
