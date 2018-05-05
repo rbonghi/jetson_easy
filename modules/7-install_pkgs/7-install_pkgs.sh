@@ -37,6 +37,8 @@ MODULE_DEFAULT=0
 
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 
+INSTALL_ZED_VERSION="2.4"
+
 pkgs_is_enabled()
 {
     if [[ $PKGS_PATCH_LIST = *"$1"* ]] ; then
@@ -66,8 +68,6 @@ script_run()
     
     if [ $(pkgs_is_enabled "ZED") == "ON" ] ; then
     
-        local ZED_VERSION="2.3"
-    
         # Check if is installed CUDA
         if [ ! -z ${JETSON_CUDA+x} ] ; then
             tput setaf 6
@@ -79,17 +79,18 @@ script_run()
                 JETSON_NAME="tegrax1"
             elif [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
                 JETSON_NAME="tegrax2"
-                
-                # Check which release of cuda has installed
-                if [ $(jetson_vercomp $JETSON_CUDA "9") -ge "0" ] ; then
-                    JETSON_NAME+="_jp32"
-                elif [ $(jetson_vercomp $JETSON_CUDA "8") -ge "0" ] ; then
-                    JETSON_NAME+="_jp31"
+                if [ $INSTALL_ZED_VERSION = "2.3" ] ; then
+                    # Check which release of cuda has installed
+                    if [ $(jetson_vercomp $JETSON_CUDA "9") -ge "0" ] ; then
+                        JETSON_NAME+="_jp32"
+                    elif [ $(jetson_vercomp $JETSON_CUDA "8") -ge "0" ] ; then
+                        JETSON_NAME+="_jp31"
+                    fi
                 fi
             fi
             
             tput setaf 6
-            echo "Download https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME"
+            echo "Download https://download.stereolabs.com/zedsdk/$INSTALL_ZED_VERSION/$JETSON_NAME"
             tput sgr0
             
             # Local folder
@@ -98,16 +99,16 @@ script_run()
             cd /tmp
             
             # Download ZED drivers
-            # wget --output-document zed_driver.run https://download.stereolabs.com/zedsdk/$ZED_VERSION/$JETSON_NAME
+            wget --output-document zed_driver.run https://download.stereolabs.com/zedsdk/$INSTALL_ZED_VERSION/$JETSON_NAME
             
             # Set executable launcher
-            # chmod +x zed_driver.run
+            chmod +x zed_driver.run
             
-            # TODO Wait fix silent the ZED sdk
-            #./zed_driver.run --quiet -- "silent"
+            # Launch zed_driver in silent mode
+            ./zed_driver.run --quiet -- "silent"
             
             # Remove zed driver
-            # rm zed_driver.run
+            rm zed_driver.run
             
             # Restore previuous folder
             cd $LOCAL_FOLDER
@@ -154,8 +155,8 @@ set_pkgs()
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
     "Which new packages do you want add?" 15 60 3 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
-    "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") 3>&1 1>&2 2>&3)
-#    "ZED" "Install ZED driver" $(pkgs_is_enabled "ZED") \
+    "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
+    "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
