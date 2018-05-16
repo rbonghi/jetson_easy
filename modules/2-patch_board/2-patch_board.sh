@@ -44,7 +44,7 @@ fi
 # Know errors for Jetpack 3.2
 # https://devtalk.nvidia.com/default/topic/1031736/jetson-tx2/cuda-9-0-samples-do-not-build-with-jetpack-3-2/
 # https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
-
+# https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
 
 script_run()
 {
@@ -52,7 +52,12 @@ script_run()
     echo "Patch $JETSON_DESCRIPTION from known errors"
     tput sgr0
     
-    if [ $JETSON_JETPACK == "3.2" ] ; then        
+    if [ $JETSON_JETPACK == "3.2" ] ; then
+        # Fix apt-get update
+        # https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
+        echo "Fix keys apt-get update"
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F60F4B3D7FA2AF80
+        sudo apt-get update
         # Load source
         source jp32/patch.sh
         # Run cuda examples patch
