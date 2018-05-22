@@ -83,6 +83,10 @@ script_run()
             tput sgr0
             # Launch ROS installer
             ros_install
+            tput setaf 6
+            echo "Load ROS environment"
+            tput sgr0
+            source /opt/ros/$ROS_NEW_DISTRO/setup.bash
         else            
             if [ $ROS_NEW_DISTRO == $ROS_DISTRO ] ; then
                 tput setaf 3
