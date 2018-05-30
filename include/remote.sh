@@ -69,8 +69,6 @@ remote_check_host()
 
 remote_from_host()
 {
-    # Save the last config to server
-    #remote_get_config
     # Remove the folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
 }
