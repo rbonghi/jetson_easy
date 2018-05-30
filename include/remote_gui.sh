@@ -111,17 +111,14 @@ menu_remote_user_host()
     local host_reference_tmp
     
     if [ -z $MODULE_REMOTE_USER ] ; then
-        MODULE_REMOTE_USER="user"
+        MODULE_REMOTE_USER="nvidia"
     fi
     
     if [ -z $MODULE_REMOTE_HOST ] ; then
-        MODULE_REMOTE_HOST="remote"
+        MODULE_REMOTE_HOST="tegra-ubuntu"
     fi
     
-    local pre_data=""
-    if [ $MODULE_REMOTE_USER != "user" ] || [ $MODULE_REMOTE_HOST != "remote" ] ; then
-        pre_data="$MODULE_REMOTE_USER@$MODULE_REMOTE_HOST"
-    fi
+    local pre_data="$MODULE_REMOTE_USER@$MODULE_REMOTE_HOST"
     
     host_reference_tmp=$(whiptail --inputbox "Write the remote reference of your jetson follow user@host" 8 78 "$pre_data" --title "Remote Address" 3>&1 1>&2 2>&3)
     exitstatus=$?
