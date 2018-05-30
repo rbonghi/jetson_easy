@@ -43,6 +43,11 @@ GUI_SAVED=0
 
 system_info()
 {
+    echo "[up arrow | down arrow] = Move on page"
+    echo "[tab] = Go on button <setup>/<ESC>"
+    echo "[enter] = Select option"
+    echo "[ESC] = Go back"
+    echo "--------------------------------------"
     # Information about board
     menu_info
     
@@ -276,12 +281,15 @@ menu_load_list()
 menu_configuration_menu()
 {
     echo "You can configure your Jetson with different modules."
-    if [ $GUI_SAVED = 1 ] ; then
-        echo "-- Configuration stored in $MODULES_CONFIG!"
-    else
-        echo ""
-    fi
+    #if [ $GUI_SAVED = 1 ] ; then
+    #    echo "-- Configuration stored in $MODULES_CONFIG!"
+    #else
+    #    echo ""
+    #fi
     echo "Choose your option:"
+    echo "[up arrow | down arrow] = Move on menu"
+    # echo "[space] = Select option"
+    echo "[enter] = Option menu"
     # Clear GUI status information
     GUI_SAVED=0
 }
