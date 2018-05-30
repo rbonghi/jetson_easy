@@ -101,6 +101,10 @@ loop_gui()
         # Load remote menu
         menu_remote
     else
+        # Set menu selection
+        if [ $MODULE_IM_HOST == "1" ] ; then
+            MENU_SELECTION=$1
+        fi
         # Load GUI menu loop
 	    menu_loop
     fi
@@ -211,6 +215,9 @@ main()
 			    ;;
 			-x) # Internal option in remote mode
 			    MODULE_IM_HOST=1
+			    # Set the page to load
+			    MENU_SELECTION="$2"
+			    shift 1
 			    ;;
 		    *)
 		        usage "Unknown option: $1"
@@ -240,7 +247,7 @@ main()
         no_gui
 	else
         # Load GUI menu loop
-        loop_gui
+        loop_gui $MENU_SELECTION
 	fi
 }
 

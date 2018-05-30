@@ -70,7 +70,7 @@ remote_check_host()
 remote_from_host()
 {
     # Save the last config to server
-    remote_get_config
+    #remote_get_config
     # Remove the folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST rm -r /tmp/jetson_easy
 }
@@ -152,13 +152,32 @@ remote_connect()
     # Load all script in remote board
     remote_load_to_host $MODULE_PASSWORD
     
-    # Start in remote the biddibi_boddibi_boo script
-    sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -ic "'
+    
+    local STATUS=1
+    local PAGE_MENU="menu_information"
+    while [ $STATUS != 0 ] ; do        
+        # Start in remote the biddibi_boddibi_boo script
+        sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -ic "'
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
 # Launch biddibi_boddibi_boo in remote
-./biddibi_boddibi_boo.sh -x -p $MODULE_PASSWORD $OPTIONS
+./biddibi_boddibi_boo.sh -x $PAGE_MENU -p $MODULE_PASSWORD $OPTIONS
 
 '"
+        # Save result status
+        STATUS=$?
+        # Check if exit with request on save config
+        case $STATUS in 
+            15) 
+                # Save the last config to server
+                remote_get_config
+                # Load configuration page
+                PAGE_MENU="menu_configuration"
+                ;;
+            *)  # Load information page
+                PAGE_MENU="menu_information"
+                ;;
+        esac
+    done
 }
 
