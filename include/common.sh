@@ -100,6 +100,13 @@ menu_header()
     echo ""
     echo "Author: Raffaello Bonghi"
     echo "email: raffaello@rnext.it"
+    echo ""
+    echo "--------------- LEGEND ---------------"
+    echo "[up arrow | down arrow] = Move on page"
+    echo "[tab | left arrow] = Go on buttons"
+    echo "[space] = Select option"
+    echo "[enter] = Save option"
+    echo "[ESC] = Go back"
 }
 
 menu_info()
@@ -137,6 +144,6 @@ jetson_status()
 
 menu_message_introduction()
 {
-    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 12 45 <<< "$(menu_header)"
+    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 19 45 <<< "$(menu_header)"
 }
 

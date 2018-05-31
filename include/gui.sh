@@ -43,11 +43,6 @@ GUI_SAVED=0
 
 system_info()
 {
-    echo "[up arrow | down arrow] = Move on page"
-    echo "[tab] = Go on button <setup>/<ESC>"
-    echo "[enter] = Select option"
-    echo "[ESC] = Go back"
-    echo "--------------------------------------"
     # Information about board
     menu_info
     
