@@ -128,8 +128,11 @@ submenu_default()
     local default_value
     default_value=$(whiptail --title "$MODULE_NAME" --radiolist \
     "$MODULE_DESCRIPTION
+     Do you want run this script?
      
-     Do you want run this script?" 15 60 2 \
+[up arrow | down arrow] = Move on menu
+[space] = Select option
+[enter] = Save option" 17 60 2 \
     "YES" "launch all updates" $(submenu_load_check "YES") \
     "NO" "Stop upgrades" $(submenu_load_check "NO") 3>&1 1>&2 2>&3)
      
