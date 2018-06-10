@@ -234,6 +234,13 @@ main()
 	    # Set in Remote mode
 	    MODULE_REMOTE=1
 	    mytitle="Jetson Easy - Remote connection"
+		# check if is installed sshpass
+		if ! dpkg-query -l sshpass > /dev/null; then
+			tput setaf 1
+			echo "Install sshpass..."
+			tput sgr0
+			sudo apt-get install sshpass
+		fi
 	else
 	    mytitle="Jetson Easy on $USER@$HOSTNAME"
 	fi
