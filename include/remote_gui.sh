@@ -115,7 +115,7 @@ menu_remote_user_host()
     fi
     
     if [ -z $MODULE_REMOTE_HOST ] ; then
-        MODULE_REMOTE_HOST="tegra-ubuntu"
+        MODULE_REMOTE_HOST="tegra-ubuntu.local"
     fi
     
     local pre_data="$MODULE_REMOTE_USER@$MODULE_REMOTE_HOST"
