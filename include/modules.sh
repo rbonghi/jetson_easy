@@ -86,6 +86,8 @@ modules_load()
         MODULES_CONFIG=$1
     fi
     
+    local MODULES_CONFIG_PATH="$USER_PWD/$MODULES_CONFIG"
+    
     if [ -f $MODULES_CONFIG ] ; then
         # echo "Setup \"$MODULES_CONFIG\" found!"
         # Load all default values

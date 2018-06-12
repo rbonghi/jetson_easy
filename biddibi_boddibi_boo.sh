@@ -63,6 +63,11 @@ if [ -f DEBUG ]; then
     tput sgr0
 fi
 
+# Load USER_PWD -> makeself compliant
+if [ -z $USER_PWD ] ; then
+    USER_PWD=$(pwd)
+fi
+
 # --------------------------------
 # MAIN
 # --------------------------------
