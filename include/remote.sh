@@ -87,16 +87,47 @@ remote_load_to_host()
     #    CONFIG_FOLDER="config"
     #fi
     
-    echo "$MODULES_CONFIG_PATH=?$(pwd)"
+    local remote_copy=""
     if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
-    	echo "other folder"
-    	
+    	# Copy folder
+    	remote_copy="-C $MODULES_CONFIG_PATH"
+    elif [ -f $MODULES_CONFIG_FILE ] ; then
+    	#Copy only the config file
+    	remote_copy="-C $MODULES_CONFIG_FILE"
     fi
     
-    exit 0
+    echo "remote_copy=$remote_copy"
+
     
+    # build a folder
+    mkdir -p /tmp/jetson_easy
+    # Copy all folders
+    cp -rf include /tmp/jetson_easy
+    cp -rf jetson /tmp/jetson_easy
+    cp -rf modules /tmp/jetson_easy
+    cp -rf biddibi_boddibi_boo.sh /tmp/jetson_easy
+    cp -rf LICENSE /tmp/jetson_easy
+    cp -rf README.md /tmp/jetson_easy
+    
+    if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
+    	# Copy folder
+    	cp -rf $MODULES_CONFIG_PATH /tmp/jetson_easy
+    elif [ -f $MODULES_CONFIG_FILE ] ; then
+    	#Copy only the config file
+    	cp -rf $MODULES_CONFIG_FILE /tmp/jetson_easy
+    fi
+    
+    # Move to temp folder
+    local old=$(pwd)
+    cd /tmp/jetson_easy
     # Tar all selected files
-    tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md $REFERENCE_CONFIG $CONFIG_FOLDER
+    tar -czf /tmp/jetson_easy.tar.gz jetson_easy
+    # Remove bkp folder
+    rm -R jetson_easy
+    # Go to origin folder
+    cd $old
+    
+    exit 0
 
     # Create folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
