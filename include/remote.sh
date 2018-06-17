@@ -75,17 +75,25 @@ remote_from_host()
 
 remote_load_to_host()
 {
-    local REFERENCE_CONFIG=""
+    #local REFERENCE_CONFIG=""
     # Copy reference only if exist the file
-    if [ -f $MODULES_CONFIG ] ; then
-        REFERENCE_CONFIG=$MODULES_CONFIG
+    #if [ -f $MODULES_CONFIG ] ; then
+    #    REFERENCE_CONFIG=$MODULES_CONFIG
+    #fi
+    
+    #local CONFIG_FOLDER=""
+    # Copy reference only if exist the file
+    #if [ -d config ] ; then
+    #    CONFIG_FOLDER="config"
+    #fi
+    
+    echo "$MODULES_CONFIG_PATH=?$(pwd)"
+    if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
+    	echo "other folder"
+    	
     fi
     
-    local CONFIG_FOLDER=""
-    # Copy reference only if exist the file
-    if [ -d config ] ; then
-        CONFIG_FOLDER="config"
-    fi
+    exit 0
     
     # Tar all selected files
     tar -czf /tmp/jetson_easy.tar.gz include jetson modules biddibi_boddibi_boo.sh LICENSE README.md $REFERENCE_CONFIG $CONFIG_FOLDER

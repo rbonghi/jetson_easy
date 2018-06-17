@@ -138,7 +138,7 @@ script_run()
                 path=$ROS_WSTOOL
             else
                 # load from config
-                path="$HOME_FOLDER/config/$ROS_WSTOOL"
+                path="$MODULES_CONFIG_PATH/$ROS_WSTOOL"
             fi
             
             tput setaf 6

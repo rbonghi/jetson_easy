@@ -68,6 +68,9 @@ if [ -z $USER_PWD ] ; then
     USER_PWD=$(pwd)
 fi
 
+# Configuration folder information
+config_folder=""
+
 # --------------------------------
 # MAIN
 # --------------------------------
@@ -97,6 +100,8 @@ loop_gui()
     # Load user interface
     source include/gui.sh
 
+	# Load configuration modules
+	modules_load_config $config_folder
     # Load all modules
     modules_load
     
@@ -115,78 +120,30 @@ loop_gui()
     fi
 }
 
-no_gui()
+command_line()
 {
+    # Load user interface
+    source include/command_line.sh
+    
+    # Load configuration modules
+    modules_load_config $config_folder
+    case "$?" in
+    	1)  # Load default configuration
+    		tput setaf 3
+    		echo "Load default configuration folder in $MODULES_CONFIG_FILE"
+    		tput sgr0
+    		;;
+    	*)  ;;
+    esac
     # Load all modules
     modules_load
-
-    if [ $MODULE_REMOTE == "1" ] ; then
-
-        if [ -z $MODULE_REMOTE_USER ] ; then
-            echo "empty user"
-            
-            local USER_HOST=""
-            echo "Write the user@remote for your board?: "
-            read USER_HOST
-            remote_get_user_host $USER_HOST
-        fi
-        
-        if [ -z $MODULE_PASSWORD ] ; then
-            echo "empty password"
-            
-            echo "What is the password?: "
-            read -s MODULE_PASSWORD
-        fi
-        
-        # Check connection
-        local CONNECTION=$(remote_check_host)
-        
-        echo "Connection to ..."
-        echo "User: $MODULE_REMOTE_USER"
-        echo "Host: $MODULE_REMOTE_HOST"
-        
-        if [ $CONNECTION == "YES" ] ; then
-            # Load system and connect
-            remote_connect -s
-        fi
-    else
-        # All modules are in MODULES_LIST
-        echo "Module loaded:"
-        echo $MODULES_LIST
-        
-	    if [ ! -z $MODULE_PASSWORD ] ; then
-	        # Pass set
-	        $(echo $MODULE_PASSWORD | sudo -S -i true)
-	    fi
-        
-        # Run installer script
-        echo "Module run:"
-        modules_run
-        
-        if [ $(modules_require_reboot) == "1" ]
-        then
-            tput setaf 1
-            echo "Reboot required!"
-            tput sgr0
-
-            if [ -z ${MODULE_REBOOT+x} ] ; then
-                read -p "Do you want reboot? [Y/n]" -n 1 -r
-                echo    # (optional) move to a new line
-                if [[ $REPLY =~ ^[Yy]$ ]]
-                then
-                    echo "REBOOOT"
-                    sudo reboot
-                fi
-            else
-                echo "REBOOOT"
-                sudo reboot
-            fi
-        fi
-    fi
+    
+    echo "no gui"
 }
 
 main()
 {
+	# Decode all information from startup
     while [ -n "$1" ]; do
 	    case "$1" in
 	        -p) 
@@ -196,7 +153,7 @@ main()
 	            ;;
 	        -c)
 	            # Load configuration file from other reference [file]
-	            MODULES_CONFIG="$2"
+	            config_folder="$2"
 	            shift 1
 	            ;;
 	        --nogui)
@@ -255,8 +212,8 @@ main()
 	
 	if [ ! -z $NO_GUI ] ; then
 	    unset NO_GUI
-        # Launch the system in silent mode (Without GUI)
-        no_gui
+		# Launch the system in silent mode (Without GUI)
+		command_line
 	else
         # Load GUI menu loop
         loop_gui $MENU_SELECTION

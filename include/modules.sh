@@ -29,7 +29,12 @@
 
 MODULES_LIST=""
 MODULES_FOLDER="modules"
-MODULES_CONFIG="setup.txt"
+# Default name setup jetson_easy
+MODULES_CONFIG_NAME="setup.txt"
+# Absolute path configuration file
+MODULES_CONFIG_PATH=""
+MODULES_CONFIG_FILE=""
+# File check if is in sudo mode
 MODULES_SUDO_ME_FILE="jetson_easy.sudo"
 # Default configuration this code start not in remote mode
 MODULE_REMOTE=0
@@ -80,58 +85,90 @@ modules_load_default()
     modules_sort
 }
 
-modules_load()
+# Load configuration return status:
+# 0 - Load file or folder
+# 1 - Load default
+modules_load_config()
 {
+	#Default load setup config name folder
+	local MODULES_CONFIG=$MODULES_CONFIG_NAME
     if [ ! -z $1 ] ; then
         MODULES_CONFIG=$1
     fi
+    # Load config path
+    local config_path="$USER_PWD/$MODULES_CONFIG"
     
-    local MODULES_CONFIG_PATH="$USER_PWD/$MODULES_CONFIG"
-    
-    if [ -f $MODULES_CONFIG ] ; then
-        # echo "Setup \"$MODULES_CONFIG\" found!"
+    # Check configuration file
+	if [[ -d $config_path ]]; then
+		# If is a directory check if exist file MODULES_CONFIG_NAME
+		local setup_file=$config_path/$MODULES_CONFIG_NAME
+		# Check if exist config file
+		if [[ -f $setup_file ]]; then
+			#echo "$setup_file is a jetson easy folder"
+			# Set variables
+			MODULES_CONFIG_PATH=$(realpath $config_path)
+			MODULES_CONFIG_FILE=$(realpath $setup_file)
+			return 0
+		#else
+			#echo "$setup_file is not a jetson easy folder"
+		fi
+	elif [[ -f $config_path ]]; then
+		#echo "$config_path is a jetson easy file"
+		# Set variables
+		MODULES_CONFIG_PATH=$(realpath $USER_PWD)
+		MODULES_CONFIG_FILE=$(realpath $config_path)
+		return 0
+	#else
+		#echo "$config_path is not valid"
+	fi
+	# Set default configuration
+	MODULES_CONFIG_PATH="$USER_PWD"
+	MODULES_CONFIG_FILE="$config_path"
+    #echo "MODULES_CONFIG_PATH=$MODULES_CONFIG_PATH"
+    #echo "MODULES_CONFIG_FILE=$MODULES_CONFIG_FILE"
+    return 1
+}
+
+modules_load()
+{
+    if [ -f $MODULES_CONFIG_FILE ] ; then
+        # echo "Setup \"$MODULES_CONFIG_FILE\" found!"
         # Load all default values
         modules_load_default
         # Load and overwrite with setup file
-        source $MODULES_CONFIG
+        source $MODULES_CONFIG_FILE
         # Sort all modules
         modules_sort
     else
-        # echo "Setup \"$MODULES_CONFIG\" NOT found! Load default"
+        # echo "Setup \"$MODULES_CONFIG_FILE\" NOT found! Load default"
         modules_load_default
     fi
 }
 
 modules_save()
 {
-    if [ -z $1 ] ; then
-        MODULES_CONFIG="setup.txt"
-    else
-        MODULES_CONFIG=$1
-    fi
-    
-    echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG
-    echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG
-    echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG
-    echo "" >> $MODULES_CONFIG
+    echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG_FILE
+    echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG_FILE
+    echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG_FILE
+    echo "" >> $MODULES_CONFIG_FILE
     
     # Add remote information
     if [ ! -z $MODULE_REMOTE_USER ] || [ ! -z $MODULE_REMOTE_HOST ]; then
-        echo "# Remote information" >> $MODULES_CONFIG
-        echo "MODULE_REMOTE_USER=\"$MODULE_REMOTE_USER\"" >> $MODULES_CONFIG
-        echo "MODULE_PASSWORD=\"$MODULE_PASSWORD\"" >> $MODULES_CONFIG
-        echo "MODULE_REMOTE_HOST=\"$MODULE_REMOTE_HOST\"" >> $MODULES_CONFIG
-        echo "" >> $MODULES_CONFIG
+        echo "# Remote information" >> $MODULES_CONFIG_FILE
+        echo "MODULE_REMOTE_USER=\"$MODULE_REMOTE_USER\"" >> $MODULES_CONFIG_FILE
+        echo "MODULE_PASSWORD=\"$MODULE_PASSWORD\"" >> $MODULES_CONFIG_FILE
+        echo "MODULE_REMOTE_HOST=\"$MODULE_REMOTE_HOST\"" >> $MODULES_CONFIG_FILE
+        echo "" >> $MODULES_CONFIG_FILE
     fi
     
-    echo "# List of availables modules" >> $MODULES_CONFIG
-    echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG
+    echo "# List of availables modules" >> $MODULES_CONFIG_FILE
+    echo "MODULES_LIST=\"$MODULES_LIST\"" >> $MODULES_CONFIG_FILE
     
-    echo "" >> $MODULES_CONFIG
-    echo "# ----------------------------- " >> $MODULES_CONFIG
-    echo "# -     Modules variables     - " >> $MODULES_CONFIG
-    echo "# ----------------------------- " >> $MODULES_CONFIG
-    echo "" >> $MODULES_CONFIG
+    echo "" >> $MODULES_CONFIG_FILE
+    echo "# ----------------------------- " >> $MODULES_CONFIG_FILE
+    echo "# -     Modules variables     - " >> $MODULES_CONFIG_FILE
+    echo "# ----------------------------- " >> $MODULES_CONFIG_FILE
+    echo "" >> $MODULES_CONFIG_FILE
     for folder in $MODULES_FOLDER/* ; do
       if [ -d "$folder" ] ; then
         # Check if exist the same file with the name of the folder
@@ -146,17 +183,17 @@ modules_save()
             if type script_save &>/dev/null
             then
                 # Write name module
-                echo "# Variables for: $MODULE_NAME" >> $MODULES_CONFIG
+                echo "# Variables for: $MODULE_NAME" >> $MODULES_CONFIG_FILE
                 # Save script
-                script_save $MODULES_CONFIG
+                script_save $MODULES_CONFIG_FILE
                 # Add space
-                echo "" >> $MODULES_CONFIG
+                echo "" >> $MODULES_CONFIG_FILE
             fi
         fi
       fi
     done
         
-    # echo "Save in $MODULES_CONFIG"
+    # echo "Save in $MODULES_CONFIG_FILE"
 }
 
 modules_isInList()
