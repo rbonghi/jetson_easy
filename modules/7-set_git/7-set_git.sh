@@ -59,30 +59,44 @@ script_run()
 
 script_load_user()
 {
-    # If is available GIT get name and email
-    if [ -z ${NEW_GIT_USERNAME+x} ] ; then
-        git --version 2>&1 >/dev/null # improvement by tripleee
-        local GIT_IS_AVAILABLE=$?
-        if [ $GIT_IS_AVAILABLE -eq 0 ]; then 
-            # Default git user name
-            NEW_GIT_USERNAME="$(git config user.name)"
-        else
-            NEW_GIT_USERNAME=""
+    if dpkg-query -l git > /dev/null; then
+		#tput setaf 1
+		#echo "Git not installed"
+		#tput sgr0
+		NEW_GIT_USERNAME=""
+    else
+        # If is available GIT get name and email
+        if [ -z ${NEW_GIT_USERNAME+x} ] ; then
+            git --version 2>&1 >/dev/null # improvement by tripleee
+            local GIT_IS_AVAILABLE=$?
+            if [ $GIT_IS_AVAILABLE -eq 0 ]; then 
+                # Default git user name
+                NEW_GIT_USERNAME="$(git config user.name)"
+            else
+                NEW_GIT_USERNAME=""
+            fi
         fi
     fi
 }
 
 script_load_email()
 {
-    # If is available GIT get name and email
-    if [ -z ${NEW_GIT_EMAIL+x} ] ; then
-        git --version 2>&1 >/dev/null # improvement by tripleee
-        local GIT_IS_AVAILABLE=$?
-        if [ $GIT_IS_AVAILABLE -eq 0 ]; then 
-            # Default git user name
-            NEW_GIT_EMAIL="$(git config user.email)"
-        else
-            NEW_GIT_EMAIL=""
+    if dpkg-query -l git > /dev/null; then
+		#tput setaf 1
+		#echo "Git not installed"
+		#tput sgr0
+		NEW_GIT_EMAIL=""
+    else
+        # If is available GIT get name and email
+        if [ -z ${NEW_GIT_EMAIL+x} ] ; then
+            git --version 2>&1 >/dev/null # improvement by tripleee
+            local GIT_IS_AVAILABLE=$?
+            if [ $GIT_IS_AVAILABLE -eq 0 ]; then 
+                # Default git user name
+                NEW_GIT_EMAIL="$(git config user.email)"
+            else
+                NEW_GIT_EMAIL=""
+            fi
         fi
     fi
 }
