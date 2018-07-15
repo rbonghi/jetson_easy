@@ -236,6 +236,15 @@ menu_checkIfLoaded()
     fi
 }
 
+menu_save_line_info()
+{
+    if [[ -d $config_folder ]]; then
+        echo "folder \"$(basename $config_folder)\""
+    else
+        echo "file \"$(basename $config_folder)\""
+    fi
+}
+
 MENU_LIST=()
 MENU_REFERENCE=()
 
@@ -273,20 +282,14 @@ menu_load_list()
     # Load last element in menu
     MENU_LIST+=("Start-->" "Start install")
     # Load last element in menu
-    local type_save=""
-    if [[ -d $config_folder ]]; then
-        type_save="folder \"$(basename $config_folder)\""
-    else
-        type_save="file \"$(basename $config_folder)\""
-    fi
-    MENU_LIST+=("Save" "Save configuration in $type_save")
+    MENU_LIST+=("Save" "Save configuration in $(menu_save_line_info)")
 }
 
 menu_configuration_menu()
 {
     echo "You can configure your Jetson with different modules."
     #if [ $GUI_SAVED = 1 ] ; then
-    #    echo "-- Configuration stored in $MODULES_CONFIG!"
+    #    echo "-- Configuration stored in $(menu_save_line_info)!"
     #else
     #    echo ""
     #fi
