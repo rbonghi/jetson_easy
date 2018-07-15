@@ -46,8 +46,6 @@ remote_get_config()
         file_config=$MODULE_REMOTE_CONFIG_NAME
     fi
     
-    echo "file_config=$file_config"
-    
     if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/$file_config \> /dev/null 2\>\&1 ; then
         # Get back the remote config
         local configuration=""
