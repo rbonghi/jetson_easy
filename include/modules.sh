@@ -95,12 +95,19 @@ modules_load_config()
     if [ ! -z $1 ] ; then
         MODULES_CONFIG=$1
     fi
+    local config_path=""
     # Load config path
-    local config_path="$USER_PWD/$MODULES_CONFIG"
+    if [[ "$MODULES_CONFIG" = /* ]]; then
+        # Save absolute path
+        config_path="$MODULES_CONFIG"
+    else
+        # Get absolute path from local path
+        config_path="$USER_PWD/$MODULES_CONFIG"
+    fi
     
     # Check configuration file
 	if [[ -d $config_path ]]; then
-		# If is a directory check if exist file MODULES_CONFIG_NAME
+		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: setup.txt)
 		local setup_file=$config_path/$MODULES_CONFIG_NAME
 		# Check if exist config file
 		if [[ -f $setup_file ]]; then

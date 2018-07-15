@@ -34,13 +34,31 @@
 
 MODULE_REMOTE_USER=""
 MODULE_REMOTE_HOST=""
+MODULE_REMOTE_CONFIG_NAME=""
 
 remote_get_config()
 {
-    if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/setup.txt \> /dev/null 2\>\&1
-    then
+    # Load file configuration, if is new get dafault name
+    local file_config=""
+    if [ -z $MODULE_REMOTE_CONFIG_NAME ] ; then
+        file_config=$MODULES_CONFIG_NAME
+    else
+        file_config=$MODULE_REMOTE_CONFIG_NAME
+    fi
+    
+    echo "file_config=$file_config"
+    
+    if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/$file_config \> /dev/null 2\>\&1 ; then
         # Get back the remote config
-        sshpass -p "$MODULE_PASSWORD" scp $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy/setup.txt $MODULES_CONFIG
+        local configuration=""
+        if [[ -d $file_config ]]; then
+            # The file config is a folder
+            configuration=$file_config/$MODULES_CONFIG_NAME
+        else
+            # The file config is a file
+            configuration=$file_config
+        fi
+        sshpass -p "$MODULE_PASSWORD" scp $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy/$configuration $MODULES_CONFIG_FILE
         # Execute load configuration
         modules_load
         # Save new setup
@@ -75,30 +93,10 @@ remote_from_host()
 
 remote_load_to_host()
 {
-    #local REFERENCE_CONFIG=""
-    # Copy reference only if exist the file
-    #if [ -f $MODULES_CONFIG ] ; then
-    #    REFERENCE_CONFIG=$MODULES_CONFIG
-    #fi
-    
-    #local CONFIG_FOLDER=""
-    # Copy reference only if exist the file
-    #if [ -d config ] ; then
-    #    CONFIG_FOLDER="config"
-    #fi
-    
-    local remote_copy=""
-    if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
-    	# Copy folder
-    	remote_copy="-C $MODULES_CONFIG_PATH"
-    elif [ -f $MODULES_CONFIG_FILE ] ; then
-    	#Copy only the config file
-    	remote_copy="-C $MODULES_CONFIG_FILE"
+    # If exist temporary jetson_easy folder remove
+    if [ -d /tmp/jetson_easy ] ; then
+        rm -R /tmp/jetson_easy
     fi
-    
-    echo "remote_copy=$remote_copy"
-
-    
     # build a folder
     mkdir -p /tmp/jetson_easy
     # Copy all folders
@@ -112,36 +110,37 @@ remote_load_to_host()
     if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
     	# Copy folder
     	cp -rf $MODULES_CONFIG_PATH /tmp/jetson_easy
+    	# Save configuration 
+    	MODULE_REMOTE_CONFIG_NAME="$(basename $MODULES_CONFIG_PATH)"
     elif [ -f $MODULES_CONFIG_FILE ] ; then
     	#Copy only the config file
     	cp -rf $MODULES_CONFIG_FILE /tmp/jetson_easy
+    	# Save configuration
+    	MODULE_REMOTE_CONFIG_NAME="$(basename $MODULES_CONFIG_FILE)"
     fi
     
     # Move to temp folder
     local old=$(pwd)
-    cd /tmp/jetson_easy
+    cd /tmp
     # Tar all selected files
     tar -czf /tmp/jetson_easy.tar.gz jetson_easy
     # Remove bkp folder
     rm -R jetson_easy
     # Go to origin folder
     cd $old
-    
-    exit 0
 
     # Create folder
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
 if [ -d /tmp/jetson_easy ] ; then
     rm -R /tmp/jetson_easy
 fi
-mkdir -p /tmp/jetson_easy
 '
     # Copy file to remote
-    sshpass -p "$MODULE_PASSWORD" scp /tmp/jetson_easy.tar.gz $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy
+    sshpass -p "$MODULE_PASSWORD" scp /tmp/jetson_easy.tar.gz $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp
     # Uncompress the file
     sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST '
 # Move to folder
-cd /tmp/jetson_easy
+cd /tmp
 # Exctract archive
 tar -xf jetson_easy.tar.gz
 # remove tar file
@@ -184,21 +183,24 @@ remote_connect()
     # Get all other options
     local OPTIONS=$@
     
-    #echo "./biddibi_boddibi_boo.sh -p $PASSWORD $OPTIONS"
-    
     # Load all script in remote board
     remote_load_to_host $MODULE_PASSWORD
     
-    
     local STATUS=1
     local PAGE_MENU="menu_information"
+    local config_file=""
+    # If MODULE_REMOTE_CONFIG_NAME exist add option -c
+    if [ ! -z $MODULE_REMOTE_CONFIG_NAME ] ; then
+        config_file="-c $MODULE_REMOTE_CONFIG_NAME"
+    fi
+    
     while [ $STATUS != 0 ] ; do        
         # Start in remote the biddibi_boddibi_boo script
         sshpass -p "$MODULE_PASSWORD" ssh -t $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST bash -ic "'
 #Move to Jetson easy folder
 cd /tmp/jetson_easy
 # Launch biddibi_boddibi_boo in remote
-./biddibi_boddibi_boo.sh -x $PAGE_MENU -p $MODULE_PASSWORD $OPTIONS
+./biddibi_boddibi_boo.sh -x $PAGE_MENU -p $MODULE_PASSWORD $config_file $OPTIONS
 
 '"
         # Save result status

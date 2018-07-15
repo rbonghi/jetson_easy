@@ -273,7 +273,13 @@ menu_load_list()
     # Load last element in menu
     MENU_LIST+=("Start-->" "Start install")
     # Load last element in menu
-    MENU_LIST+=("Save" "Save configuration in $MODULES_CONFIG")
+    local type_save=""
+    if [[ -d $config_folder ]]; then
+        type_save="folder \"$(basename $config_folder)\""
+    else
+        type_save="file \"$(basename $config_folder)\""
+    fi
+    MENU_LIST+=("Save" "Save configuration in $type_save")
 }
 
 menu_configuration_menu()
