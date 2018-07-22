@@ -36,16 +36,11 @@ ros_wstool_string()
 {
     local regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
     if [[ $ROS_WSTOOL =~ $regex ]] ; then
-    
-        # Remove .rosinstall if written
-        local string=$(echo $(basename $ROS_WSTOOL) | cut -f1 -d ".")
         # Is a weblink
-        echo "weblink $(basename $string)"
+        echo "weblink $(basename $ROS_WSTOOL)"
     else
-        # Remove .rosinstall if written
-        local string=$(echo $ROS_WSTOOL | cut -f1 -d ".")
         # Load from file
-        echo "file in config/$string"
+        echo "file $(basename $ROS_WSTOOL)"
     fi
 }
 
@@ -360,7 +355,7 @@ ros_name_workspace()
     fi
 }
 
-ros_wstool()
+ros_wstool2()
 {
     local ros_wstool_temp
     ros_wstool_temp=$(whiptail --inputbox "Set reference wstool" 8 78 $ROS_WSTOOL --title "Set reference wstool" 3>&1 1>&2 2>&3)
@@ -368,6 +363,62 @@ ros_wstool()
     if [ $exitstatus = 0 ]; then
         # Write the wstool file reference
         ROS_WSTOOL=$ros_wstool_temp
+    fi
+}
+
+ros_wstool_select()
+{
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yesno "Configuration select: $1" 8 50 3>&1 1>&2 2>&3) then
+        #Set wstool file
+        ROS_WSTOOL=$(basename $1)
+    else
+        menu_filebrowser $(dirname $1)
+    fi
+}
+
+ros_wstool()
+{
+    local real_path
+    if [ -z $1 ]; then
+        real_path=$(realpath $MODULES_CONFIG_PATH)
+    else
+        real_path=$(realpath $1)
+    fi
+    
+    #Build the folder list
+    local FILE_LIST=("../" "BACK")
+    local folder
+    for folder in $(ls --group-directories-first -p $real_path) ; do
+        local description= "a"
+        local filename=$(basename -- "$real_path")
+        local extension="${filename##*.}"
+        if [ $extension == "rosinstall" ]; then
+            description="ROS"
+        fi
+        FILE_LIST+=("$folder" "$description")
+    done
+    # Build the menu
+    local PATH_SELECT
+    PATH_SELECT=$(whiptail --title "$(menu_title)Biddibi Boddibi Boo" --menu "Select rosinstall in $real_path" 20 50 10 "${FILE_LIST[@]}" 3>&1 1>&2 2>&3)
+    
+    local RET=$?
+    if [ $RET -eq 0 ]; then
+        if [[ -f "$real_path/$PATH_SELECT" ]]; then
+            #Check if the file selected if a .txt file
+            local filename=$(basename -- "$real_path/$PATH_SELECT")
+            local extension="${filename##*.}"
+            if [[ $extension == "rosinstall" ]]; then
+                #echo "path=$(realpath $real_path/$PATH_SELECT)"
+                ros_wstool_select $real_path/$PATH_SELECT
+            else
+                menu_filebrowser $real_path
+            fi
+        elif [[ -d "$real_path/$PATH_SELECT" ]]; then
+            # Otherwise enter in other folder
+            menu_filebrowser "$real_path/$PATH_SELECT"
+        else
+            menu_filebrowser
+        fi
     fi
 }
 

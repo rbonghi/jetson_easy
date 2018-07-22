@@ -190,7 +190,7 @@ menu_filebrowser()
             #Check if the file selected if a .txt file
             local filename=$(basename -- "$real_path/$PATH_SELECT")
             local extension="${filename##*.}"
-            if [ extension == "txt" ]; then
+            if [ $extension == "txt" ]; then
                 #echo "path=$(realpath $real_path/$PATH_SELECT)"
                 menu_config_select $real_path/$PATH_SELECT
             else
