@@ -28,6 +28,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Update and upgrade
+# How many updates are availables
+# https://stackoverflow.com/questions/21949984/find-os-number-of-updates-available
 
 MODULE_NAME="Update & Distribution upgrade & Upgrade"
 MODULE_DESCRIPTION="Launch in order:
@@ -35,6 +37,18 @@ MODULE_DESCRIPTION="Launch in order:
  - apt-get dist-upgrade
  - apt-get upgrade"
 MODULE_DEFAULT=1
+
+script_list()
+{
+    local update_available=$(/usr/lib/update-notifier/apt-check 2>&1 | awk '-F;' 'END { print $1, $2 }')
+    local pkg=$(echo $update_available | cut -d ' ' -f1)
+    local sec=$(echo $update_available | cut -d ' ' -f2)
+    if [ $pkg -gt "0" ] ; then
+        echo "(*) Update required:"
+        echo "    - $pkg packages can be updated"
+        echo "    - $sec updates are security updates"
+    fi
+}
 
 script_run()
 {
