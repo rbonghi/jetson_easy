@@ -49,7 +49,7 @@ remote_get_config()
     if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/$file_config \> /dev/null 2\>\&1 ; then
         # Get back the remote config
         local configuration=""
-        if [[ -d $file_config ]]; then
+        if [ $(basename $MODULES_CONFIG_FILE) != $file_config ]; then
             # The file config is a folder
             configuration=$file_config/$MODULES_CONFIG_NAME
         else
