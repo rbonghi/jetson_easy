@@ -37,7 +37,7 @@ MODULE_DEFAULT=0
 
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 
-INSTALL_ZED_VERSION="2.4"
+INSTALL_ZED_VERSION="2.5"
 
 pkgs_is_enabled()
 {
