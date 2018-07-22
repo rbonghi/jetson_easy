@@ -145,7 +145,12 @@ jetson_status()
 menu_config_select()
 {
     if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yesno "Configuration select: $1" 8 50 3>&1 1>&2 2>&3) then
-        echo "Yes pressed"
+        #Set config folder to select file/folder
+        config_folder=$1
+	    # Load configuration modules
+	    modules_load_config $config_folder
+        # Load all modules
+        modules_load
     else
         menu_filebrowser $(dirname $1)
     fi
@@ -202,9 +207,7 @@ menu_filebrowser()
 
 menu_message_introduction()
 {
-    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "OK" --no-button "Load config" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
-        echo "Yes pressed"
-    else
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "Load config" --no-button "skip" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
         #echo "Config pressed"
         menu_filebrowser $USER_PWD
     fi
