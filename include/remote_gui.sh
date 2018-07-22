@@ -91,7 +91,7 @@ menu_remote_pass()
     psw=$(whiptail --title "Remote Password" --passwordbox "Enter your password for and choose Ok to continue.
     
 user: $MODULE_REMOTE_USER
-host: $MODULE_REMOTE_HOST" 10 60 3>&1 1>&2 2>&3)
+host: $MODULE_REMOTE_HOST" 10 60 "$MODULE_PASSWORD" 3>&1 1>&2 2>&3)
     #Password
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
