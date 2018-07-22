@@ -69,7 +69,7 @@ if [ -z $USER_PWD ] ; then
 fi
 
 # Configuration folder information
-config_folder=""
+config_folder="$USER_PWD"
 
 # --------------------------------
 # MAIN
@@ -112,7 +112,7 @@ loop_gui()
         menu_remote
     else
         # Set menu selection
-        if [ $MODULE_IM_HOST == "1" ] ; then
+        if [ ! -z $MODULE_IM_HOST ] ; then
             MENU_SELECTION=$1
         fi
         # Load GUI menu loop
