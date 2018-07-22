@@ -142,8 +142,71 @@ jetson_status()
     fi
 }
 
+menu_config_select()
+{
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yesno "Configuration select: $1" 8 50 3>&1 1>&2 2>&3) then
+        echo "Yes pressed"
+    else
+        menu_filebrowser $(dirname $1)
+    fi
+}
+
+menu_filebrowser()
+{
+    local real_path=$(realpath $1)
+    
+    #Build the folder list
+    local FILE_LIST=("../" "BACK")
+    local folder
+    for folder in $(ls --group-directories-first -p $real_path) ; do
+        local description= "a"
+        local status=$(find "$folder" -maxdepth 1 -name "*.txt" 2>/dev/null)
+        if [[ ! -z $status ]]; then
+            description="config"
+        fi
+        FILE_LIST+=("$folder" "$description")
+    done
+    # Build the menu
+    local PATH_SELECT
+    PATH_SELECT=$(whiptail --title "$(menu_title)Biddibi Boddibi Boo" --menu "Select configuration in $real_path" 20 50 10 "${FILE_LIST[@]}" 3>&1 1>&2 2>&3)
+    
+    local RET=$?
+    if [ $RET -eq 0 ]; then
+        
+        if [[ ! -z $(find "$real_path/$PATH_SELECT" -maxdepth 1 -name "*.txt") ]]; then
+            # The folder contain the configuration folder
+            #echo "path=$(realpath $real_path/$PATH_SELECT)"
+            if [ "$real_path/$PATH_SELECT" != "$USER_PWD/" ]; then
+                menu_config_select $real_path/$PATH_SELECT
+            else
+                menu_filebrowser $real_path/$PATH_SELECT
+            fi
+        elif [[ -f "$real_path/$PATH_SELECT" ]]; then
+            #Check if the file selected if a .txt file
+            local filename=$(basename -- "$real_path/$PATH_SELECT")
+            local extension="${filename##*.}"
+            if [ extension == "txt" ]; then
+                #echo "path=$(realpath $real_path/$PATH_SELECT)"
+                menu_config_select $real_path/$PATH_SELECT
+            else
+                menu_filebrowser $real_path
+            fi
+        elif [[ -d "$real_path/$PATH_SELECT" ]]; then
+            # Otherwise enter in other folder
+            menu_filebrowser "$real_path/$PATH_SELECT"
+        else
+            menu_filebrowser
+        fi
+    fi
+}
+
 menu_message_introduction()
 {
-    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 19 45 <<< "$(menu_header)"
+    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "OK" --no-button "Load config" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
+        echo "Yes pressed"
+    else
+        #echo "Config pressed"
+        menu_filebrowser $USER_PWD
+    fi
 }
 
