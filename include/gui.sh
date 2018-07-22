@@ -294,9 +294,9 @@ menu_configuration_menu()
     #    echo ""
     #fi
     echo "Choose your option:"
-    echo "[up arrow | down arrow] = Move on menu"
+    #echo "[up arrow | down arrow] = Move on menu"
     # echo "[space] = Select option"
-    echo "[enter] = Option menu"
+    #echo "[enter] = Option menu"
     # Clear GUI status information
     GUI_SAVED=0
 }

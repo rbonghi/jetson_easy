@@ -207,9 +207,15 @@ menu_filebrowser()
 
 menu_message_introduction()
 {
-    if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "Load config" --no-button "skip" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
-        #echo "Config pressed"
-        menu_filebrowser $USER_PWD
+    if [ -z $USER_PWD/$MODULES_CONFIG_NAME ]; then
+        if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "Load config" --no-button "skip" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
+            #echo "Config pressed"
+            menu_filebrowser $USER_PWD
+        fi
+    else
+        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 45 <<< "$(menu_header)
+--------------------------------------
+Load Config from $MODULES_CONFIG_NAME"
     fi
 }
 
