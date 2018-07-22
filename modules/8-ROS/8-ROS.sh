@@ -355,16 +355,7 @@ ros_name_workspace()
     fi
 }
 
-ros_wstool2()
-{
-    local ros_wstool_temp
-    ros_wstool_temp=$(whiptail --inputbox "Set reference wstool" 8 78 $ROS_WSTOOL --title "Set reference wstool" 3>&1 1>&2 2>&3)
-    local exitstatus=$?
-    if [ $exitstatus = 0 ]; then
-        # Write the wstool file reference
-        ROS_WSTOOL=$ros_wstool_temp
-    fi
-}
+#### SET ROS_WSTOOL ####
 
 ros_wstool_select()
 {
@@ -376,7 +367,7 @@ ros_wstool_select()
     fi
 }
 
-ros_wstool()
+ros_wstool_folder_search()
 {
     local real_path
     if [ -z $1 ]; then
@@ -418,6 +409,31 @@ ros_wstool()
             menu_filebrowser "$real_path/$PATH_SELECT"
         else
             menu_filebrowser
+        fi
+    fi
+}
+
+ros_wstool_name()
+{
+    local ros_wstool_temp
+    ros_wstool_temp=$(whiptail --inputbox "Set reference wstool" 8 78 $ROS_WSTOOL --title "Write the local path or http address" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write the wstool file reference
+        ROS_WSTOOL=$ros_wstool_temp
+    fi
+}
+
+ros_wstool()
+{
+    local ros_wstool_temp
+    ros_wstool_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 10 40 2 "folder" "Find in configuration folder" "write" "write the address" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        if [ $ros_wstool_temp == "folder" ] ; then
+            ros_wstool_folder_search
+        else
+            ros_wstool_name
         fi
     fi
 }
