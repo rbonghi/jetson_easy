@@ -165,7 +165,7 @@ menu_filebrowser()
     local folder
     for folder in $(ls --group-directories-first -p $real_path) ; do
         local description= "a"
-        local status=$(find "$folder" -maxdepth 1 -name "*.txt" 2>/dev/null)
+        local status=$(find "$real_path/$folder" -maxdepth 1 -name "*.txt" 2>/dev/null)
         if [[ ! -z $status ]]; then
             description="config"
         fi
@@ -207,15 +207,15 @@ menu_filebrowser()
 
 menu_message_introduction()
 {
-    if [ -z $USER_PWD/$MODULES_CONFIG_NAME ]; then
+    if [ -e $USER_PWD/$MODULES_CONFIG_NAME ] || [ $config_folder != "$USER_PWD" ] ; then
+        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 45 <<< "$(menu_header)
+--------------------------------------
+Load Config from $config_folder"
+    else
         if (whiptail --title "$(menu_title)Biddibi Boddibi Boo" --scrolltext --yes-button "Load config" --no-button "skip" --yesno "$(menu_header)" 19 45 3>&1 1>&2 2>&3) then
             #echo "Config pressed"
             menu_filebrowser $USER_PWD
         fi
-    else
-        whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 45 <<< "$(menu_header)
---------------------------------------
-Load Config from $MODULES_CONFIG_NAME"
     fi
 }
 
