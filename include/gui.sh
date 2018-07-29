@@ -308,9 +308,11 @@ menu_configuration()
                 # Show message
                 GUI_SAVED=1
                 # Save only if is the local machine
-                if [ $MODULE_IM_HOST == 1 ] ; then
-                    # Save
-                    exit 15
+                if [ ! -z ${MODULE_IM_HOST+x} ] ; then
+                    if [ $MODULE_IM_HOST == 1 ] ; then
+                        # Save
+                        exit 15
+                    fi
                 fi
             elif [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]] ; then
                 submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
