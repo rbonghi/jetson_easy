@@ -295,7 +295,7 @@ menu_configuration()
         menu_load_list
         # Evaluate the size
         local ARLENGTH
-        let ARLENGTH=${#repoar[@]}
+        let ARLENGTH=${#MENU_LIST[@]}/2
         # Write the menu         
         OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
