@@ -31,7 +31,12 @@
 
 MODULE_NAME="Install Jetson performance service"
 MODULE_DESCRIPTION="Install jetson_release add variables and jetson_performance"
-MODULE_DEFAULT=1
+MODULE_DEFAULT="AUTO"
+
+script_check()
+{
+    return 1
+}
 
 script_run()
 {

@@ -494,7 +494,8 @@ ros_name_module()
 # Default variables load
 MODULE_NAME="Install ROS $(ros_name_module)"
 MODULE_DESCRIPTION="ROS - This module install the release of ROS, build a workspace, set a new hostname and set a new master uri"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 
 ros_is_check()
 {

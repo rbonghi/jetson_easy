@@ -56,9 +56,10 @@ modules_sort()
 
 
 # MODULES_DEFAULT options:
-# - 0 NO Install
-# - 1 Default install
-# - 2 Automatic mode
+# - DIS  - Disable module
+# - STOP - NO Install
+# - RUN  - Default install
+# - AUTO - Automatic mode
 modules_load_default()
 {
     # Read modules
@@ -75,10 +76,12 @@ modules_load_default()
                 source "$FILE"
                 # If MODULE_DEFAULT doesn't exist set automatically stop
                 if [ -z ${MODULE_DEFAULT+x} ] ; then
-                    $MODULE_DEFAULT = "0"
+                    $MODULE_DEFAULT = "STOP"
                 fi
                 # Add in list all modules with default option
-                MODULES_LIST+="$FILE_NAME|$MODULE_DEFAULT:"
+                if [ $MODULE_DEFAULT != "DIS" ] ; then
+                    MODULES_LIST+="$FILE_NAME|$MODULE_DEFAULT:"
+                fi
                 # Check if exist the function
                 if type script_load_default &>/dev/null ; then
                     script_load_default
@@ -225,7 +228,7 @@ modules_isInList()
         fi
     done
     # Otherwise return 0
-    echo "0"
+    echo "DIS"
 }
 
 modules_update()
@@ -276,6 +279,20 @@ modules_sudo_me_stop()
     rm $MODULES_SUDO_ME_FILE
 }
 
+modules_run_script()
+{
+    # Check if exist the function
+    if type script_run &>/dev/null ; then
+        # Move to same folder
+        cd $FOLDER
+        # run script
+        # exesudo script_run
+        #script_run $LOCAL_FOLDER
+        # Restore previuous folder
+        cd $LOCAL_FOLDER
+    fi
+}
+
 modules_run()
 {
     # Load exesudo
@@ -289,33 +306,44 @@ modules_run()
         echo "Start install script..."
         IFS=':' read -ra MODULE <<< "$MODULES_LIST"
         for mod in "${MODULE[@]}"; do
+            # Take name and option
+            local name=$(echo $mod | cut -d "|" -f 1)
+            local option=$(echo $mod | cut -d "|" -f 2)
             # Check if exist the same file with the name of the folder
-            local FOLDER="$MODULES_FOLDER/$mod"
-            local FILE="$FOLDER/$mod.sh"
+            local FOLDER="$MODULES_FOLDER/$name"
+            local FILE="$FOLDER/$name.sh"
             if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_run
+                unset -f script_check
                 unset MODULE_DEFAULT
                 # Local folder
                 local LOCAL_FOLDER=$(pwd)
-                # Load source
-                source "$FILE"
-                # Add only all modules without MODULE_DEFAULT=-1
-                if [ $MODULE_DEFAULT -ne -1 ] ; then
-                    # Write name module
-                    echo "Running module - $MODULE_NAME"
-                    # Check if exist the function
-                    if type script_run &>/dev/null
-                    then
-                        # Move to same folder
-                        cd $FOLDER
-                        # run script
-                        # exesudo script_run
-                        script_run $LOCAL_FOLDER
-                    fi
-                    # Restore previuous folder
-                    cd $LOCAL_FOLDER
-                fi
+                case $option in
+                    "AUTO")  # Load source
+                        source "$FILE"
+                        echo "Running module - $MODULE_NAME in mode AUTO mode"
+                        # Check if exist the function
+                        if type script_check &>/dev/null ; then
+                            # Run script check function
+                            script_check
+                            local RET=$?
+                            if [ $RET == 1 ] ; then
+                                # run Script
+                                modules_run_script
+                            else
+                                echo "Not require other updates"
+                            fi
+                        else
+                            echo "Any check function are installed, please check module $MODULE_NAME"
+                        fi ;;
+                    "RUN")  # Load source
+                        source "$FILE"
+                        echo "Running module - $MODULE_NAME"
+                        # run Script
+                        modules_run_script ;;
+                    *) ;;
+                esac
             fi
         done
 

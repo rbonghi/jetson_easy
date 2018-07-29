@@ -38,7 +38,7 @@ MODULE_NAME="Update the NVIDIA Jetson Kernel"
 MODULE_DESCRIPTION="This module update the NVIDIA Jetson and add new features:
 FTDI driver converter
 ACM driver"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="AUTO"
 
 kernel_has_removed()
 {
@@ -338,6 +338,39 @@ script_save()
         then
             echo "KERNEL_REMOVE_FOLDER=\"$KERNEL_REMOVE_FOLDER\"" >> $1
         fi
+    fi
+}
+
+script_check()
+{
+    # Show list only if exist the file
+    if [ -f $KERNEL_SRC_CONFIG ] ; then
+        
+        local config_file="/tmp/config"
+        # Extract config file in tmp if doesn't exist
+        kernel_extract_config $config_file
+        
+        local sub_element
+        local check=true
+        for sub_element in "${KERNEL_DRIVER_LIST[@]}"; do
+            local name=$(echo $sub_element | cut -f1 -d ":")
+            local config=$(echo $sub_element | cut -f2 -d ":")
+            local description=$(echo $sub_element | cut -f3 -d ":")
+            
+            if [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
+                check=$check&true 
+            else
+                check=$check&false
+            fi
+        done
+        # if all are installed is require to launch the kernel update system
+        if $check ; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 0
     fi
 }
 

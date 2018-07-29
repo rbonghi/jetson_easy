@@ -33,7 +33,8 @@ MODULE_NAME="Install standard packages"
 MODULE_DESCRIPTION="Install standard packages:
 htop
 nano"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 

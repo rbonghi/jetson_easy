@@ -31,7 +31,8 @@
 
 MODULE_NAME="Set hostname"
 MODULE_DESCRIPTION="Set a new hostname for the board."
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 MODULE_SUBMENU=("Write new hostname:new_hostname")
 
 script_run()

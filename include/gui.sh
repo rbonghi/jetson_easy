@@ -85,37 +85,11 @@ menu_introduction()
 
 submenu_load_check()
 {
-    case $1 in
-        "AUTO") case $defaultvar in
-                    2) echo "ON" ;;
-                    1) echo "OFF" ;;
-                    0) echo "OFF" ;;
-                    *) echo "OFF" ;;
-                esac ;;
-        "RUN")  case $defaultvar in
-                    2) echo "OFF" ;;
-                    1) echo "ON" ;;
-                    0) echo "OFF" ;;
-                    *) echo "OFF" ;;
-                esac ;;
-        "STOP") case $defaultvar in
-                    2) echo "OFF" ;;
-                    1) echo "OFF" ;;
-                    0) echo "ON" ;;
-                    *) echo "OFF" ;;
-                esac ;;
-        *)      echo "OFF" ;;
-    esac
-}
-
-submenu_get_check()
-{
-    case $1 in
-        "AUTO") echo "2" ;;
-        "RUN") echo "1" ;;
-        "ST0P") echo "0" ;;
-        *) echo "0" ;;
-    esac
+    if [ $1 == $defaultvar ] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
 }
 
 submenu_default()
@@ -124,7 +98,24 @@ submenu_default()
     local  defaultvar=$1
     # Load enable variable
     local  __enablevar=$2
-    
+    # If MODULE_OPTIONS doesn't exist load default values
+    if [ -z ${MODULE_OPTIONS+x} ] ; then
+        MODULE_OPTIONS=("AUTO" "RUN" "STOP")
+    fi
+    # Load lines
+    local MENU_SHOW_OPTIONS=()
+    local tmp
+    for tmp in "${MODULE_OPTIONS[@]}" ; do
+        case $tmp in
+            "AUTO") MENU_SHOW_OPTIONS+=("AUTO" "AUTOmatic module control" $(submenu_load_check "AUTO") ) ;;
+            "RUN" ) MENU_SHOW_OPTIONS+=("RUN" "Force RUN this module" $(submenu_load_check "RUN") ) ;;
+            "STOP") MENU_SHOW_OPTIONS+=("STOP" "Force STOP this module" $(submenu_load_check "STOP") );;
+        esac
+    done
+    # Evaluate the size
+    local ARLENGTH
+    let ARLENGTH=${#MODULE_OPTIONS[@]}
+    # Load menu
     local default_value
     default_value=$(whiptail --title "$MODULE_NAME" --radiolist \
     "$MODULE_DESCRIPTION
@@ -132,17 +123,14 @@ submenu_default()
      
 [up arrow | down arrow] = Move on menu
 [space] = Select option
-[enter] = Save option" 17 60 3 \
-    "AUTO" "AUTOmatic module control" $(submenu_load_check "AUTO") \
-    "RUN" "Force RUN this module" $(submenu_load_check "RUN") \
-    "STOP" "Force STOP this module" $(submenu_load_check "STOP") 3>&1 1>&2 2>&3)
+[enter] = Save option" 17 60 $ARLENGTH "${MENU_SHOW_OPTIONS[@]}" 3>&1 1>&2 2>&3)
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
-        eval $__enablevar=$(submenu_get_check $default_value)
+        eval $__enablevar=$default_value
     else
         #echo "You chose Cancel."
-        eval $__enablevar="-1"
+        eval $__enablevar=$1
     fi
 
 }
@@ -226,10 +214,10 @@ menu_checkIfLoaded()
 {
     # Check if the module is in List
     case $(modules_isInList $FILE_NAME) in
-        2) echo "A" ;;
-        1) echo "X" ;;
-        0) echo " " ;;
-        *) echo " " ;;
+        "AUTO") echo "A" ;;
+        "RUN")  echo "X" ;;
+        "STOP") echo " " ;;
+        *)      echo " " ;;
     esac
 }
 
@@ -263,10 +251,11 @@ menu_load_list()
         if [ -f $FILE ] ; then
             # unload variables
             unset MODULE_DEFAULT
+            unset MODULE_OPTIONS
             # Load source
             source "$FILE"
-            # Add only all modules without MODULE_DEFAULT=-1
-            if [ $MODULE_DEFAULT -ne -1 ] ; then
+            # Add only all modules without MODULE_DEFAULT not equal "DIS"
+            if [ $MODULE_DEFAULT != "DIS" ] ; then
                 # Add element in menu
                 MENU_LIST+=("$COUNTER" "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME")
                 MENU_REFERENCE+=("$COUNTER" "$FILE")
@@ -408,23 +397,21 @@ menu_list_installed()
         # Check if exist the same file with the name of the folder
         local FILE_NAME=$(echo $folder | cut -f2 -d "/")
         local FILE="$folder"/$FILE_NAME.sh
-        if [ -f $FILE ]
-        then
-            if [ $(modules_isInList $FILE_NAME) == "1" ]
-            then
-                # Unset save function
-                unset -f script_info
-                # Load source
-                source "$FILE"
-                # Add element in menu
-                echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
-                # Check if exist the function
-                if type script_info &>/dev/null
-                then
-                    # run script
-                    script_info
-                fi
-            fi
+        if [ -f $FILE ] ; then
+            case $(modules_isInList $FILE_NAME) in
+                "AUTO" | "RUN" ) # Unset save function
+                         unset -f script_info
+                         # Load source
+                         source "$FILE"
+                         # Add element in menu
+                         echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
+                         # Check if exist the function
+                         if type script_info &>/dev/null ; then
+                            # run script
+                            script_info
+                        fi ;;
+                *) ;;
+            esac
         fi
       fi
     done

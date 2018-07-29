@@ -33,7 +33,8 @@ MODULE_NAME="Clean Ubuntu distribution"
 MODULE_DESCRIPTION="Clean the jetson from program futile:
 Open Office
 unity_scope"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Remove packages:set_pkgs")
 

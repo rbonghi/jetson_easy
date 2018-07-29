@@ -31,7 +31,8 @@
 
 MODULE_NAME="Set default configuration of git"
 MODULE_DESCRIPTION="Set GIT global configuration equal to user.name and user.email"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 MODULE_SUBMENU=("Set user name:set_user_name" "Set email:set_email")
 
 script_run()

@@ -32,5 +32,6 @@
 # Default variables load
 MODULE_NAME="Install deep learning frameworks"
 MODULE_DESCRIPTION="With this module you can install other deep learning modules, such as: TensorFlow, Caffe, Pytorch and other"
-MODULE_DEFAULT=0
+MODULE_DEFAULT="STOP"
+MODULE_OPTIONS=("RUN" "STOP")
 
