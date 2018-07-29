@@ -38,11 +38,14 @@ script_check()
     if hash jetson_release 2>/dev/null; then
         # Read version
         local info_je=$(jetson_release)
-        echo info_je
-        # if old update
-        return 1
-        # otherwise don't care
-        return 1 #temporary always true
+        local je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
+        # Compare jetson easy version with local installed version in your jetson
+        #echo "compare=$(jetson_vercomp $JETSON_EASY_VERSION $je_version)"
+        if [ $(jetson_vercomp $JETSON_EASY_VERSION $je_version) -gt 0 ] ; then
+            return 1
+        else
+            return 0
+        fi
     else
         return 1
     fi
