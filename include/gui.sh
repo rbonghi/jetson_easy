@@ -39,8 +39,6 @@
 # Variable to show the saved information status
 GUI_SAVED=0
 
-
-
 system_info()
 {
     # Information about board

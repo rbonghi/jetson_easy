@@ -358,9 +358,9 @@ script_check()
             local description=$(echo $sub_element | cut -f3 -d ":")
             
             if [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
-                check=$check&true 
+                check=$check & true 
             else
-                check=$check&false
+                check=$check & false
             fi
         done
         # if all are installed is require to launch the kernel update system

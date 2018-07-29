@@ -35,7 +35,17 @@ MODULE_DEFAULT="AUTO"
 
 script_check()
 {
-    return 1
+    if hash jetson_release 2>/dev/null; then
+        # Read version
+        local info_je=$(jetson_release)
+        echo info_je
+        # if old update
+        return 1
+        # otherwise don't care
+        return 1 #temporary always true
+    else
+        return 1
+    fi
 }
 
 script_run()

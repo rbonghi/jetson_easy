@@ -287,7 +287,7 @@ modules_run_script()
         cd $FOLDER
         # run script
         # exesudo script_run
-        #script_run $LOCAL_FOLDER
+        script_run $LOCAL_FOLDER
         # Restore previuous folder
         cd $LOCAL_FOLDER
     fi
