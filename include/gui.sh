@@ -209,8 +209,7 @@ submenu_configuration()
     # Save the name of the function
     local NAME=$(echo $FUNC | cut -f1 -d ".")
     # Check if exist the function
-    if [ ! -z ${MODULE_SUBMENU+x} ]
-    then
+    if [ ! -z ${MODULE_SUBMENU+x} ] ; then
         # Launch the function
         # ${FUNC} $(modules_isInList $NAME) STATUS
         submenu_extra $(modules_isInList $NAME) STATUS $1
@@ -220,15 +219,7 @@ submenu_configuration()
     fi
     # echo "Return value: $STATUS"
     # Add or remove the module in list
-    case $STATUS in
-        "1") # Add module
-             modules_add $NAME
-             # Load default variables
-             # script_load_default 
-             ;;
-        "0") modules_remove $NAME ;;
-        *) ;;
-    esac
+    modules_update $NAME $STATUS
 }
 
 menu_checkIfLoaded()

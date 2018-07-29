@@ -70,15 +70,17 @@ modules_load_default()
             if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_load_default
+                unset MODULE_DEFAULT
                 # Load source
                 source "$FILE"
-                 # If a default module
-                if [ $MODULE_DEFAULT -eq 1 ] ; then
-                    MODULES_LIST+="$FILE_NAME:"
+                # If MODULE_DEFAULT doesn't exist set automatically stop
+                if [ -z ${MODULE_DEFAULT+x} ] ; then
+                    $MODULE_DEFAULT = "0"
                 fi
+                # Add in list all modules with default option
+                MODULES_LIST+="$FILE_NAME|$MODULE_DEFAULT:"
                 # Check if exist the function
-                if type script_load_default &>/dev/null
-                then
+                if type script_load_default &>/dev/null ; then
                     script_load_default
                     # Load initialization variable function
                     # echo "Load Default variable for: $MODULE_NAME"
@@ -211,9 +213,14 @@ modules_save()
 modules_isInList()
 {
     IFS=':' read -ra MODULE <<< "$MODULES_LIST"
+    local mod
     for mod in "${MODULE[@]}"; do
-        if [ "$mod" == $1 ] ; then
-            echo "1"
+        # Take name
+        local name=$(echo $mod | cut -d "|" -f 1)
+        # Check if the name is the same
+        if [ $name == $1 ] ; then
+            # Return the mode
+            echo $(echo $mod | cut -d "|" -f 2)
             return
         fi
     done
@@ -221,24 +228,30 @@ modules_isInList()
     echo "0"
 }
 
-modules_add()
+modules_update()
 {
-    # Check if the module is in list otherwise add the new module
-    if [[ $MODULES_LIST != *"$1"* ]] ; then
-        # Add new element
-        # echo "Add new module $1"
-        MODULES_LIST+=":$1"
-        # Sort all modules
-        modules_sort
-    #else
-    #    echo "Module $1 is already in list"
+    IFS=':' read -ra MODULE <<< "$MODULES_LIST"
+    local new_list
+    local mod
+    local check=0
+    for mod in "${MODULE[@]}"; do
+        # Take name
+        local name=$(echo $mod | cut -d "|" -f 1)
+        # Check if the name is the same
+        if [ $name == $1 ] ; then
+            new_list+=":$1|$2"
+            check=1
+        else
+            # Add same module in the list
+            new_list+=":$mod"
+        fi
+    done
+    # If this module is not in list add in tail
+    if [ $check == 0 ] ; then
+        new_list+=":$1|$2"
     fi
-}
-
-modules_remove()
-{
-    # Remove from list
-    MODULES_LIST=$(echo $MODULES_LIST | sed -e "s/$1//g")
+    #Update MODULES_LIST
+    MODULES_LIST=$new_list
     # Sort all modules
     modules_sort
 }
