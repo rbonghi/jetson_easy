@@ -228,7 +228,7 @@ modules_isInList()
         fi
     done
     # Otherwise return 0
-    echo "DIS"
+    echo "STOP"
 }
 
 modules_update()
