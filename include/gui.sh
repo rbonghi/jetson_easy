@@ -85,32 +85,37 @@ menu_introduction()
 
 submenu_load_check()
 {
-    if [ $1 == "YES" ]
-    then
-        if [ $defaultvar == "1" ]
-        then
-            echo "ON"
-        else
-            echo "OFF"
-        fi
-    else
-        if [ $defaultvar == "0" ]
-        then
-            echo "ON"
-        else
-            echo "OFF"
-        fi
-    fi
+    case $1 in
+        "AUTO") case $defaultvar in
+                    2) echo "ON" ;;
+                    1) echo "OFF" ;;
+                    0) echo "OFF" ;;
+                    *) echo "OFF" ;;
+                esac ;;
+        "RUN")  case $defaultvar in
+                    2) echo "OFF" ;;
+                    1) echo "ON" ;;
+                    0) echo "OFF" ;;
+                    *) echo "OFF" ;;
+                esac ;;
+        "STOP") case $defaultvar in
+                    2) echo "OFF" ;;
+                    1) echo "OFF" ;;
+                    0) echo "ON" ;;
+                    *) echo "OFF" ;;
+                esac ;;
+        *)      echo "OFF" ;;
+    esac
 }
 
 submenu_get_check()
 {
-    if [ $1 == "YES" ]
-    then
-        echo "1"
-    else
-        echo "0"
-    fi
+    case $1 in
+        "AUTO") echo "2" ;;
+        "RUN") echo "1" ;;
+        "ST0P") echo "0" ;;
+        *) echo "0" ;;
+    esac
 }
 
 submenu_default()
@@ -127,9 +132,10 @@ submenu_default()
      
 [up arrow | down arrow] = Move on menu
 [space] = Select option
-[enter] = Save option" 17 60 2 \
-    "YES" "launch all updates" $(submenu_load_check "YES") \
-    "NO" "Stop upgrades" $(submenu_load_check "NO") 3>&1 1>&2 2>&3)
+[enter] = Save option" 17 60 3 \
+    "AUTO" "AUTOmatic module control" $(submenu_load_check "AUTO") \
+    "RUN" "Force RUN this module" $(submenu_load_check "RUN") \
+    "STOP" "Force STOP this module" $(submenu_load_check "STOP") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
@@ -228,12 +234,12 @@ submenu_configuration()
 menu_checkIfLoaded()
 {
     # Check if the module is in List
-    if [ $(modules_isInList $FILE_NAME) == "1" ]
-    then
-        echo "X"
-    else
-        echo " "
-    fi
+    case $(modules_isInList $FILE_NAME) in
+        2) echo "A" ;;
+        1) echo "X" ;;
+        0) echo " " ;;
+        *) echo " " ;;
+    esac
 }
 
 menu_save_line_info()

@@ -54,6 +54,11 @@ modules_sort()
     MODULES_LIST=$(echo ${MODULES_LIST_ARRAY[*]} | sed -e "s/ /:/g")
 }
 
+
+# MODULES_DEFAULT options:
+# - 0 NO Install
+# - 1 Default install
+# - 2 Automatic mode
 modules_load_default()
 {
     # Read modules
