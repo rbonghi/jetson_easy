@@ -224,7 +224,7 @@ modules_isInList()
         if [ $name == $1 ] ; then
             # Return the mode
             echo $(echo $mod | cut -d "|" -f 2)
-            return
+            return 0
         fi
     done
     # Otherwise return 0

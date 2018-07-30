@@ -162,17 +162,15 @@ submenu_extra()
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Load submenu only if is not "Start-->" or "<--Back"
-        if [ $OPTION_EXTRA == "Enable" ]
-        then
+        if [ $OPTION_EXTRA == "Enable" ] ; then
             # Load default Enable menu
             submenu_default $1 STATUS
             #echo "You chose Cancel."
-            eval $__enablevar="$STATUS"            
+            eval __enablevar="$STATUS"            
             # Load submenu
             submenu_configuration $3
             
-        elif [ $OPTION_EXTRA != "<--Back" ]
-        then
+        elif [ $OPTION_EXTRA != "<--Back" ] ; then
             # echo "Called $OPTION_EXTRA + ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}"
             # Run extra menu
             ${MENU_EXTRA_FUNC[$OPTION_EXTRA]}
@@ -203,9 +201,11 @@ submenu_configuration()
         # Load default_menu to enable/disable this script
         submenu_default $(modules_isInList $NAME) STATUS
     fi
-    # echo "Return value: $STATUS"
-    # Add or remove the module in list
-    modules_update $NAME $STATUS
+    if [ ! -z "$STATUS" ] ; then
+        # echo "Return value: $STATUS"
+        # Add or remove the module in list
+        modules_update $NAME $STATUS
+    fi
 }
 
 menu_checkIfLoaded()
