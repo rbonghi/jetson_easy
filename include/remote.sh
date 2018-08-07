@@ -208,8 +208,8 @@ cd /tmp/jetson_easy
             15) 
                 # Save the last config to server
                 remote_get_config
-                # Load configuration page
-                PAGE_MENU="menu_configuration"
+                # Load save page
+                PAGE_MENU="menu_save"
                 ;;
             *)  # Load information page
                 PAGE_MENU="menu_information"

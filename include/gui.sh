@@ -36,9 +36,6 @@
 # https://en.wikibooks.org/wiki/Bash_Shell_Scripting/Whiptail
 # http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
 
-# Variable to show the saved information status
-GUI_SAVED=0
-
 system_info()
 {
     # Information about board
@@ -272,24 +269,17 @@ menu_load_list()
 menu_configuration_menu()
 {
     echo "You can configure your Jetson with different modules."
-    #if [ $GUI_SAVED = 1 ] ; then
-    #    echo "-- Configuration stored in $(menu_save_line_info)!"
-    #else
-    #    echo ""
-    #fi
     echo "Choose your option:"
     #echo "[up arrow | down arrow] = Move on menu"
     # echo "[space] = Select option"
     #echo "[enter] = Option menu"
-    # Clear GUI status information
-    GUI_SAVED=0
 }
 
 menu_configuration()
 {
     # Load menu
     local OPTION=0
-    while [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]]
+    while [[ $OPTION != "Start-->" && $OPTION != "<--Back" && $OPTION != "Save" ]]
     do
         # Load menu
         menu_load_list
@@ -305,8 +295,6 @@ menu_configuration()
             if [ $OPTION == "Save" ] ; then
                 # Save modification
                 modules_save $MODULES_CONFIG
-                # Show message
-                GUI_SAVED=1
                 # Save only if is the local machine
                 if [ ! -z ${MODULE_IM_HOST+x} ] ; then
                     if [ $MODULE_IM_HOST == 1 ] ; then
@@ -330,10 +318,21 @@ menu_configuration()
         "Start-->")
             MENU_SELECTION=menu_recap
             ;;
+        "Save")
+            MENU_SELECTION=menu_save
+            ;;
         *)
             MENU_SELECTION=menu_information
             ;;
     esac
+}
+
+menu_save()
+{
+    whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 8 50 --ok-button "OK" <<< "Saved configuration in $(menu_save_line_info)"
+    # Return on configuration menu
+    MENU_SELECTION=menu_configuration
+    
 }
 
 menu_information()
