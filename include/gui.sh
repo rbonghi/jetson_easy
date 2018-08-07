@@ -211,7 +211,7 @@ submenu_configuration()
 menu_checkIfLoaded()
 {
     # Check if the module is in List
-    case $(modules_isInList $FILE_NAME) in
+    case $(modules_isInList $1) in
         "AUTO") echo "A" ;;
         "RUN")  echo "X" ;;
         "STOP") echo " " ;;
@@ -390,7 +390,7 @@ menu_list_installed()
 {
     local folder
     # Read modules
-    echo "Modules installed:"
+    #echo "Modules installed:"
     echo ""
     for folder in $MODULES_FOLDER/* ; do
       if [ -d "$folder" ] ; then
@@ -399,7 +399,30 @@ menu_list_installed()
         local FILE="$folder"/$FILE_NAME.sh
         if [ -f $FILE ] ; then
             case $(modules_isInList $FILE_NAME) in
-                "AUTO" | "RUN" ) # Unset save function
+                "AUTO") # Unset save function
+                         unset -f script_info
+                         unset -f script_check
+                         # Load source
+                         source "$FILE"
+                         # Check if exist the function
+                         if type script_check &>/dev/null ; then
+                            # Run script check function
+                            script_check
+                            local RET=$?
+                            if [ $RET == 1 ] ; then
+                                 # Add element in menu
+                                 echo "[X] $MODULE_NAME"
+                                 # Check if exist the function
+                                 if type script_info &>/dev/null ; then
+                                    # run script
+                                    script_info
+                                 fi
+                            else
+                                 # Add element in menu
+                                 echo "[ ] $MODULE_NAME"
+                            fi
+                         fi ;;
+                "RUN" ) # Unset save function
                          unset -f script_info
                          # Load source
                          source "$FILE"
@@ -427,7 +450,8 @@ menu_list_installed()
 menu_recap()
 {
     # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
-    if (whiptail --title "$(menu_title)Recap" --yes-button "INSTALL" --no-button "exit" --yesno "$(menu_list_installed)" 22 60) then
+    if (whiptail --title "$(menu_title)Recap" --yes-button "INSTALL" --no-button "exit" --yesno "Modules will be installed:
+$(menu_list_installed)" 22 60) then
         # Launch installer
         MENU_SELECTION=menu_install
     else
@@ -443,14 +467,16 @@ menu_end()
     then
         if [ -z ${MODULE_REBOOT+x} ] ; then
             # If you cannot understand this, read Bash_Shell_Scripting#if_statements again.
-            if (whiptail --title "$(menu_title)Recap" --yes-button "REBOOT" --no-button "exit" --yesno "$(menu_list_installed)" 22 60) then
+            if (whiptail --title "$(menu_title)Recap" --yes-button "REBOOT" --no-button "exit" --yesno "Modules installed:
+$(menu_list_installed)" 22 60) then
                 echo "System rebotting ... "
                 sudo reboot
             else
                 echo "System require a reboot!"
             fi
         else
-            whiptail --title "$(menu_title)Recap" --ok-button "REBOOT" --textbox /dev/stdin 22 60 <<< "$(menu_list_installed)"
+            whiptail --title "$(menu_title)Recap" --ok-button "REBOOT" --textbox /dev/stdin 22 60 <<< "Modules installed:
+$(menu_list_installed)"
             echo "System rebotting ... "
             sudo reboot
         fi

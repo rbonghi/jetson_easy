@@ -41,10 +41,7 @@ MODULE_DEFAULT="AUTO"
 script_check()
 {
     # Automatically update keys
-    tput setaf 6
-    echo 'APT KEY update starting...'
-    tput sgr0
-    sudo apt-key update
+    #sudo apt-key update &>/dev/null
     
     local update_available=$(/usr/lib/update-notifier/apt-check 2>&1 | awk '-F;' 'END { print $1, $2 }')
     local pkg=$(echo $update_available | cut -d ' ' -f1)
