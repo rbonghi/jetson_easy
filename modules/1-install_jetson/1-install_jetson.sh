@@ -39,16 +39,18 @@ script_check()
         # Read version
         local info_je=$(jetson_release)
         local je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
-        # Compare jetson easy version with local installed version in your jetson
-        #echo "compare=$(jetson_vercomp $JETSON_EASY_VERSION $je_version)"
-        if [ $(jetson_vercomp $JETSON_EASY_VERSION $je_version) -gt 0 ] ; then
-            return 1
-        else
-            return 0
-        fi
-    else
-        return 1
-    fi
+		if [ ! -z "$je_version" ] ; then
+			# Compare jetson easy version with local installed version in your jetson
+			#echo "compare=$(jetson_vercomp $JETSON_EASY_VERSION $je_version)"
+			if [ $(jetson_vercomp $JETSON_EASY_VERSION $je_version) -gt 0 ] ; then
+				return 1
+			else
+				return 0
+			fi
+		fi
+	fi
+	# Otherwise return false
+    return 1
 }
 
 script_run()

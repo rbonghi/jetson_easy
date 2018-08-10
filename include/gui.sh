@@ -395,8 +395,11 @@ menu_list_installed()
       if [ -d "$folder" ] ; then
         # Check if exist the same file with the name of the folder
         local FILE_NAME=$(echo $folder | cut -f2 -d "/")
+        local FOLDER="$MODULES_FOLDER/$FILE_NAME"
         local FILE="$folder"/$FILE_NAME.sh
         if [ -f $FILE ] ; then
+            # Local folder
+            local LOCAL_FOLDER=$(pwd)
             case $(modules_isInList $FILE_NAME) in
                 "AUTO") # Unset save function
                          unset -f script_info
@@ -405,9 +408,13 @@ menu_list_installed()
                          source "$FILE"
                          # Check if exist the function
                          if type script_check &>/dev/null ; then
+							# Move to same folder
+							cd $FOLDER
                             # Run script check function
-                            script_check
+                            script_check $LOCAL_FOLDER
                             local RET=$?
+							# Restore previuous folder
+							cd $LOCAL_FOLDER
                             if [ $RET == 1 ] ; then
                                  # Add element in menu
                                  echo "[X] $MODULE_NAME"
