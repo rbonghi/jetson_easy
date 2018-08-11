@@ -29,6 +29,14 @@
 
 # Install Deep learning frameworks
 
+# Tensorflow for jetson 
+# https://github.com/peterlee0127/tensorflow-nvJetson
+# https://www.jetsonhacks.com/2017/03/24/caffe-deep-learning-framework-nvidia-jetson-tx2/
+# caffe2
+# https://github.com/caffe2/caffe2
+# Pytorch
+# https://gist.github.com/dusty-nv/ef2b372301c00c0a9d3203e42fd83426#file-pytorch_jetson_install-sh
+
 # Default variables load
 MODULE_NAME="Install deep learning frameworks"
 MODULE_DESCRIPTION="With this module you can install other deep learning modules, such as: TensorFlow, Caffe, Pytorch and other"
@@ -36,6 +44,90 @@ MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Install deep learning module:dp_learning_list" "Set install folder:dp_set_install_folder")
+
+dp_install_pytorch()
+{
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
+    tput setaf 6
+    echo "Download pytorch install script from @dusty-nv script"
+    tput sgr0
+    # Download pytorch
+    wget https://gist.githubusercontent.com/dusty-nv/ef2b372301c00c0a9d3203e42fd83426/raw/b4086f39f4b53c5ed184cf4d1bb246c1ee16d6c0/pytorch_jetson_install.sh
+    
+    chmod +x pytorch_jetson_install.sh
+    
+    tput setaf 6
+    echo "Run install script"
+    tput sgr0
+    ./pytorch_jetson_install.sh
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
+}
+
+dp_install_tensorflow()
+{
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+            
+    local DP_TENSORFLOW=""
+    # Decode all JETSON_JETPACK versions
+    IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
+    local ver
+    for ver in "${JETSON_JETPACK_VERS[@]}"; do
+        #Clean from extra spaces
+        ver=${ver//[[:blank:]]/}
+        case $ver in
+            "3.3")  # Set version of tensorflow to install
+                    DP_TENSORFLOW=tensorflow-1.10.0rc1-cp27-cp27mu-linux_aarch64.whl
+                    ;;
+            "3.2"| "3.2.1" ) 
+                    # Add version of tensorflow
+                    DP_TENSORFLOW=tensorflow-1.10.0rc0-cp27-cp27mu-linux_aarch64.whl
+                    #DP_TENSORFLOW=tensorflow-1.9.0-cp35-cp35m-linux_aarch64.whl
+                    ;;
+            *) ;;
+        esac
+    done
+    
+    # Check if is selected the version of tensorflow to install
+    if [ ! -z $DP_TENSORFLOW ] ; then
+        # Move to selected folder
+        cd $DP_FOLDER
+        
+        tput setaf 6
+        echo "Download and install pip"
+        tput sgr0
+        wget https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        sudo python get-pip.py
+        
+        tput setaf 6
+        echo "Downloading in $DP_FOLDER Tensorflow $DP_TENSORFLOW"
+        echo "Tensorflow $DP_TENSORFLOW"
+        echo "Thanks @peterlee0127"
+        tput sgr0
+        # Download last version of tensor flow
+        wget https://github.com/peterlee0127/tensorflow-nvJetson/releases/download/binary/$DP_TENSORFLOW
+        
+        tput setaf 6
+        echo "Install Tensorflow $DP_TENSORFLOW"
+        tput sgr0
+        # Install tensorflow
+        sudo pip install $DP_TENSORFLOW
+        
+        # Remove file
+        #sudo rm $DP_TENSORFLOW
+        
+        # Restore previuous folder
+        cd $LOCAL_FOLDER
+    else
+        tput setaf 1
+        echo "I can't install Tensorflow, any Jetpack is recognized!"
+        tput sgr0
+    fi
+}
 
 script_load_default()
 {
@@ -84,8 +176,7 @@ dp_is_enabled()
 
 dp_learning_list()
 {
-    if [ -z ${DP_PATCH_LIST+x} ]
-    then
+    if [ -z ${DP_PATCH_LIST+x} ] ; then
         # Empty kernel patch list
         DP_PATCH_LIST="\"\""
     fi
