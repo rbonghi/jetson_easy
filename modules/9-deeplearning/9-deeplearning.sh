@@ -28,14 +28,19 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Install Deep learning frameworks
+# https://www.elinux.org/Jetson_TX2
 
 # Tensorflow for jetson 
 # https://github.com/peterlee0127/tensorflow-nvJetson
 # https://www.jetsonhacks.com/2017/03/24/caffe-deep-learning-framework-nvidia-jetson-tx2/
-# caffe2
-# https://github.com/caffe2/caffe2
+# Torch7
+# http://torch.ch/
+# https://github.com/dusty-nv/jetson-reinforcement/blob/master/CMakePreBuild.sh
 # Pytorch
+# https://pytorch.org/
 # https://gist.github.com/dusty-nv/ef2b372301c00c0a9d3203e42fd83426#file-pytorch_jetson_install-sh
+# Jetson-Inference
+# https://github.com/dusty-nv/jetson-inference
 
 # Default variables load
 MODULE_NAME="Install deep learning frameworks"
@@ -44,6 +49,72 @@ MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Install deep learning module:dp_learning_list" "Set install folder:dp_set_install_folder")
+
+dp_is_enabled()
+{
+    if [[ $DP_PATCH_LIST = *"$1"* ]] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
+script_run()
+{
+
+    if [ $(dp_is_enabled "tensorflow") == "ON" ] ; then
+        tput setaf 6
+        echo "Install tensorflow"
+        tput sgr0
+        dp_install_tensorflow
+    fi
+    
+    if [ $(dp_is_enabled "pyTorch") == "ON" ] ; then
+        tput setaf 6
+        echo "Install pyTorch"
+        tput sgr0
+        dp_install_pytorch
+    fi
+    
+    if [ $(dp_is_enabled "jetson-inference") == "ON" ] ; then
+        tput setaf 6
+        echo "Install jetson-inference"
+        tput sgr0
+        dp_install_jetson_inference
+    fi
+}
+
+dp_install_jetson_inference()
+{
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+    
+    tput setaf 6
+    echo "Install git and cmake"
+    tput sgr0
+    sudo apt-get install git cmake
+    
+    tput setaf 6
+    echo "Clone jetson-inference repository from @dusty-nv"
+    tput sgr0
+    git clone https://github.com/dusty-nv/jetson-inference
+    
+    tput setaf 6
+    echo "Configuring CMAKE"
+    tput sgr0
+    cd jetson-inference
+    mkdir build
+    cd build
+    cmake ../
+    
+    tput setaf 6
+    echo "Make jetson-inference"
+    tput sgr0
+    make
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
+}
 
 dp_install_pytorch()
 {
@@ -100,7 +171,7 @@ dp_install_tensorflow()
         tput setaf 6
         echo "Download and install pip"
         tput sgr0
-        wget https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         sudo python get-pip.py
         
         tput setaf 6
@@ -109,7 +180,7 @@ dp_install_tensorflow()
         echo "Thanks @peterlee0127"
         tput sgr0
         # Download last version of tensor flow
-        wget https://github.com/peterlee0127/tensorflow-nvJetson/releases/download/binary/$DP_TENSORFLOW
+        wget --output-document $DP_TENSORFLOW https://github.com/peterlee0127/tensorflow-nvJetson/releases/download/binary/$DP_TENSORFLOW
         
         tput setaf 6
         echo "Install Tensorflow $DP_TENSORFLOW"
@@ -165,15 +236,6 @@ script_info()
     echo " - Installation folder: $DP_FOLDER"
 }
 
-dp_is_enabled()
-{
-    if [[ $PKGS_PATCH_LIST = *"$1"* ]] ; then
-        echo "ON"
-    else
-        echo "OFF"
-    fi
-}
-
 dp_learning_list()
 {
     if [ -z ${DP_PATCH_LIST+x} ] ; then
@@ -181,22 +243,22 @@ dp_learning_list()
         DP_PATCH_LIST="\"\""
     fi
     
+    #"caffe"  "A fast open framework" $(dp_is_enabled "caffe") \
+    #"caffe2" "Lightweight, modular, and scalable" $(dp_is_enabled "caffe2") \
+    #"torch7" "Scientific computing framework" $(dp_is_enabled "torch7") \
+    
     local PKGS_PATCH_LIST_TMP
     DP_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which new packages do you want add?" 15 75 6 \
-    "caffe"  "A fast open framework" $(dp_is_enabled "caffe") \
-    "caffe2" "Lightweight, modular, and scalable" $(dp_is_enabled "caffe2") \
+    "Which new packages do you want add?" 15 75 3 \
     "tensorflow" "Open source machine learning framework" $(dp_is_enabled "tensorflow") \
-    "torch7" "Scientific computing framework" $(dp_is_enabled "torch7") \
     "pyTorch" "Tensors & Dynamic neural networks in Python" $(dp_is_enabled "pyTorch") \
     "jetson-inference" "Inference net & deep vision with TensorRT" $(dp_is_enabled "jetson-inference") 3>&1 1>&2 2>&3)
      
-    exitstatus=$?
+    local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Save list of new element to patch
         DP_PATCH_LIST="$DP_PATCH_LIST_TMP"
     fi
-    
 }
 
 dp_set_install_folder()
