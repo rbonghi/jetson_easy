@@ -35,3 +35,88 @@ MODULE_DESCRIPTION="With this module you can install other deep learning modules
 MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
+MODULE_SUBMENU=("Install deep learning module:dp_learning_list" "Set install folder:dp_set_install_folder")
+
+script_load_default()
+{
+    if [ -z ${DP_PATCH_LIST+x} ] ; then
+        # Empty packages patch list 
+        DP_PATCH_LIST="\"\""
+    fi
+    
+    if [ -z ${DP_FOLDER+x} ] ; then
+        # Empty packages patch list 
+        DP_FOLDER="$HOME"
+    fi
+}
+
+script_save()
+{    
+    if [ ! -z ${DP_PATCH_LIST+x} ] ; then
+        if [ $DP_PATCH_LIST != "\"\"" ]
+        then
+            echo "DP_PATCH_LIST=\"$DP_PATCH_LIST\"" >> $1
+        fi
+    fi
+    
+    if [ ! -z ${DP_FOLDER+x} ] ; then
+        if [ $DP_FOLDER != "\"\"" ]
+        then
+            echo "DP_FOLDER=\"$DP_FOLDER\"" >> $1
+        fi
+    fi
+}
+
+script_info()
+{
+    echo " - Will be add this packages: $DP_PATCH_LIST"
+    echo " - Installation folder: $DP_FOLDER"
+}
+
+dp_is_enabled()
+{
+    if [[ $PKGS_PATCH_LIST = *"$1"* ]] ; then
+        echo "ON"
+    else
+        echo "OFF"
+    fi
+}
+
+dp_learning_list()
+{
+    if [ -z ${DP_PATCH_LIST+x} ]
+    then
+        # Empty kernel patch list
+        DP_PATCH_LIST="\"\""
+    fi
+    
+    local PKGS_PATCH_LIST_TMP
+    DP_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
+    "Which new packages do you want add?" 15 75 6 \
+    "caffe"  "A fast open framework" $(dp_is_enabled "caffe") \
+    "caffe2" "Lightweight, modular, and scalable" $(dp_is_enabled "caffe2") \
+    "tensorflow" "Open source machine learning framework" $(dp_is_enabled "tensorflow") \
+    "torch7" "Scientific computing framework" $(dp_is_enabled "torch7") \
+    "pyTorch" "Tensors & Dynamic neural networks in Python" $(dp_is_enabled "pyTorch") \
+    "jetson-inference" "Inference net & deep vision with TensorRT" $(dp_is_enabled "jetson-inference") 3>&1 1>&2 2>&3)
+     
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save list of new element to patch
+        DP_PATCH_LIST="$DP_PATCH_LIST_TMP"
+    fi
+    
+}
+
+dp_set_install_folder()
+{
+    local dp_set_install_folder_temp
+    ros_set_master_uri_temp=$(whiptail --inputbox "Set install folder" 8 78 $DP_FOLDER --title "Set install folder" 3>&1 1>&2 2>&3)
+    
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Write new DP_FOLDER
+        DP_FOLDER=$dp_set_install_folder_temp
+    fi
+}
+
