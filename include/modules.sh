@@ -325,9 +325,13 @@ modules_run()
                         echo "Running module - $MODULE_NAME in mode AUTO mode"
                         # Check if exist the function
                         if type script_check &>/dev/null ; then
+							# Move to same folder
+							cd $FOLDER
                             # Run script check function
-                            script_check
+                            script_check $LOCAL_FOLDER
                             local RET=$?
+							# Restore previuous folder
+							cd $LOCAL_FOLDER
                             if [ $RET == 1 ] ; then
                                 # run Script
                                 modules_run_script

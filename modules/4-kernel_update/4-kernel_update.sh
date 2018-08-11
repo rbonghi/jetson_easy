@@ -358,10 +358,10 @@ script_check()
             local description=$(echo $sub_element | cut -f3 -d ":")
             
             if [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
-                echo "$name is installed!"
+                #echo "$name is installed!"
                 check=$check & true 
             else
-                echo "$name require installation!"
+                #echo "$name require installation!"
                 check=$check & false
             fi
         done

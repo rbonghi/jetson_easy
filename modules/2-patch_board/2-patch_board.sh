@@ -52,7 +52,8 @@ script_check()
         #Clean from extra spaces
         ver=${ver//[[:blank:]]/}
         case $ver in
-            "3.2"| "3.2.1" ) return 1 ;;
+            "3.2"| "3.2.1" ) 
+               return 1 ;;
             *) return 0 ;;
         esac
     done
