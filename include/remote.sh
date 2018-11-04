@@ -64,6 +64,14 @@ remote_get_config()
     fi
 }
 
+remote_find_jetson()
+{
+    # Return all boards with written jetson
+    # nmap -sP 192.168.1.1/24 | grep "jetson" | cut -d "(" -f2 | cut -d ")" -f1
+    # check for all "jetson" or "tegra-ubuntu"
+    echo "0"
+}
+
 remote_get_user_host()
 {
     MODULE_REMOTE_USER=$(echo "$1" |  cut -f1 -d "@" )

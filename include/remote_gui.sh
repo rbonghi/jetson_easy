@@ -85,6 +85,11 @@ Do you want continue?" 12 50) then
     fi
 }
 
+#menu_remote_pass()
+#{
+# TODO
+#}
+
 menu_remote_pass()
 {
     #Password Input
