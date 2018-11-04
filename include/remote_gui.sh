@@ -38,6 +38,7 @@ menu_remote_introduction()
     if [ ! -z $MODULE_REMOTE_USER ] && [ ! -z $MODULE_REMOTE_HOST ] && [ ! -z $MODULE_PASSWORD ] ; then
         MENU_REMOTE_SELECTION=menu_remote_info
     else
+        #MENU_REMOTE_SELECTION=menu_remote_find
         MENU_REMOTE_SELECTION=menu_remote_user_host
     fi  
 }
@@ -85,10 +86,25 @@ Do you want continue?" 12 50) then
     fi
 }
 
-#menu_remote_pass()
-#{
-# TODO
-#}
+menu_remote_find()
+{
+    # Load all Jetson availables
+    remote_find_jetson
+    # Evaluate the size
+    local ARLENGTH
+    let ARLENGTH=${#MENU_LIST[@]}/2
+
+    local MODULE_REMOTE_FIND
+    MODULE_REMOTE_FIND=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 22 60 $ARLENGTH "${MODULE_REMOTE_FIND_LIST[@]}" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        if [ $MODULE_REMOTE_FIND != "Manual" ] ; then
+            MODULE_REMOTE_HOST=$MODULE_REMOTE_FIND
+        fi
+    fi
+    # Initialize remote menu
+    MENU_REMOTE_SELECTION=menu_remote_user_host
+}
 
 menu_remote_pass()
 {
