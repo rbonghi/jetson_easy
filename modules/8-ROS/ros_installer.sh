@@ -59,7 +59,7 @@ ros_install()
 
     # Install ROS 
     tput setaf 6
-    echo "Install ROS ros-$ROS_NEW_DISTRO-ros-base"
+    echo "Install ROS ros-$ROS_NEW_DISTRO-$ROS_DISTRO_TYPE"
     tput sgr0
     sudo apt-get install ros-$ROS_NEW_DISTRO-$ROS_DISTRO_TYPE -y
 
