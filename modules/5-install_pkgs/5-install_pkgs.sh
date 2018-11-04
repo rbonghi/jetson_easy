@@ -38,7 +38,7 @@ MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 
-INSTALL_ZED_VERSION="2.5"
+INSTALL_ZED_VERSION="2.7"
 
 pkgs_is_enabled()
 {
@@ -76,7 +76,9 @@ script_run()
             tput sgr0
             local JETSON_NAME
             # Select version board
-            if [ $JETSON_BOARD == "TX1" ] ; then
+            if [ $JETSON_BOARD == "Xavier" ] ; then
+                 JETSON_NAME="tegraxavier"
+            elif [ $JETSON_BOARD == "TX1" ] ; then
                 JETSON_NAME="tegrax1"
             elif [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
                 JETSON_NAME="tegrax2"
@@ -90,6 +92,9 @@ script_run()
                 fi
             fi
             
+            # Example output
+            # https://download.stereolabs.com/zedsdk/2.7/tegraxavier
+
             tput setaf 6
             echo "Download https://download.stereolabs.com/zedsdk/$INSTALL_ZED_VERSION/$JETSON_NAME"
             tput sgr0
