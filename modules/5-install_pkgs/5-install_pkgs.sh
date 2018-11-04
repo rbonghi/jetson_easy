@@ -66,6 +66,13 @@ script_run()
         tput sgr0
         sudo apt-get install nano -y
     fi
+
+    if [ $(pkgs_is_enabled "iftop") == "ON" ] ; then
+        tput setaf 6
+        echo "Install iftop"
+        tput sgr0
+        sudo apt-get install iftop -y
+    fi
     
     if [ $(pkgs_is_enabled "ZED") == "ON" ] ; then
     
@@ -159,9 +166,10 @@ set_pkgs()
     
     local PKGS_PATCH_LIST_TMP
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which new packages do you want add?" 15 60 3 \
+    "Which new packages do you want add?" 15 60 4 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
+    "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
