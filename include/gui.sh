@@ -52,6 +52,7 @@ system_info()
         if [ -f $FILE ] ; then
             # Unset save function
             unset -f script_list
+            unset MODULE_OPTIONS
             # Load source
             source "$FILE"
             # Check if exist the function
@@ -94,7 +95,7 @@ submenu_default()
     # Load enable variable
     local  __enablevar=$2
     # If MODULE_OPTIONS doesn't exist load default values
-    if [ -z ${MODULE_OPTIONS+x} ] ; then
+    if [ -z $MODULE_OPTIONS ] ; then
         MODULE_OPTIONS=("AUTO" "RUN" "STOP")
     fi
     # Load lines
@@ -183,6 +184,7 @@ submenu_extra()
 submenu_configuration()
 {
     unset MODULE_SUBMENU
+    unset MODULE_OPTIONS
     # Load source
     source "$1"
     # Load the function with the same name    
@@ -404,6 +406,7 @@ menu_list_installed()
                 "AUTO") # Unset save function
                          unset -f script_info
                          unset -f script_check
+                         unset MODULE_OPTIONS
                          # Load source
                          source "$FILE"
                          # Check if exist the function
@@ -430,6 +433,7 @@ menu_list_installed()
                          fi ;;
                 "RUN" ) # Unset save function
                          unset -f script_info
+                         unset MODULE_OPTIONS
                          # Load source
                          source "$FILE"
                          # Add element in menu
