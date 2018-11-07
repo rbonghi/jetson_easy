@@ -164,22 +164,23 @@ patch_opencv3_patcher()
     #https://www.thegeekstuff.com/2014/12/patch-command-examples
     sudo patch /usr/local/cuda/include/cuda_gl_interop.h opencv/cuda_gl_interop.patch
     
-    ### Fix the symbolic link of libGL.so
-    tput setaf 6
-    echo "Fix the symbolic link of libGL.so"
-    tput sgr0
+    # If exist the tegra file
+    # https://devtalk.nvidia.com/default/topic/946136/
+    if [ -f /usr/lib/aarch64-linux-gnu/tegra/libGL.so ]; then
+        # Local folder
+        local LOCAL_FOLDER=$(pwd)
     
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-    
-    cd /usr/lib/aarch64-linux-gnu/
-    
-    if [ $DISTRIB_RELEASE == "16.04" ] ; then
+        ### Fix the symbolic link of libGL.so
+        tput setaf 6
+        echo "Fix the symbolic link of libGL.so"
+        tput sgr0
+        cd /usr/lib/aarch64-linux-gnu/   
+        
         sudo ln -sf tegra/libGL.so libGL.so
+        
+        # Restore previuous folder
+        cd $LOCAL_FOLDER
     fi
-    
-    # Restore previuous folder
-    cd $LOCAL_FOLDER
 }
 
 patch_opencv3_installer()
@@ -218,6 +219,9 @@ patch_opencv3_installer()
     cd $opencv_source_folder/opencv
     mkdir build
     cd build
+
+    # Reference to cmake OpenCV
+    # https://github.com/jetsonhacks/buildOpenCVXavier/blob/master/buildOpenCV.sh
 
     time cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
           -D WITH_CUDA=ON -D CUDA_ARCH_BIN=$JETSON_CUDA_ARCH_BIN -D CUDA_ARCH_PTX="" \
