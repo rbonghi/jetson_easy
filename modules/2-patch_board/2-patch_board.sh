@@ -41,8 +41,12 @@ MODULE_DEFAULT="AUTO"
 # https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
 # https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
 
+PATCH_OPENCV_VERSION=3.4.0
+PATCH_DOWNLOAD_OPENCV_EXTRAS="NO"
+
 script_check()
 {
+    # Check if this jetpack require update return true
     local IFS
     local JETSON_JETPACK_VERS
     # Decode all JETSON_JETPACK versions
@@ -54,25 +58,62 @@ script_check()
         case $ver in
             "3.2"| "3.2.1" ) 
                return 1 ;;
-            *) return 0 ;;
+            *) ;;
         esac
     done
+    # Otherwise check  if other script requre updates
+    
+    # Load fix_opencv.sh script
+    source opencv/fix_opencv.sh
+    # Check opencv3
+    opencv3_check $PATCH_OPENCV_VERSION
+    if [ $? -eq 1 ] ; then
+        return 1
+    fi
+    # Load source
+    source cuda_examples/fix_cuda_example.sh
+    # Check cuda examples
+    cuda_examples_check
+    if [ $? -eq 1 ] ; then
+        return 1
+    fi
+    # Otherwise return 0
+    return 0
 }
 
-jp32_fix()
+script_info()
 {
-        # Fix apt-get update
-        # https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
-        echo "Fix keys apt-get update"
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F60F4B3D7FA2AF80
-        sudo apt-get update
-        # Load source
-        source jp32/patch.sh
-        # Run cuda examples patch
-        jp32_patch_cuda_examples
-        echo "Pach opencv in $JETSON_JETPACK"
-        # Run patcher
-        jp32_patch_opencv3
+    # Check if this jetpack require update return true
+    local IFS
+    local JETSON_JETPACK_VERS
+    # Decode all JETSON_JETPACK versions
+    IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
+    local ver
+    for ver in "${JETSON_JETPACK_VERS[@]}"; do
+        #Clean from extra spaces
+        ver=${ver//[[:blank:]]/}
+        case $ver in
+            "3.2"| "3.2.1" ) 
+               echo "    - Fix errors in Jetpack $ver"
+               break ;;
+            *) ;;
+        esac
+    done
+    
+    # Load fix_opencv.sh script
+    source opencv/fix_opencv.sh
+    # Check opencv3
+    opencv3_check $PATCH_OPENCV_VERSION
+    if [ $? -eq 1 ] ; then
+        echo "    - Update OpenCV $JETSON_OPENCV to $PATCH_OPENCV_VERSION and enable CUDA"
+    fi
+    # Load source
+    source cuda_examples/fix_cuda_example.sh
+    # Check cuda examples
+    cuda_examples_check
+    if [ $? -eq 1 ] ; then
+        echo "    - Update Cuda Examples"
+    fi
 }
 
 script_run()
@@ -81,19 +122,33 @@ script_run()
     echo "Patch $JETSON_DESCRIPTION from known errors"
     tput sgr0
     
-    # Decode all JETSON_JETPACK versions
+    # Decode all JETSON_JETPACK versions and run script check
     IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
     local ver
     for ver in "${JETSON_JETPACK_VERS[@]}"; do
         #Clean from extra spaces
         ver=${ver//[[:blank:]]/}
         case $ver in
-            "3.2"| "3.2.1" ) # Run jp32 fix
-                             jp32_fix
+            "3.2"| "3.2.1" ) # Run jp32 fix key
+                             source jp32_patch.sh
+                             jp32_fix_key
                              ;;
             *) ;;
         esac
     done
+    
+    # Load fix_opencv.sh script
+    source opencv/fix_opencv.sh
+    tput setaf 6
+    echo "Pach opencv in $JETSON_JETPACK"
+    tput sgr0
+    # Run patcher
+    patch_opencv3 $PATCH_OPENCV_VERSION
+    
+    # Load source
+    source cuda_examples/fix_cuda_example.sh
+    # Run cuda examples patch
+    patch_cuda_examples
 }
 
 
