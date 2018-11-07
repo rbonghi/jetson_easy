@@ -289,7 +289,7 @@ menu_configuration()
         local ARLENGTH
         let ARLENGTH=${#MENU_LIST[@]}/2
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 66 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
@@ -423,8 +423,12 @@ menu_list_installed()
                                  echo "[X] $MODULE_NAME"
                                  # Check if exist the function
                                  if type script_info &>/dev/null ; then
+                                    # Move to same folder
+       							    cd $FOLDER
                                     # run script
                                     script_info
+                                    # Restore previuous folder
+							        cd $LOCAL_FOLDER
                                  fi
                             else
                                  # Add element in menu
@@ -440,8 +444,12 @@ menu_list_installed()
                          echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
                          # Check if exist the function
                          if type script_info &>/dev/null ; then
+                            # Move to same folder
+						    cd $FOLDER
                             # run script
                             script_info
+                            # Restore previuous folder
+					        cd $LOCAL_FOLDER
                         fi ;;
                 *) ;;
             esac

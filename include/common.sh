@@ -134,9 +134,10 @@ jetson_status()
     if [ ! -z ${JETSON_BOARD+x} ] ; then
         echo "(*) NVIDIA embedded:"
         echo "    - Board: $JETSON_DESCRIPTION"
+        echo "    - CUDA GPU architecture: $JETSON_CUDA_ARCH_BIN"
         echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
         echo "    - CUDA: $JETSON_CUDA"
-        echo "    - OpenCV: $JETSON_OPENCV"
+        echo "    - OpenCV: $JETSON_OPENCV compiled CUDA: $JETSON_OPENCV_CUDA"
     else
         echo "(*) It isn't an NVIDIA Jetson"
     fi
