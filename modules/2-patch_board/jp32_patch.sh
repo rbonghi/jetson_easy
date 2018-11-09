@@ -30,6 +30,27 @@
 # https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
 # https://jkjung-avt.github.io/opencv3-on-tx2/
 
+jp32_check()
+{
+    # Check if this jetpack require update return true
+    local IFS
+    local JETSON_JETPACK_VERS
+    # Decode all JETSON_JETPACK versions
+    IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
+    local ver
+    for ver in "${JETSON_JETPACK_VERS[@]}"; do
+        #Clean from extra spaces
+        ver=${ver//[[:blank:]]/}
+        case $ver in
+            "3.2"| "3.2.1" ) 
+               return 1 ;;
+            *) ;;
+        esac
+    done
+    # Otherwise check  if other script require updates
+    return 0
+}
+
 jp32_fix_key()
 {
         # Fix apt-get update

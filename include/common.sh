@@ -80,6 +80,36 @@ jetson_vercomp()
     return
 }
 
+common_load_check()
+{
+    if [ ! -z ${1+x} ] ; then
+        if [ $1 == "YES" ] ; then
+            if [ ! -z ${2+x} ] && [ $2 == "YES" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        else
+            if [ ! -z ${2+x} ] && [ $2 == "NO" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        fi
+    else
+        echo "OFF"
+    fi
+}
+
+common_is_check()
+{
+    if [ ! -z ${1+x} ] && [ $1 == "YES" ] ; then
+        echo "X"
+    else
+        echo " "
+    fi
+}
+
 ####################################
 
 menu_title()

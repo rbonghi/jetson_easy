@@ -41,27 +41,159 @@ MODULE_DEFAULT="AUTO"
 # https://devtalk.nvidia.com/default/topic/1027301/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-developer-preview-for-jetson-tx2/post/5225602/#5225602
 # https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
 
-PATCH_OPENCV_VERSION=3.4.0
-PATCH_DOWNLOAD_OPENCV_EXTRAS="NO"
+# Load jetpack scripts
+source $(pwd)/modules/2-patch_board/jp32_patch.sh
+# Check if is require to patch jetson or NOT
+jp32_check
+if [ $? -eq 1 ] ; then
+    PATCH_JETPACK="YES"
+else
+    PATCH_JETPACK="NO"
+fi
+
+# Load source
+source $(pwd)/modules/2-patch_board/cuda_examples/fix_cuda_example.sh
+# Check cuda examples
+cuda_examples_check
+if [ $? -eq 1 ] ; then
+    PATCH_CUDA_EXAMPLES="YES"
+else
+    PATCH_CUDA_EXAMPLES="NO"
+fi
+
+patch_opencv_set_contrib()
+{
+    local patch_opencv_set_contrib_temp
+    patch_opencv_set_contrib_temp=$(whiptail --title "$MODULE_NAME - Install contrib" --radiolist \
+    "Do you want install OpenCV with Contrib?" 15 60 2 \
+    "YES" "Install Contrib" $(common_load_check "YES" $PATCH_DOWNLOAD_OPENCV_CONTRIB) \
+    "NO" "Without Contrib" $(common_load_check "NO" $PATCH_DOWNLOAD_OPENCV_CONTRIB) 3>&1 1>&2 2>&3)
+     
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        PATCH_DOWNLOAD_OPENCV_CONTRIB=$patch_opencv_set_contrib_temp
+    fi
+    patch_opencv
+}
+
+patch_opencv_set_extras()
+{
+    local patch_opencv_set_extras_temp
+    patch_opencv_set_extras_temp=$(whiptail --title "$MODULE_NAME - Install extras" --radiolist \
+    "Do you want install OpenCV with Extras?" 15 60 2 \
+    "YES" "Install Extras" $(common_load_check "YES" $PATCH_DOWNLOAD_OPENCV_EXTRAS) \
+    "NO" "Without Extras" $(common_load_check "NO" $PATCH_DOWNLOAD_OPENCV_EXTRAS) 3>&1 1>&2 2>&3)
+     
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        PATCH_DOWNLOAD_OPENCV_EXTRAS=$patch_opencv_set_extras_temp
+    fi
+    patch_opencv
+}
+
+patch_opencv_set_version()
+{
+    local patch_opencv_menu_temp
+    patch_opencv_menu_temp=$(whiptail --inputbox "Write the ONLY version number you want install" 8 78 $PATCH_OPENCV_VERSION --title "$MODULE_NAME - OpenCV version number" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save openCV version
+        PATCH_OPENCV_VERSION=$patch_opencv_menu_temp
+    fi
+    patch_opencv
+}
+
+patch_opencv_set_path()
+{
+    local patch_opencv_path_temp
+    patch_opencv_path_temp=$(whiptail --inputbox "Write where will be download all opencv source path" 8 78 $PATCH_OPENCV_PATH --title "$MODULE_NAME - OpenCV source path" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save openCV version
+        PATCH_OPENCV_PATH=$patch_opencv_path_temp
+    fi
+    patch_opencv
+}
+
+patch_opencv()
+{
+    local patch_opencv_menu_temp
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 10 60 4 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "path" "Set OpenCV source path: $PATCH_OPENCV_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        case $patch_opencv_menu_temp in
+            "version") patch_opencv_set_version ;;
+            "path") patch_opencv_set_path ;;
+            "contrib") patch_opencv_set_contrib ;;
+            "extras") patch_opencv_set_extras ;;
+            *) ;;
+        esac
+    fi
+}
+
+patch_jetpack()
+{
+    whiptail --title "$MODULE_NAME - Update This $JETSON_JETPACK" --textbox /dev/stdin 10 45 <<< "Update This $JETSON_JETPACK with last fixes"
+}
+
+patch_cuda_examples()
+{
+    whiptail --title "$MODULE_NAME - Fix all CUDA examples" --textbox /dev/stdin 10 45 <<< "Fix all CUDA $JETSON_CUDA examples"
+}
+
+############################################
+
+script_load_default()
+{
+    # Write openCV version
+    if [ -z ${PATCH_OPENCV_VERSION+x} ] ; then
+        PATCH_OPENCV_VERSION=3.4.0
+    fi
+    
+    # Write openCV path
+    if [ -z ${PATCH_OPENCV_PATH+x} ] ; then
+        PATCH_OPENCV_PATH="/usr/local"
+    fi
+    
+    # Write openCV with contrib
+    if [ -z ${PATCH_DOWNLOAD_OPENCV_CONTRIB+x} ] ; then
+        PATCH_DOWNLOAD_OPENCV_CONTRIB="NO"
+    fi
+    
+    # Write openCV with extras
+    if [ -z ${PATCH_DOWNLOAD_OPENCV_EXTRAS+x} ] ; then
+        PATCH_DOWNLOAD_OPENCV_EXTRAS="NO"
+    fi
+}
+
+script_save()
+{
+    # OpenCV version
+    if [ ! -z ${PATCH_OPENCV_VERSION+x} ] && [ ! -z $PATCH_OPENCV_VERSION ] ; then
+        echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1
+    fi
+    
+    # OpenCV path
+    if [ ! -z ${PATCH_OPENCV_PATH+x} ] && [ ! -z $PATCH_OPENCV_PATH ] ; then
+        echo "PATCH_OPENCV_PATH=\"$PATCH_OPENCV_PATH\"" >> $1
+    fi
+    
+    # OpenCV with contrib
+    if [ ! -z ${PATCH_DOWNLOAD_OPENCV_CONTRIB+x} ] && [ ! -z $PATCH_DOWNLOAD_OPENCV_CONTRIB ] ; then
+        echo "PATCH_DOWNLOAD_OPENCV_CONTRIB=\"$PATCH_DOWNLOAD_OPENCV_CONTRIB\"" >> $1
+    fi
+    
+    # OpenCV with contrib
+    if [ ! -z ${PATCH_DOWNLOAD_OPENCV_EXTRAS+x} ] && [ ! -z $PATCH_DOWNLOAD_OPENCV_EXTRAS ] ; then
+        echo "PATCH_DOWNLOAD_OPENCV_EXTRAS=\"$PATCH_DOWNLOAD_OPENCV_EXTRAS\"" >> $1
+    fi
+}
 
 script_check()
 {
-    # Check if this jetpack require update return true
-    local IFS
-    local JETSON_JETPACK_VERS
-    # Decode all JETSON_JETPACK versions
-    IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
-    local ver
-    for ver in "${JETSON_JETPACK_VERS[@]}"; do
-        #Clean from extra spaces
-        ver=${ver//[[:blank:]]/}
-        case $ver in
-            "3.2"| "3.2.1" ) 
-               return 1 ;;
-            *) ;;
-        esac
-    done
-    # Otherwise check  if other script requre updates
+    if [ $PATCH_JETPACK == "YES" ] ; then
+        return 1
+    fi
     
     # Load fix_opencv.sh script
     source opencv/fix_opencv.sh
@@ -70,11 +202,9 @@ script_check()
     if [ $? -eq 1 ] ; then
         return 1
     fi
-    # Load source
-    source cuda_examples/fix_cuda_example.sh
+
     # Check cuda examples
-    cuda_examples_check
-    if [ $? -eq 1 ] ; then
+    if [ $PATCH_CUDA_EXAMPLES == "YES" ] ; then
         return 1
     fi
     # Otherwise return 0
@@ -152,3 +282,13 @@ script_run()
 }
 
 
+## Name distribution
+MODULE_SUBMENU=("Configure OpenCV:patch_opencv" )
+
+if [ ! -z ${PATCH_JETPACK+x} ] && [ $PATCH_JETPACK == "YES" ] ; then
+    MODULE_SUBMENU+=("Patch Jetpack:patch_jetpack" )
+fi
+
+if [ ! -z ${PATCH_CUDA_EXAMPLES+x} ] && [ $PATCH_CUDA_EXAMPLES == "YES" ] ; then
+    MODULE_SUBMENU+=("Patch CUDA Examples:patch_cuda_examples" )
+fi
