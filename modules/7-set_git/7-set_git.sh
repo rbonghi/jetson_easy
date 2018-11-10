@@ -42,7 +42,7 @@ script_run()
     tput setaf 6
     echo "Install git"
     tput sgr0
-    sudo apt-get install git -y
+    sudo apt install git -y
     
     if [ ! -z ${NEW_GIT_USERNAME+x} ] ; then
         tput setaf 6

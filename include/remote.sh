@@ -64,6 +64,32 @@ remote_get_config()
     fi
 }
 
+remote_find_jetson()
+{
+    # Find all jetson in network
+    local list=$(nmap -sP 192.168.1.1/24)
+    # Initialize global vector
+    MODULE_REMOTE_FIND_LIST=()
+    # Add Manual entry
+    MODULE_REMOTE_FIND_LIST+=("Manual" "Write manually the address")
+    # Get all tegra boards availables
+    local tegra_list=$(echo $list | grep "tegra")
+    # Get all jetson boards availables
+    local jetson_list=$(echo $list | grep "jetson")
+    # Read all lines
+    local line
+    while read line ; do 
+        # Export name from list
+        local name=${line#"Nmap scan report for "}
+        name=$(echo $name | cut -d " " -f1 )
+        # Get IP address
+        local address=$(echo $line | cut -d "(" -f2 | cut -d ")" -f1)
+        MODULE_REMOTE_FIND_LIST+=("$address" "$name")
+        #echo $address - $name
+    done <<< "$tegra_list
+$jetson_list"
+}
+
 remote_get_user_host()
 {
     MODULE_REMOTE_USER=$(echo "$1" |  cut -f1 -d "@" )

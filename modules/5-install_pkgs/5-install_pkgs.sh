@@ -38,7 +38,7 @@ MODULE_OPTIONS=("RUN" "STOP")
 
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 
-INSTALL_ZED_VERSION="2.5"
+INSTALL_ZED_VERSION="2.7"
 
 pkgs_is_enabled()
 {
@@ -49,6 +49,31 @@ pkgs_is_enabled()
     fi
 }
 
+install_pkgs_jupyter()
+{
+    # http://jupyter.org/install
+    # https://github.com/jupyterhub/jupyterhub/wiki/Installation-of-Jupyterhub-on-remote-server
+    # https://jupyter-notebook.readthedocs.io/en/stable/public_server.html
+    # http://blog.lerner.co.il/five-minute-guide-setting-jupyter-notebook-server/
+    # https://aichamp.wordpress.com/2017/06/13/setting-up-jupyter-notebook-server-as-service-in-ubuntu-16-04/
+    # https://github.com/dusty-nv/jetson-reinforcement/issues/21
+    
+    sudo apt install python3-pip
+    
+    python3 -m pip install --upgrade pip
+    python3 -m pip install --user jupyter
+    
+    # Add in bashrc
+    
+    # Add Jupiter path
+    export PATH=${PATH}:~/.local/bin
+    
+    # TODO
+    # write service module for jupyter
+    
+    echo "None"
+}
+
 script_run()
 {
     echo "Install standard packages"
@@ -57,14 +82,21 @@ script_run()
         tput setaf 6
         echo "Install htop"
         tput sgr0
-        sudo apt-get install htop -y
+        sudo apt install htop -y
     fi
     
     if [ $(pkgs_is_enabled "nano") == "ON" ] ; then
         tput setaf 6
         echo "Install nano"
         tput sgr0
-        sudo apt-get install nano -y
+        sudo apt install nano -y
+    fi
+
+    if [ $(pkgs_is_enabled "iftop") == "ON" ] ; then
+        tput setaf 6
+        echo "Install iftop"
+        tput sgr0
+        sudo apt install iftop -y
     fi
     
     if [ $(pkgs_is_enabled "ZED") == "ON" ] ; then
@@ -76,7 +108,9 @@ script_run()
             tput sgr0
             local JETSON_NAME
             # Select version board
-            if [ $JETSON_BOARD == "TX1" ] ; then
+            if [ $JETSON_BOARD == "Xavier" ] ; then
+                 JETSON_NAME="tegraxavier"
+            elif [ $JETSON_BOARD == "TX1" ] ; then
                 JETSON_NAME="tegrax1"
             elif [ $JETSON_BOARD == "TX2" ] || [ $JETSON_BOARD == "TX2i" ] ; then
                 JETSON_NAME="tegrax2"
@@ -90,6 +124,9 @@ script_run()
                 fi
             fi
             
+            # Example output
+            # https://download.stereolabs.com/zedsdk/2.7/tegraxavier
+
             tput setaf 6
             echo "Download https://download.stereolabs.com/zedsdk/$INSTALL_ZED_VERSION/$JETSON_NAME"
             tput sgr0
@@ -154,9 +191,10 @@ set_pkgs()
     
     local PKGS_PATCH_LIST_TMP
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which new packages do you want add?" 15 60 3 \
+    "Which new packages do you want add?" 15 60 4 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
+    "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?

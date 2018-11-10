@@ -133,6 +133,8 @@ script_list()
             
             if [ $(kernel_check_isconfig $config "y" $config_file) == "ON" ] ; then
                 echo "    - [X] $name - $description"
+            elif [ $(kernel_check_isconfig $config "m" $config_file) == "ON" ] ; then
+                echo "    - [M] $name - $description"
             else
                 echo "    - [ ] $name - $description"
             fi

@@ -80,6 +80,36 @@ jetson_vercomp()
     return
 }
 
+common_load_check()
+{
+    if [ ! -z ${1+x} ] ; then
+        if [ $1 == "YES" ] ; then
+            if [ ! -z ${2+x} ] && [ $2 == "YES" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        else
+            if [ ! -z ${2+x} ] && [ $2 == "NO" ] ; then
+                echo "ON"
+            else
+                echo "OFF"
+            fi
+        fi
+    else
+        echo "OFF"
+    fi
+}
+
+common_is_check()
+{
+    if [ ! -z ${1+x} ] && [ $1 == "YES" ] ; then
+        echo "X"
+    else
+        echo " "
+    fi
+}
+
 ####################################
 
 menu_title()
@@ -134,9 +164,10 @@ jetson_status()
     if [ ! -z ${JETSON_BOARD+x} ] ; then
         echo "(*) NVIDIA embedded:"
         echo "    - Board: $JETSON_DESCRIPTION"
+        echo "    - CUDA GPU architecture: $JETSON_CUDA_ARCH_BIN"
         echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
         echo "    - CUDA: $JETSON_CUDA"
-        echo "    - OpenCV: $JETSON_OPENCV"
+        echo "    - OpenCV: $JETSON_OPENCV compiled CUDA: $JETSON_OPENCV_CUDA"
     else
         echo "(*) It isn't an NVIDIA Jetson"
     fi

@@ -52,6 +52,7 @@ system_info()
         if [ -f $FILE ] ; then
             # Unset save function
             unset -f script_list
+            unset MODULE_OPTIONS
             # Load source
             source "$FILE"
             # Check if exist the function
@@ -94,7 +95,7 @@ submenu_default()
     # Load enable variable
     local  __enablevar=$2
     # If MODULE_OPTIONS doesn't exist load default values
-    if [ -z ${MODULE_OPTIONS+x} ] ; then
+    if [ -z $MODULE_OPTIONS ] ; then
         MODULE_OPTIONS=("AUTO" "RUN" "STOP")
     fi
     # Load lines
@@ -183,6 +184,7 @@ submenu_extra()
 submenu_configuration()
 {
     unset MODULE_SUBMENU
+    unset MODULE_OPTIONS
     # Load source
     source "$1"
     # Load the function with the same name    
@@ -287,7 +289,7 @@ menu_configuration()
         local ARLENGTH
         let ARLENGTH=${#MENU_LIST[@]}/2
         # Write the menu         
-        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 60 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
+        OPTION=$(whiptail --title "$(menu_title)Setup" --menu "$(menu_configuration_menu)" 22 66 $ARLENGTH "${MENU_LIST[@]}" 3>&1 1>&2 2>&3)
         
         exitstatus=$?
         if [ $exitstatus = 0 ]; then
@@ -404,6 +406,7 @@ menu_list_installed()
                 "AUTO") # Unset save function
                          unset -f script_info
                          unset -f script_check
+                         unset MODULE_OPTIONS
                          # Load source
                          source "$FILE"
                          # Check if exist the function
@@ -420,8 +423,12 @@ menu_list_installed()
                                  echo "[X] $MODULE_NAME"
                                  # Check if exist the function
                                  if type script_info &>/dev/null ; then
+                                    # Move to same folder
+       							    cd $FOLDER
                                     # run script
                                     script_info
+                                    # Restore previuous folder
+							        cd $LOCAL_FOLDER
                                  fi
                             else
                                  # Add element in menu
@@ -430,14 +437,19 @@ menu_list_installed()
                          fi ;;
                 "RUN" ) # Unset save function
                          unset -f script_info
+                         unset MODULE_OPTIONS
                          # Load source
                          source "$FILE"
                          # Add element in menu
                          echo "[$(menu_checkIfLoaded $FILE_NAME)] $MODULE_NAME"
                          # Check if exist the function
                          if type script_info &>/dev/null ; then
+                            # Move to same folder
+						    cd $FOLDER
                             # run script
                             script_info
+                            # Restore previuous folder
+					        cd $LOCAL_FOLDER
                         fi ;;
                 *) ;;
             esac
@@ -500,7 +512,7 @@ menu_loop()
     do  
         # Load Menu
         ${MENU_SELECTION}
-    done
+    done 
 }
 
 

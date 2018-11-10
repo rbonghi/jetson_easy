@@ -88,6 +88,7 @@ dp_install_jetson_inference()
 {
     # Local folder
     local LOCAL_FOLDER=$(pwd)
+    local NUM_CPU=$(nproc)
     
     tput setaf 6
     echo "Install git and cmake"
@@ -105,12 +106,12 @@ dp_install_jetson_inference()
     cd jetson-inference
     mkdir build
     cd build
-    cmake ../
+    time cmake ../
     
     tput setaf 6
-    echo "Make jetson-inference"
+    echo "Make jetson-inference with $NUM_CPU CPU"
     tput sgr0
-    make
+    time make -j$(($NUM_CPU - 1))
     
     # Restore previuous folder
     cd $LOCAL_FOLDER
@@ -138,11 +139,8 @@ dp_install_pytorch()
     cd $LOCAL_FOLDER
 }
 
-dp_install_tensorflow()
+dp_install_tensorflow_32()
 {
-    # Local folder
-    local LOCAL_FOLDER=$(pwd)
-            
     local DP_TENSORFLOW=""
     # Decode all JETSON_JETPACK versions
     IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
@@ -151,9 +149,6 @@ dp_install_tensorflow()
         #Clean from extra spaces
         ver=${ver//[[:blank:]]/}
         case $ver in
-            "3.3")  # Set version of tensorflow to install
-                    DP_TENSORFLOW=tensorflow-1.10.0rc1-cp27-cp27mu-linux_aarch64.whl
-                    ;;
             "3.2"| "3.2.1" ) 
                     # Add version of tensorflow
                     DP_TENSORFLOW=tensorflow-1.10.0rc0-cp27-cp27mu-linux_aarch64.whl
@@ -162,9 +157,39 @@ dp_install_tensorflow()
             *) ;;
         esac
     done
+}
+
+dp_install_tensorflow_check32()
+{
+    # Decode all JETSON_JETPACK versions
+    IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
+    local ver
+    for ver in "${JETSON_JETPACK_VERS[@]}"; do
+        #Clean from extra spaces
+        ver=${ver//[[:blank:]]/}
+        case $ver in
+            "3.2"| "3.2.1" ) 
+                    # Add version of tensorflow
+                    echo "tensorflow-1.10.0rc0-cp27-cp27mu-linux_aarch64.whl"
+                    return
+                    #DP_TENSORFLOW=tensorflow-1.9.0-cp35-cp35m-linux_aarch64.whl
+                    ;;
+            *) echo "" 
+               return ;;
+        esac
+    done
+}
+
+dp_install_tensorflow()
+{
+    # Local folder
+    local LOCAL_FOLDER=$(pwd)
+            
+    local DP_TENSORFLOW=""
     
-    # Check if is selected the version of tensorflow to install
-    if [ ! -z $DP_TENSORFLOW ] ; then
+    # If is Jetpack 3.2 follow another line to install TensorFlow
+    DP_TENSORFLOW=$(dp_install_tensorflow_check32)
+    if [ ! -z "$DP_TENSORFLOW" ] ; then
         # Move to selected folder
         cd $DP_FOLDER
         
@@ -194,9 +219,53 @@ dp_install_tensorflow()
         # Restore previuous folder
         cd $LOCAL_FOLDER
     else
-        tput setaf 1
-        echo "I can't install Tensorflow, any Jetpack is recognized!"
-        tput sgr0
+    
+        local DP_TENSORFLOW_VERSION=""
+        # Decode all JETSON_JETPACK versions
+        IFS='|' read -ra JETSON_JETPACK_VERS <<< "$JETSON_JETPACK"
+        local ver
+        for ver in "${JETSON_JETPACK_VERS[@]}"; do
+            #Clean from extra spaces
+            ver=${ver//[[:blank:]]/}
+            case $ver in
+                "4.1"| "4.1.1" ) 
+                        DP_TENSORFLOW_VERSION="41"
+                        ;;
+                "4.0") 
+                        DP_TENSORFLOW_VERSION="40"
+                        ;;
+                "3.3") 
+                        DP_TENSORFLOW_VERSION="33"
+                        ;;
+                *) ;;
+            esac
+        done
+        
+        # Check if is selected the version of tensorflow to install
+        if [ ! -z $DP_TENSORFLOW_VERSION ] ; then
+            tput setaf 6
+            echo "Download and install pip"
+            tput sgr0
+            sudo apt-get install python-pip
+            tput setaf 6
+            echo "Download and install pip3"
+            tput sgr0
+            sudo apt-get install python3-pip
+        
+            tput setaf 6
+            echo "Install Tensorflow $DP_TENSORFLOW for python2.7"
+            tput sgr0
+            pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v$DP_TENSORFLOW_VERSION tensorflow-gpu
+            tput setaf 6
+            echo "Install Tensorflow $DP_TENSORFLOW for python3.6"
+            tput sgr0
+            pip3 install --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v$DP_TENSORFLOW_VERSION tensorflow-gpu
+            
+        else
+            tput setaf 1
+            echo "I can't install Tensorflow, any Jetpack is recognized!"
+            tput sgr0
+        fi
     fi
 }
 

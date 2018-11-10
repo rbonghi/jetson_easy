@@ -297,11 +297,21 @@ ros_load_check()
 
 ros_set_distro()
 {
+    local ROS_DISTRO_LIST=()
+    if [ $DISTRIB_RELEASE == "18.04" ] ; then
+        ROS_DISTRO_LIST+=("melodic" "Install the workspace" $(ros_load_equal "melodic" $ROS_NEW_DISTRO))
+    elif [ $DISTRIB_RELEASE == "16.04" ] ; then
+        ROS_DISTRO_LIST+=("kinetic" "Install the workspace" $(ros_load_equal "kinetic" $ROS_NEW_DISTRO))
+        ROS_DISTRO_LIST+=("lunar" "Skipp installation" $(ros_load_equal "lunar" $ROS_NEW_DISTRO))
+    fi
+
+    # Evaluate the size
+    local ARLENGTH
+    let ARLENGTH=${#ROS_DISTRO_LIST[@]}/2
+
     local ros_new_distro_temp
     ros_new_distro_temp=$(whiptail --title "Set distribution" --radiolist \
-    "Set ROS distribution" 15 60 2 \
-    "kinetic" "Install the workspace" $(ros_load_equal "kinetic" $ROS_NEW_DISTRO) \
-    "lunar" "Skipp installation" $(ros_load_equal "lunar" $ROS_NEW_DISTRO) 3>&1 1>&2 2>&3)
+    "Set ROS distribution" 15 60 $ARLENGTH "${ROS_DISTRO_LIST[@]}" 3>&1 1>&2 2>&3)
      
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
