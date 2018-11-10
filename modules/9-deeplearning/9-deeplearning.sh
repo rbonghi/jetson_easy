@@ -234,7 +234,7 @@ dp_install_tensorflow()
                 "4.0") 
                         DP_TENSORFLOW_VERSION="40"
                         ;;
-                "3.3"| "3.2.1" ) 
+                "3.3") 
                         DP_TENSORFLOW_VERSION="33"
                         ;;
                 *) ;;
