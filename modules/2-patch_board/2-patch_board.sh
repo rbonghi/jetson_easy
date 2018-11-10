@@ -145,7 +145,7 @@ patch_opencv_set_install_path()
 patch_opencv()
 {
     local patch_opencv_menu_temp
-    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 16 60 6 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "force" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_FORCE)] Force to install OpenCV" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 16 60 6 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "force" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_FORCE)] Force OpenCV install" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         case $patch_opencv_menu_temp in
