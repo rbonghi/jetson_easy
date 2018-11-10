@@ -49,6 +49,31 @@ pkgs_is_enabled()
     fi
 }
 
+install_pkgs_jupyter()
+{
+    # http://jupyter.org/install
+    # https://github.com/jupyterhub/jupyterhub/wiki/Installation-of-Jupyterhub-on-remote-server
+    # https://jupyter-notebook.readthedocs.io/en/stable/public_server.html
+    # http://blog.lerner.co.il/five-minute-guide-setting-jupyter-notebook-server/
+    # https://aichamp.wordpress.com/2017/06/13/setting-up-jupyter-notebook-server-as-service-in-ubuntu-16-04/
+    # https://github.com/dusty-nv/jetson-reinforcement/issues/21
+    
+    sudo apt install python3-pip
+    
+    python3 -m pip install --upgrade pip
+    python3 -m pip install --user jupyter
+    
+    # Add in bashrc
+    
+    # Add Jupiter path
+    export PATH=${PATH}:~/.local/bin
+    
+    # TODO
+    # write service module for jupyter
+    
+    echo "None"
+}
+
 script_run()
 {
     echo "Install standard packages"
