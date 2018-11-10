@@ -157,12 +157,23 @@ patch_opencv3_patcher()
     
     ### Patch OpenCV3
     # https://devtalk.nvidia.com/default/topic/1007290/jetson-tx2/building-opencv-with-opengl-support-/post/5141945/#5141945
-    tput setaf 6
-    echo "Patching cuda_gl_interop.h"
-    tput sgr0
-    
     #https://www.thegeekstuff.com/2014/12/patch-command-examples
-    sudo patch /usr/local/cuda/include/cuda_gl_interop.h opencv/cuda_gl_interop.patch
+    
+    sudo patch -p0 -N --dry-run --silent /usr/local/cuda/include/cuda_gl_interop.h opencv/cuda_gl_interop.patch 2>/dev/null
+    #If the patch has not been applied then the $? which is the exit status 
+    #for last command would have a success status code = 0
+    if [ $? -eq 0 ];
+    then
+        #apply the patch
+        tput setaf 6
+        echo "Patching CUDA file: /usr/local/cuda/include/cuda_gl_interop.h"
+        tput sgr0
+        sudo patch -N /usr/local/cuda/include/cuda_gl_interop.h opencv/cuda_gl_interop.patch
+    else
+        tput setaf 3
+        echo "CUDA /usr/local/cuda/include/cuda_gl_interop.h has already patched!"
+        tput sgr0
+    fi
     
     # If exist the tegra file
     # https://devtalk.nvidia.com/default/topic/946136/
@@ -189,26 +200,33 @@ patch_opencv3_installer()
     local LOCAL_FOLDER=$(pwd)
     local NUM_CPU=$(nproc)
     local OPENCV_VERSION=$1
-    local opencv_source_folder="/tmp/opencv-$OPENCV_VERSION"
+    local opencv_source_path="$PATCH_OPENCV_SOURCE_PATH"
     
     ### Download last stable opencv source code
     tput setaf 6
     echo "Download OpenCV $OPENCV_VERSION source code"
     tput sgr0
     
-    mkdir -p $opencv_source_folder
-    cd $opencv_source_folder
+    mkdir -p $opencv_source_path
+    cd $opencv_source_path
     git clone https://github.com/opencv/opencv.git
     cd opencv
     git checkout -b v${OPENCV_VERSION} ${OPENCV_VERSION}
 
+    if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
+        echo "Installing opencv_contrib"
+        git clone https://github.com/opencv/opencv_contrib.git
+        cd opencv_contrib
+        git checkout -b v${OPENCV_VERSION} ${OPENCV_VERSION}
+        cd ..
+    fi
+
     if [ $PATCH_DOWNLOAD_OPENCV_EXTRAS == "YES" ] ; then
         echo "Installing opencv_extras"
-        # This is for the test data
-        cd $opencv_source_folder
         git clone https://github.com/opencv/opencv_extra.git
         cd opencv_extra
         git checkout -b v${OPENCV_VERSION} ${OPENCV_VERSION}
+        cd ..
     fi
     
     ### Build opencv (CUDA_ARCH_BIN="6.2" for TX2, or "5.3" for TX1)
@@ -216,19 +234,45 @@ patch_opencv3_installer()
     echo "Build openCV with CUDA_ARCH_BIN=\"$JETSON_CUDA_ARCH_BIN\" for your $JETSON_DESCRIPTION"
     tput sgr0
     
-    cd $opencv_source_folder/opencv
+    cd $opencv_source_path/opencv
     mkdir build
     cd build
 
     # Reference to cmake OpenCV
     # https://github.com/jetsonhacks/buildOpenCVXavier/blob/master/buildOpenCV.sh
 
-    time cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
+    # Added for this release of Jetson AGX Xavier from Jetson TX2
+    local opencv_xavier_option = ""
+    if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
+        opencv_xavier_option = "-D CUDA_NVCC_FLAGS=\"--expt-relaxed-constexpr\" -D WITH_TBB=ON"
+    fi
+    
+    # Add extra options for OpenCV contrib
+    local opencv_contrib_option = ""
+    if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
+        opencv_contrib_option = "-D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules"
+    fi
+    
+    # Add extra options for OpenCV extras
+    local opencv_extras_option = ""
+    if [ $PATCH_DOWNLOAD_OPENCV_EXTRAS == "YES" ] ; then
+        opencv_extras_option = "-D INSTALL_TESTS=ON -D OPENCV_TEST_DATA_PATH=../opencv_extra/testdata"
+    fi
+    
+    local opencv_test_option = ""
+    if [ $PATCH_DOWNLOAD_OPENCV_TEST == "YES" ] ; then
+        opencv_test_option = "-D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON"
+    fi
+    # There are also switches which tell CMAKE to build the samples and tests
+    # Check OpenCV documentation for details
+
+    time cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=$PATCH_OPENCV_INSTALL_PATH \
           -D WITH_CUDA=ON -D CUDA_ARCH_BIN=$JETSON_CUDA_ARCH_BIN -D CUDA_ARCH_PTX="" \
           -D WITH_CUBLAS=ON -D ENABLE_FAST_MATH=ON -D CUDA_FAST_MATH=ON \
           -D ENABLE_NEON=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=OFF \
           -D BUILD_PERF_TESTS=OFF -D BUILD_EXAMPLES=OFF \
-          -D WITH_QT=ON -D WITH_OPENGL=ON ..
+          -D WITH_GSTREAMER=ON -D WITH_GSTREAMER_0_10=OFF \
+          -D WITH_QT=ON -D WITH_OPENGL=ON $opencv_xavier_option $opencv_contrib_option $opencv_extras_option ..
 
     if [ $? -eq 0 ] ; then
     
@@ -247,17 +291,19 @@ patch_opencv3_installer()
         sudo make install
 
         tput setaf 6
-        echo "Remove OpenCV $OPENCV_VERSION source code"
-        tput sgr0
-        sudo rm -R $opencv_source_folder
-
-        tput setaf 6
         echo "ldconfig"
         tput sgr0
         sudo ldconfig
+        
+        tput setaf 6
+        echo "Remove OpenCV $OPENCV_VERSION source code in $opencv_source_path"
+        tput sgr0
+        cd $PATCH_OPENCV_SOURCE_PATH
+        sudo rm -R "opencv"
+        
     else
       # Try to make again
-      tput setaf 0
+      tput setaf 3
       echo "CMake issues " >&2
       echo "Please check the configuration being used"
       tput sgr0

@@ -103,14 +103,26 @@ patch_opencv_set_version()
     patch_opencv
 }
 
-patch_opencv_set_path()
+patch_opencv_set_source_path()
 {
-    local patch_opencv_path_temp
-    patch_opencv_path_temp=$(whiptail --inputbox "Write where will be download all opencv source path" 8 78 $PATCH_OPENCV_PATH --title "$MODULE_NAME - OpenCV source path" 3>&1 1>&2 2>&3)
+    local patch_opencv_source_path_temp
+    patch_opencv_source_path_temp=$(whiptail --inputbox "Write where will be download all opencv source path" 8 78 $PATCH_OPENCV_SOURCE_PATH --title "$MODULE_NAME - OpenCV source path" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Save openCV version
-        PATCH_OPENCV_PATH=$patch_opencv_path_temp
+        PATCH_OPENCV_SOURCE_PATH=$patch_opencv_source_path_temp
+    fi
+    patch_opencv
+}
+
+patch_opencv_set_install_path()
+{
+    local patch_opencv_install_path_temp
+    patch_opencv_install_path_temp=$(whiptail --inputbox "Write where will be installed opencv" 8 78 $PATCH_OPENCV_INSTALL_PATH --title "$MODULE_NAME - OpenCV install path" 3>&1 1>&2 2>&3)
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        # Save openCV version
+        PATCH_OPENCV_INSTALL_PATH=$patch_opencv_install_path_temp
     fi
     patch_opencv
 }
@@ -118,12 +130,13 @@ patch_opencv_set_path()
 patch_opencv()
 {
     local patch_opencv_menu_temp
-    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 10 60 4 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "path" "Set OpenCV source path: $PATCH_OPENCV_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 10 60 5 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_SOURCE_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         case $patch_opencv_menu_temp in
             "version") patch_opencv_set_version ;;
-            "path") patch_opencv_set_path ;;
+            "source") patch_opencv_set_source_path ;;
+            "install") patch_opencv_set_install_path ;;
             "contrib") patch_opencv_set_contrib ;;
             "extras") patch_opencv_set_extras ;;
             *) ;;
@@ -150,9 +163,14 @@ script_load_default()
         PATCH_OPENCV_VERSION=3.4.0
     fi
     
+    # Write openCV source path
+    if [ -z ${PATCH_OPENCV_SOURCE_PATH+x} ] ; then
+        PATCH_OPENCV_SOURCE_PATH="/tmp"
+    fi
+    
     # Write openCV path
-    if [ -z ${PATCH_OPENCV_PATH+x} ] ; then
-        PATCH_OPENCV_PATH="/usr/local"
+    if [ -z ${PATCH_OPENCV_INSTALL_PATH+x} ] ; then
+        PATCH_OPENCV_INSTALL_PATH="/usr/local"
     fi
     
     # Write openCV with contrib
@@ -173,9 +191,14 @@ script_save()
         echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1
     fi
     
-    # OpenCV path
-    if [ ! -z ${PATCH_OPENCV_PATH+x} ] && [ ! -z $PATCH_OPENCV_PATH ] ; then
-        echo "PATCH_OPENCV_PATH=\"$PATCH_OPENCV_PATH\"" >> $1
+    # OpenCV source path
+    if [ ! -z ${PATCH_OPENCV_SOURCE_PATH+x} ] && [ ! -z $PATCH_OPENCV_SOURCE_PATH ] ; then
+        echo "PATCH_OPENCV_SOURCE_PATH=\"$PATCH_OPENCV_SOURCE_PATH\"" >> $1
+    fi
+    
+    # OpenCV install path
+    if [ ! -z ${PATCH_OPENCV_INSTALL_PATH+x} ] && [ ! -z $PATCH_OPENCV_INSTALL_PATH ] ; then
+        echo "PATCH_OPENCV_INSTALL_PATH=\"$PATCH_OPENCV_INSTALL_PATH\"" >> $1
     fi
     
     # OpenCV with contrib
