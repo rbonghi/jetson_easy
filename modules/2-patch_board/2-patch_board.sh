@@ -61,6 +61,21 @@ else
     PATCH_CUDA_EXAMPLES="NO"
 fi
 
+patch_opencv_set_force()
+{
+    local patch_opencv_set_force_temp
+    patch_opencv_set_force_temp=$(whiptail --title "$MODULE_NAME - Force reinstall" --radiolist \
+    "Do you want force install/reinstall OpenCV v$PATCH_OPENCV_VERSION?" 15 60 2 \
+    "YES" "Force reinstall OpenCV v$PATCH_OPENCV_VERSION" $(common_load_check "YES" $PATCH_DOWNLOAD_OPENCV_FORCE) \
+    "NO" "Automatic check if is required" $(common_load_check "NO" $PATCH_DOWNLOAD_OPENCV_FORCE) 3>&1 1>&2 2>&3)
+     
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        PATCH_DOWNLOAD_OPENCV_FORCE=$patch_opencv_set_force_temp
+    fi
+    patch_opencv
+}
+
 patch_opencv_set_contrib()
 {
     local patch_opencv_set_contrib_temp
@@ -130,13 +145,14 @@ patch_opencv_set_install_path()
 patch_opencv()
 {
     local patch_opencv_menu_temp
-    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 15 60 5 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 16 60 6 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "force" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_FORCE)] Force to install OpenCV" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         case $patch_opencv_menu_temp in
             "version") patch_opencv_set_version ;;
             "source") patch_opencv_set_source_path ;;
             "install") patch_opencv_set_install_path ;;
+            "force") patch_opencv_set_force ;;
             "contrib") patch_opencv_set_contrib ;;
             "extras") patch_opencv_set_extras ;;
             *) ;;
@@ -158,6 +174,11 @@ patch_cuda_examples()
 
 script_load_default()
 {
+    # Write openCV force
+    if [ -z ${PATCH_DOWNLOAD_OPENCV_FORCE+x} ] ; then
+        PATCH_DOWNLOAD_OPENCV_FORCE="NO"
+    fi
+
     # Write openCV version
     if [ -z ${PATCH_OPENCV_VERSION+x} ] ; then
         PATCH_OPENCV_VERSION=3.4.0
@@ -186,6 +207,11 @@ script_load_default()
 
 script_save()
 {
+    # OpenCV force
+    if [ ! -z ${PATCH_DOWNLOAD_OPENCV_FORCE+x} ] && [ ! -z $PATCH_DOWNLOAD_OPENCV_FORCE ] ; then
+        echo "PATCH_DOWNLOAD_OPENCV_FORCE=\"$PATCH_DOWNLOAD_OPENCV_FORCE\"" >> $1
+    fi
+
     # OpenCV version
     if [ ! -z ${PATCH_OPENCV_VERSION+x} ] && [ ! -z $PATCH_OPENCV_VERSION ] ; then
         echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1

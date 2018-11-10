@@ -31,6 +31,11 @@
 opencv3_check()
 {
     local PATCH_OPENCV_VERSION=$1
+    
+    if [ "$PATCH_DOWNLOAD_OPENCV_FORCE" = "YES" ] ; then
+        return 1
+    fi
+    
     if [ "$JETSON_OPENCV" = "NOT INSTALLED" ] ; then
         return 0
     else
@@ -204,7 +209,7 @@ patch_opencv3_installer()
     
     ### Download last stable opencv source code
     tput setaf 6
-    echo "Download OpenCV $OPENCV_VERSION source code"
+    echo "Download OpenCV $OPENCV_VERSION source code in $opencv_source_path"
     tput sgr0
     
     mkdir -p $opencv_source_path
