@@ -130,7 +130,7 @@ patch_opencv_set_install_path()
 patch_opencv()
 {
     local patch_opencv_menu_temp
-    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 10 60 5 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_SOURCE_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 15 60 5 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         case $patch_opencv_menu_temp in
@@ -259,6 +259,12 @@ script_info()
     opencv3_check $PATCH_OPENCV_VERSION
     if [ $? -eq 1 ] ; then
         echo "    - Update OpenCV $JETSON_OPENCV to $PATCH_OPENCV_VERSION and enable CUDA"
+        if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
+            echo "        - Install Contrib"
+        fi
+        if [ $PATCH_DOWNLOAD_OPENCV_EXTRAS == "YES" ] ; then
+            echo "        - Install Extras"
+        fi
     fi
     # Load source
     source cuda_examples/fix_cuda_example.sh
@@ -306,7 +312,7 @@ script_run()
 
 
 ## Name distribution
-MODULE_SUBMENU=("Configure OpenCV:patch_opencv" )
+MODULE_SUBMENU=("Configure OpenCV with v$PATCH_OPENCV_VERSION:patch_opencv" )
 
 if [ ! -z ${PATCH_JETPACK+x} ] && [ $PATCH_JETPACK == "YES" ] ; then
     MODULE_SUBMENU+=("Patch Jetpack:patch_jetpack" )
