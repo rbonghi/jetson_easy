@@ -181,7 +181,11 @@ script_load_default()
 
     # Write openCV version
     if [ -z ${PATCH_OPENCV_VERSION+x} ] ; then
-        PATCH_OPENCV_VERSION=3.4.0
+        if [ $JETSON_OPENCV != "NOT INSTALLED" ] ; then
+            PATCH_OPENCV_VERSION=$JETSON_OPENCV
+        else
+            PATCH_OPENCV_VERSION=3.4.0
+        fi
     fi
     
     # Write openCV source path
@@ -214,7 +218,10 @@ script_save()
 
     # OpenCV version
     if [ ! -z ${PATCH_OPENCV_VERSION+x} ] && [ ! -z $PATCH_OPENCV_VERSION ] ; then
-        echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1
+        # Save only if the versions are not the same
+        if [ $PATCH_OPENCV_VERSION != $JETSON_OPENCV] ; then
+            echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1
+        fi
     fi
     
     # OpenCV source path
