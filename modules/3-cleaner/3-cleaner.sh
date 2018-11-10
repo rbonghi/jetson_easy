@@ -59,45 +59,45 @@ uninstall_unity_scope()
         'more_suggestions-u1ms.scope', 'more_suggestions-populartracks.scope', 'music-musicstore.scope', \
         'more_suggestions-ebay.scope', 'more_suggestions-ubuntushop.scope', 'more_suggestions-skimlinks.scope']"
 
-    sudo apt-get remove --purge unity-lens-friends -y
-    sudo apt-get remove --purge unity-lens-music -y
-    sudo apt-get remove --purge unity-lens-music -y
-    sudo apt-get remove --purge unity-lens-photos -y
-    sudo apt-get remove --purge unity-lens-video -y
+    sudo apt remove --purge unity-lens-friends -y
+    sudo apt remove --purge unity-lens-music -y
+    sudo apt remove --purge unity-lens-music -y
+    sudo apt remove --purge unity-lens-photos -y
+    sudo apt remove --purge unity-lens-video -y
 
-    sudo apt-get remove --purge unity-scope-audacious -y
-    sudo apt-get remove --purge unity-scope-calculator -y
-    sudo apt-get remove --purge unity-scope-chromiumbookmarks -y
-    sudo apt-get remove --purge unity-scope-clementine -y
-    sudo apt-get remove --purge unity-scope-colourlovers -y
-    sudo apt-get remove --purge unity-scope-devhelp -y
-    sudo apt-get remove --purge unity-scope-firefoxbookmarks -y
-    sudo apt-get remove --purge unity-scope-gdrive -y
-    sudo apt-get remove --purge unity-scope-gmusicbrowser -y
-    sudo apt-get remove --purge unity-scope-gourmet -y
-    sudo apt-get remove --purge unity-scope-guayadeque -y
-    sudo apt-get remove --purge unity-scope-manpages -y
-    sudo apt-get remove --purge unity-scope-musicstores -y
-    sudo apt-get remove --purge unity-scope-musique -y
-    sudo apt-get remove --purge unity-scope-openclipart -y
-    sudo apt-get remove --purge unity-scope-exdoc -y
-    sudo apt-get remove --purge unity-scope-tomboy -y
-    sudo apt-get remove --purge unity-scope-video-remote -y
-    sudo apt-get remove --purge unity-scope-virtualbox -y
-    sudo apt-get remove --purge unity-scope-yelp -y
-    sudo apt-get remove --purge unity-scope-zotero -y
+    sudo apt remove --purge unity-scope-audacious -y
+    sudo apt remove --purge unity-scope-calculator -y
+    sudo apt remove --purge unity-scope-chromiumbookmarks -y
+    sudo apt remove --purge unity-scope-clementine -y
+    sudo apt remove --purge unity-scope-colourlovers -y
+    sudo apt remove --purge unity-scope-devhelp -y
+    sudo apt remove --purge unity-scope-firefoxbookmarks -y
+    sudo apt remove --purge unity-scope-gdrive -y
+    sudo apt remove --purge unity-scope-gmusicbrowser -y
+    sudo apt remove --purge unity-scope-gourmet -y
+    sudo apt remove --purge unity-scope-guayadeque -y
+    sudo apt remove --purge unity-scope-manpages -y
+    sudo apt remove --purge unity-scope-musicstores -y
+    sudo apt remove --purge unity-scope-musique -y
+    sudo apt remove --purge unity-scope-openclipart -y
+    sudo apt remove --purge unity-scope-exdoc -y
+    sudo apt remove --purge unity-scope-tomboy -y
+    sudo apt remove --purge unity-scope-video-remote -y
+    sudo apt remove --purge unity-scope-virtualbox -y
+    sudo apt remove --purge unity-scope-yelp -y
+    sudo apt remove --purge unity-scope-zotero -y
     
     sudo apt-get clean -y
-    sudo apt-get autoremove -y
+    sudo apt autoremove -y
 }
 
 uninstall_libreoffice()
 {
     # Remove the Libre Office installation
     # Useful if you need the extra rom
-    sudo apt-get remove --purge libreoffice* -y
+    sudo apt remove --purge libreoffice* -y
     sudo apt-get clean -y
-    sudo apt-get autoremove -y
+    sudo apt autoremove -y
 }
 
 script_run()

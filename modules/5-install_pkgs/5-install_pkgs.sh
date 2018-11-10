@@ -57,21 +57,21 @@ script_run()
         tput setaf 6
         echo "Install htop"
         tput sgr0
-        sudo apt-get install htop -y
+        sudo apt install htop -y
     fi
     
     if [ $(pkgs_is_enabled "nano") == "ON" ] ; then
         tput setaf 6
         echo "Install nano"
         tput sgr0
-        sudo apt-get install nano -y
+        sudo apt install nano -y
     fi
 
     if [ $(pkgs_is_enabled "iftop") == "ON" ] ; then
         tput setaf 6
         echo "Install iftop"
         tput sgr0
-        sudo apt-get install iftop -y
+        sudo apt install iftop -y
     fi
     
     if [ $(pkgs_is_enabled "ZED") == "ON" ] ; then

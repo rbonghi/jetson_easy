@@ -70,7 +70,7 @@ wstool_install()
     echo "Install wstool"
     tput sgr0
     
-    sudo apt-get install python-wstool
+    sudo apt install python-wstool
     
     # Download and check rosinstall file
     local PATH_FILE

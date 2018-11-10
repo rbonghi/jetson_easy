@@ -55,19 +55,19 @@ ros_install()
     tput setaf 6
     echo 'APT update starting...'
     tput sgr0
-    sudo apt-get update
+    sudo apt update
 
     # Install ROS 
     tput setaf 6
     echo "Install ROS ros-$ROS_NEW_DISTRO-$ROS_DISTRO_TYPE"
     tput sgr0
-    sudo apt-get install ros-$ROS_NEW_DISTRO-$ROS_DISTRO_TYPE -y
+    sudo apt install ros-$ROS_NEW_DISTRO-$ROS_DISTRO_TYPE -y
 
     # Initialize rosdep
     tput setaf 6
     echo "Install ROS python-rosdep"
     tput sgr0
-    sudo apt-get install python-rosdep -y
+    sudo apt install python-rosdep -y
 
     # Certificates are messed up on the Jetson for some reason
     tput setaf 6
@@ -102,7 +102,7 @@ ros_install()
     tput setaf 6
     echo "Install python-rosinstall"
     tput sgr0
-    sudo apt-get install python-rosinstall -y
+    sudo apt install python-rosinstall -y
 }
 
 ros_install_workspace()

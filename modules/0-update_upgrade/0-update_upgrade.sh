@@ -30,6 +30,7 @@
 # Update and upgrade
 # How many updates are availables
 # https://stackoverflow.com/questions/21949984/find-os-number-of-updates-available
+# https://itsfoss.com/apt-vs-apt-get-difference/
 
 MODULE_NAME="Update & Distribution upgrade & Upgrade"
 MODULE_DESCRIPTION="Launch in order:
@@ -65,6 +66,7 @@ script_list()
     fi
 }
 
+# https://itsfoss.com/apt-vs-apt-get-difference/
 script_run()
 {
     # Automatically update keys
@@ -83,25 +85,25 @@ script_run()
     tput setaf 6
     echo 'APT update starting...'
     tput sgr0
-    sudo apt-get update
+    sudo apt update
     
     # Automatically distributive upgrade all packages
     tput setaf 6
     echo 'APT distributive upgrade starting...'
     tput sgr0
-    sudo apt-get -y dist-upgrade --allow-unauthenticated
+    sudo apt -y full-upgrade --allow-unauthenticated
     
     # Automatically upgrade all packages
     tput setaf 6
     echo 'APT upgrade starting...'
     tput sgr0
-    sudo apt-get -y dist-upgrade
+    sudo apt -y full-upgrade
     
     # Automatically remove packages
     tput setaf 6
     echo 'APT autoremove starting...'
     tput sgr0
-    sudo apt-get -y autoremove --allow-unauthenticated
+    sudo apt -y autoremove --allow-unauthenticated
     
     tput setaf 6
     echo 'END'

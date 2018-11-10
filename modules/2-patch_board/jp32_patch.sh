@@ -57,6 +57,6 @@ jp32_fix_key()
         # https://devtalk.nvidia.com/default/topic/1030831/jetson-tx2/jetpack-3-2-mdash-l4t-r28-2-production-release-for-jetson-tx1-tx2/post/5245450/#5245450
         echo "Fix keys apt-get update"
         sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F60F4B3D7FA2AF80
-        sudo apt-get update
+        sudo apt update
 }
 
