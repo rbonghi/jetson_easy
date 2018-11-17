@@ -238,7 +238,7 @@ menu_filebrowser()
 
 menu_message_introduction()
 {
-    if [ -e $USER_PWD/$MODULES_CONFIG_NAME ] || [ $config_folder != "$USER_PWD" ] ; then
+    if [ -e $USER_PWD/$MODULES_CONFIG_FOLDER/$MODULES_CONFIG_NAME ] || [ $config_folder != "$USER_PWD/$MODULES_CONFIG_FOLDER" ] ; then
         whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 45 <<< "$(menu_header)
 --------------------------------------
 Load Config from $config_folder"

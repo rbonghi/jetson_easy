@@ -219,7 +219,7 @@ script_save()
     # OpenCV version
     if [ ! -z ${PATCH_OPENCV_VERSION+x} ] && [ ! -z $PATCH_OPENCV_VERSION ] ; then
         # Save only if the versions are not the same
-        if [ $PATCH_OPENCV_VERSION != $JETSON_OPENCV] ; then
+        if [ $PATCH_OPENCV_VERSION != $JETSON_OPENCV ] ; then
             echo "PATCH_OPENCV_VERSION=\"$PATCH_OPENCV_VERSION\"" >> $1
         fi
     fi

@@ -31,6 +31,7 @@ MODULES_LIST=""
 MODULES_FOLDER="modules"
 # Default name setup jetson_easy
 MODULES_CONFIG_NAME="setup.txt"
+MODULES_CONFIG_FOLDER="config"
 # Absolute path configuration file
 MODULES_CONFIG_PATH=""
 MODULES_CONFIG_FILE=""
@@ -93,6 +94,9 @@ modules_load_default()
     done
     # Sort all modules
     modules_sort
+    
+    echo $MODULES_CONFIG_PATH
+    #if [ -d "$MODULES_CONFIG_PATH" ] 
 }
 
 # Load configuration return status:
@@ -101,27 +105,33 @@ modules_load_default()
 modules_load_config()
 {
 	#Default load setup config name folder
-	local MODULES_CONFIG=$MODULES_CONFIG_NAME
+	local MODULES_CONFIG=$MODULES_CONFIG_FOLDER/$MODULES_CONFIG_NAME
     if [ ! -z $1 ] ; then
         MODULES_CONFIG=$1
-    fi
+    fi    
     local config_path=""
     # Load config path
     if [[ "$MODULES_CONFIG" = /* ]]; then
         # Save absolute path
         config_path="$MODULES_CONFIG"
+        
+        echo "Absoulte"
     else
         # Get absolute path from local path
         config_path="$USER_PWD/$MODULES_CONFIG"
+        
+        echo "Local"
     fi
+    
+    echo "config_path=$config_path"
     
     # Check configuration file
 	if [[ -d $config_path ]]; then
-		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: setup.txt)
+		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: config/setup.txt)
 		local setup_file=$config_path/$MODULES_CONFIG_NAME
 		# Check if exist config file
 		if [[ -f $setup_file ]]; then
-			#echo "$setup_file is a jetson easy folder"
+			echo "$setup_file is a jetson easy folder"
 			# Set variables
 			MODULES_CONFIG_PATH=$(realpath $config_path)
 			MODULES_CONFIG_FILE=$(realpath $setup_file)
