@@ -98,6 +98,9 @@ submenu_default()
     if [ -z $MODULE_OPTIONS ] ; then
         MODULE_OPTIONS=("AUTO" "RUN" "STOP")
     fi
+    if [ -z ${MODULE_NAME+x} ]; then
+        MODULE_NAME="Extra Script in \"$MODULES_CONFIG_PROJECT\""
+    fi
     # Load lines
     local MENU_SHOW_OPTIONS=()
     local tmp
@@ -185,10 +188,11 @@ submenu_configuration()
 {
     unset MODULE_SUBMENU
     unset MODULE_OPTIONS
+    unset MODULE_NAME
     # Load source
     source "$1"
-    # Load the function with the same name    
-    local FUNC=$(echo $1 | cut -f2 -d "/")
+    # Load the function with the same name
+    local FUNC=$(basename -- "$1")
     # Save the name of the function
     local NAME=$(echo $FUNC | cut -f1 -d ".")
     # Check if exist the function
@@ -201,7 +205,7 @@ submenu_configuration()
         submenu_default $(modules_isInList $NAME) STATUS
     fi
     if [ ! -z "$STATUS" ] ; then
-        # echo "Return value: $STATUS"
+        # echo "$NAME = Return value: $STATUS"
         # Add or remove the module in list
         modules_update $NAME $STATUS
     fi
@@ -217,7 +221,6 @@ menu_checkIfLoaded()
         *)      echo " " ;;
     esac
 }
-
 menu_save_line_info()
 {
     if [[ -d $config_folder ]]; then
@@ -249,6 +252,7 @@ menu_load_list()
             # unload variables
             unset MODULE_DEFAULT
             unset MODULE_OPTIONS
+            unset MODULE_NAME
             # Load source
             source "$FILE"
             # Add only all modules without MODULE_DEFAULT not equal "DIS"
@@ -259,9 +263,29 @@ menu_load_list()
                 #Increase counter
                 COUNTER=$((COUNTER+1))
             fi
+            unset MODULE_NAME
         fi
       fi
-    done
+    done    
+    # Check if exist an extra configuration script file and load it
+    local EXTRA_CONFIG="$MODULES_CONFIG_PATH/X-$MODULES_CONFIG_PROJECT.sh"
+    if [ -f $EXTRA_CONFIG ] ; then
+        # unload variables
+        unset MODULE_DEFAULT
+        unset MODULE_OPTIONS
+        unset MODULE_NAME
+        # Load source
+        source "$EXTRA_CONFIG"
+        if [ -z ${MODULE_NAME+x} ]; then
+            MODULE_NAME="Extra Script in \"$MODULES_CONFIG_PROJECT\""
+        fi
+        MENU_LIST+=("Extra" "[$(menu_checkIfLoaded X-$MODULES_CONFIG_PROJECT)] $MODULE_NAME")
+    fi
+
+    # unload variables
+    unset MODULE_DEFAULT
+    unset MODULE_OPTIONS
+    unset MODULE_NAME
     # Load last element in menu
     MENU_LIST+=("Start-->" "Start install")
     # Load last element in menu
@@ -304,8 +328,10 @@ menu_configuration()
                         exit 15
                     fi
                 fi
-            elif [[ $OPTION != "Start-->" && $OPTION != "<--Back" ]] ; then
+            elif [[ $OPTION != "Start-->" && $OPTION != "<--Back" && $OPTION != "Extra" ]] ; then
                 submenu_configuration "${MENU_REFERENCE[$OPTION*2+1]}"
+            elif [ $OPTION == "Extra" ] ; then
+                submenu_configuration "$MODULES_CONFIG_PATH/X-$MODULES_CONFIG_PROJECT.sh"
             fi
         else
             # You chose Cancel
@@ -407,6 +433,7 @@ menu_list_installed()
                          unset -f script_info
                          unset -f script_check
                          unset MODULE_OPTIONS
+                         unset MODULE_NAME
                          # Load source
                          source "$FILE"
                          # Check if exist the function
@@ -438,6 +465,7 @@ menu_list_installed()
                 "RUN" ) # Unset save function
                          unset -f script_info
                          unset MODULE_OPTIONS
+                         unset MODULE_NAME
                          # Load source
                          source "$FILE"
                          # Add element in menu
@@ -456,6 +484,72 @@ menu_list_installed()
         fi
       fi
     done
+    
+    # Check if exist an extra configuration script file and load it
+    local EXTRA_CONFIG="$MODULES_CONFIG_PATH/X-$MODULES_CONFIG_PROJECT.sh"
+    if [ -f $EXTRA_CONFIG ] ; then
+        # Local folder
+        local LOCAL_FOLDER=$(pwd)
+        case $(modules_isInList X-$MODULES_CONFIG_PROJECT) in
+            "AUTO") # Unset save function
+                     unset -f script_info
+                     unset -f script_check
+                     unset MODULE_OPTIONS
+                     unset MODULE_NAME
+                     # Load source
+                     source "$EXTRA_CONFIG"
+                     if [ -z ${MODULE_NAME+} ] ; then
+                          MODULE_NAME="Extra Script in \"$MODULES_CONFIG_PROJECT\""
+                     fi
+                     # Check if exist the function
+                     if type script_check &>/dev/null ; then
+					    # Move to same folder
+					    cd $FOLDER
+                        # Run script check function
+                        script_check $LOCAL_FOLDER
+                        local RET=$?
+					    # Restore previuous folder
+					    cd $LOCAL_FOLDER
+                        if [ $RET == 1 ] ; then
+                             # Add element in menu
+                             echo "[X] $MODULE_NAME"
+                             # Check if exist the function
+                             if type script_info &>/dev/null ; then
+                                # Move to same folder
+						        cd $FOLDER
+                                # run script
+                                script_info
+                                # Restore previuous folder
+					            cd $LOCAL_FOLDER
+                             fi
+                        else
+                             # Add element in menu
+                             echo "[ ] $MODULE_NAME"
+                        fi
+                     fi ;;
+            "RUN" ) # Unset save function
+                     unset -f script_info
+                     unset MODULE_OPTIONS
+                     unset MODULE_NAME
+                     # Load source
+                     source "$EXTRA_CONFIG"
+                     if [ -z ${MODULE_NAME+} ] ; then
+                          MODULE_NAME="Extra Script in \"$MODULES_CONFIG_PROJECT\""
+                     fi
+                     # Add element in menu
+                     echo "[$(menu_checkIfLoaded X-$MODULES_CONFIG_PROJECT)] $MODULE_NAME"
+                     # Check if exist the function
+                     if type script_info &>/dev/null ; then
+                        # Move to same folder
+				        cd $FOLDER
+                        # run script
+                        script_info
+                        # Restore previuous folder
+			            cd $LOCAL_FOLDER
+                    fi ;;
+            *) ;;
+        esac
+    fi 
     
     if [ $(modules_require_reboot) == "1" ]
     then
