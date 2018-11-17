@@ -41,22 +41,17 @@ remote_get_config()
     # Load file configuration, if is new get dafault name
     local file_config=""
     if [ -z $MODULE_REMOTE_CONFIG_NAME ] ; then
-        file_config=$MODULES_CONFIG_NAME
+        file_config=$MODULES_CONFIG_FOLDER/$MODULES_CONFIG_NAME
     else
-        file_config=$MODULE_REMOTE_CONFIG_NAME
-    fi
-    
+        file_config="$MODULE_REMOTE_CONFIG_NAME/$(basename $MODULES_CONFIG_FILE)"
+    fi    
     if sshpass -p "$MODULE_PASSWORD" ssh $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST stat /tmp/jetson_easy/$file_config \> /dev/null 2\>\&1 ; then
-        # Get back the remote config
-        local configuration=""
-        if [ $(basename $MODULES_CONFIG_FILE) != $file_config ]; then
-            # The file config is a folder
-            configuration=$file_config/$MODULES_CONFIG_NAME
-        else
-            # The file config is a file
-            configuration=$file_config
+
+        # If not exist make a new folder
+        if [ ! -d $MODULES_CONFIG_PATH ] ; then
+            mkdir -p $MODULES_CONFIG_PATH
         fi
-        sshpass -p "$MODULE_PASSWORD" scp $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy/$configuration $MODULES_CONFIG_FILE
+        sshpass -p "$MODULE_PASSWORD" scp $MODULE_REMOTE_USER@$MODULE_REMOTE_HOST:/tmp/jetson_easy/$file_config $MODULES_CONFIG_FILE
         # Execute load configuration
         modules_load
         # Save new setup
@@ -131,16 +126,11 @@ remote_load_to_host()
     cp -rf LICENSE /tmp/jetson_easy
     cp -rf README.md /tmp/jetson_easy
     
-    if [ $MODULES_CONFIG_PATH != $(pwd) ] ; then
-    	# Copy folder
-    	cp -rf $MODULES_CONFIG_PATH /tmp/jetson_easy
-    	# Save configuration 
-    	MODULE_REMOTE_CONFIG_NAME="$(basename $MODULES_CONFIG_PATH)"
-    elif [ -f $MODULES_CONFIG_FILE ] ; then
-    	#Copy only the config file
-    	cp -rf $MODULES_CONFIG_FILE /tmp/jetson_easy
-    	# Save configuration
-    	MODULE_REMOTE_CONFIG_NAME="$(basename $MODULES_CONFIG_FILE)"
+    if [ -d $MODULES_CONFIG_PATH ] ; then
+	    # Copy folder
+	    cp -rf $MODULES_CONFIG_PATH /tmp/jetson_easy
+	    # Save configuration 
+	    MODULE_REMOTE_CONFIG_NAME="$(basename $MODULES_CONFIG_PATH)"
     fi
     
     # Move to temp folder

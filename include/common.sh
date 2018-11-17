@@ -198,7 +198,12 @@ menu_filebrowser()
         local description= "a"
         local status=$(find "$real_path/$folder" -maxdepth 1 -name "*.txt" 2>/dev/null)
         if [[ ! -z $status ]]; then
-            description="config"
+            description=" config"
+            local project_name="X-$(echo $folder | cut -d "/" -f1)"
+            local status_script=$(find "$real_path/$folder" -maxdepth 1 -name "$project_name.sh" 2>/dev/null)
+            if [[ ! -z $status_script ]]; then
+                description=" conf & script"
+            fi
         fi
         FILE_LIST+=("$folder" "$description")
     done

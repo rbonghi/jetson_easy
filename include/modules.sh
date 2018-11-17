@@ -116,6 +116,7 @@ modules_load_config()
         # Get absolute path from local path
         config_path="$USER_PWD/$MODULES_CONFIG"
     fi
+    
     # Check configuration file
 	if [[ -d $config_path ]]; then
 		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: config/setup.txt)
@@ -168,6 +169,11 @@ modules_load()
 
 modules_save()
 {
+    # Check if exist folder and file otherwise create it
+    if [ ! -d "$MODULES_CONFIG_PATH" ] ; then
+        mkdir -p $MODULES_CONFIG_PATH
+    fi
+
     echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG_FILE
     echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG_FILE
     echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG_FILE
