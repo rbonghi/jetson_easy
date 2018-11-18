@@ -106,6 +106,21 @@ patch_opencv_set_extras()
     patch_opencv
 }
 
+patch_opencv_test()
+{
+    local patch_opencv_set_test_temp
+    patch_opencv_set_test_temp=$(whiptail --title "$MODULE_NAME - Install test files" --radiolist \
+    "Do you want install OpenCV with Test files?" 15 60 2 \
+    "YES" "Install test files" $(common_load_check "YES" $PATCH_DOWNLOAD_OPENCV_TEST) \
+    "NO" "Without test files" $(common_load_check "NO" $PATCH_DOWNLOAD_OPENCV_TEST) 3>&1 1>&2 2>&3)
+     
+    local exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        PATCH_DOWNLOAD_OPENCV_TEST=$patch_opencv_set_test_temp
+    fi
+    patch_opencv
+}
+
 patch_opencv_set_version()
 {
     local patch_opencv_menu_temp
@@ -145,7 +160,7 @@ patch_opencv_set_install_path()
 patch_opencv()
 {
     local patch_opencv_menu_temp
-    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 16 60 6 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "force" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_FORCE)] Force OpenCV install" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" 3>&1 1>&2 2>&3)
+    patch_opencv_menu_temp=$(whiptail --title "Set wstool option" --menu "Select type of wstool configuration" 16 60 8 "version" "Set OpenCV version v$PATCH_OPENCV_VERSION" "source" "OpenCV source path: $PATCH_OPENCV_SOURCE_PATH" "install" "OpenCV install path: $PATCH_OPENCV_INSTALL_PATH" "force" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_FORCE)] Force OpenCV install" "contrib" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_CONTRIB)] Install OpenCV with contrib" "extras" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_EXTRAS)] Install OpenCV with Extras" "tests" "[$(common_is_check $PATCH_DOWNLOAD_OPENCV_TEST)] Install OpenCV with test files" 3>&1 1>&2 2>&3)
     local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         case $patch_opencv_menu_temp in
@@ -155,6 +170,7 @@ patch_opencv()
             "force") patch_opencv_set_force ;;
             "contrib") patch_opencv_set_contrib ;;
             "extras") patch_opencv_set_extras ;;
+            "tests") patch_opencv_test ;;
             *) ;;
         esac
     fi
@@ -207,6 +223,11 @@ script_load_default()
     if [ -z ${PATCH_DOWNLOAD_OPENCV_EXTRAS+x} ] ; then
         PATCH_DOWNLOAD_OPENCV_EXTRAS="NO"
     fi
+    
+    # Write openCV with test
+    if [ -z ${PATCH_DOWNLOAD_OPENCV_TEST+x} ] ; then
+        PATCH_DOWNLOAD_OPENCV_TEST="NO"
+    fi
 }
 
 script_save()
@@ -239,9 +260,14 @@ script_save()
         echo "PATCH_DOWNLOAD_OPENCV_CONTRIB=\"$PATCH_DOWNLOAD_OPENCV_CONTRIB\"" >> $1
     fi
     
-    # OpenCV with contrib
+    # OpenCV with extras
     if [ ! -z ${PATCH_DOWNLOAD_OPENCV_EXTRAS+x} ] && [ ! -z $PATCH_DOWNLOAD_OPENCV_EXTRAS ] ; then
         echo "PATCH_DOWNLOAD_OPENCV_EXTRAS=\"$PATCH_DOWNLOAD_OPENCV_EXTRAS\"" >> $1
+    fi
+    
+    # OpenCV with tests
+    if [ ! -z ${PATCH_DOWNLOAD_OPENCV_TEST+x} ] && [ ! -z $PATCH_DOWNLOAD_OPENCV_TEST ] ; then
+        echo "PATCH_DOWNLOAD_OPENCV_TEST=\"$PATCH_DOWNLOAD_OPENCV_TEST\"" >> $1
     fi
 }
 
