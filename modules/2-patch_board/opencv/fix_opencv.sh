@@ -247,26 +247,26 @@ patch_opencv3_installer()
     # https://github.com/jetsonhacks/buildOpenCVXavier/blob/master/buildOpenCV.sh
 
     # Added for this release of Jetson AGX Xavier from Jetson TX2
-    local opencv_xavier_option = ""
+    local opencv_xavier_option=""
     if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
-        opencv_xavier_option = "-D CUDA_NVCC_FLAGS=\"--expt-relaxed-constexpr\" -D WITH_TBB=ON"
+        opencv_xavier_option="-D CUDA_NVCC_FLAGS=\"--expt-relaxed-constexpr\" -D WITH_TBB=ON"
     fi
     
     # Add extra options for OpenCV contrib
-    local opencv_contrib_option = ""
+    local opencv_contrib_option=""
     if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
-        opencv_contrib_option = "-D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules"
+        opencv_contrib_option="-D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules"
     fi
     
     # Add extra options for OpenCV extras
-    local opencv_extras_option = ""
+    local opencv_extras_option=""
     if [ $PATCH_DOWNLOAD_OPENCV_EXTRAS == "YES" ] ; then
-        opencv_extras_option = "-D INSTALL_TESTS=ON -D OPENCV_TEST_DATA_PATH=../opencv_extra/testdata"
+        opencv_extras_option="-D INSTALL_TESTS=ON -D OPENCV_TEST_DATA_PATH=../opencv_extra/testdata"
     fi
     
-    local opencv_test_option = ""
+    local opencv_test_option=""
     if [ $PATCH_DOWNLOAD_OPENCV_TEST == "YES" ] ; then
-        opencv_test_option = "-D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON"
+        opencv_test_option="-D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON"
     fi
     # There are also switches which tell CMAKE to build the samples and tests
     # Check OpenCV documentation for details
