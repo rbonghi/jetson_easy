@@ -31,7 +31,9 @@ MODULES_LIST=""
 MODULES_FOLDER="modules"
 # Default name setup jetson_easy
 MODULES_CONFIG_NAME="setup.txt"
+MODULES_CONFIG_FOLDER="config"
 # Absolute path configuration file
+MODULES_CONFIG_PROJECT=""
 MODULES_CONFIG_PATH=""
 MODULES_CONFIG_FILE=""
 # File check if is in sudo mode
@@ -101,10 +103,10 @@ modules_load_default()
 modules_load_config()
 {
 	#Default load setup config name folder
-	local MODULES_CONFIG=$MODULES_CONFIG_NAME
+	local MODULES_CONFIG=$MODULES_CONFIG_FOLDER/$MODULES_CONFIG_NAME
     if [ ! -z $1 ] ; then
         MODULES_CONFIG=$1
-    fi
+    fi    
     local config_path=""
     # Load config path
     if [[ "$MODULES_CONFIG" = /* ]]; then
@@ -117,14 +119,15 @@ modules_load_config()
     
     # Check configuration file
 	if [[ -d $config_path ]]; then
-		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: setup.txt)
+		# If is a directory check if exist file MODULES_CONFIG_NAME (standard name is: config/setup.txt)
 		local setup_file=$config_path/$MODULES_CONFIG_NAME
 		# Check if exist config file
 		if [[ -f $setup_file ]]; then
-			#echo "$setup_file is a jetson easy folder"
+			# echo "$setup_file is a jetson easy folder"
 			# Set variables
 			MODULES_CONFIG_PATH=$(realpath $config_path)
 			MODULES_CONFIG_FILE=$(realpath $setup_file)
+			MODULES_CONFIG_PROJECT=$(basename $MODULES_CONFIG_PATH)
 			return 0
 		#else
 			#echo "$setup_file is not a jetson easy folder"
@@ -134,13 +137,15 @@ modules_load_config()
 		# Set variables
 		MODULES_CONFIG_PATH=$(realpath $USER_PWD)
 		MODULES_CONFIG_FILE=$(realpath $config_path)
+		MODULES_CONFIG_PROJECT=$(basename $MODULES_CONFIG_PATH)
 		return 0
 	#else
 		#echo "$config_path is not valid"
 	fi
 	# Set default configuration
-	MODULES_CONFIG_PATH="$USER_PWD"
+	MODULES_CONFIG_PATH="$USER_PWD/$MODULES_CONFIG_FOLDER"
 	MODULES_CONFIG_FILE="$MODULES_CONFIG_PATH/$MODULES_CONFIG_NAME"
+	MODULES_CONFIG_PROJECT=$(basename $MODULES_CONFIG_PATH)
     #echo "MODULES_CONFIG_PATH=$MODULES_CONFIG_PATH"
     #echo "MODULES_CONFIG_FILE=$MODULES_CONFIG_FILE"
     return 1
@@ -164,6 +169,11 @@ modules_load()
 
 modules_save()
 {
+    # Check if exist folder and file otherwise create it
+    if [ ! -d "$MODULES_CONFIG_PATH" ] ; then
+        mkdir -p $MODULES_CONFIG_PATH
+    fi
+
     echo "# Configuration Biddibi boddibi Boo" > $MODULES_CONFIG_FILE
     echo "# Author: Raffaello Bonghi" >> $MODULES_CONFIG_FILE
     echo "# Email: raffaello@rnext.it" >> $MODULES_CONFIG_FILE
@@ -312,6 +322,11 @@ modules_run()
             # Check if exist the same file with the name of the folder
             local FOLDER="$MODULES_FOLDER/$name"
             local FILE="$FOLDER/$name.sh"
+            # Overload name FOLDER and file if the name is the same of project
+            if [ $name == "X-$MODULES_CONFIG_PROJECT" ] ; then
+                FOLDER="$MODULES_CONFIG_PATH"
+                FILE="$FOLDER/X-$MODULES_CONFIG_PROJECT.sh"
+            fi
             if [ -f $FILE ] ; then
                 # Unset save function
                 unset -f script_run

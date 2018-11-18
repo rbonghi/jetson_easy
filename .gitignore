@@ -1,6 +1,7 @@
 
 fix_wifi
 
-config
+test*
+config*
 DEBUG*
 setup*.txt

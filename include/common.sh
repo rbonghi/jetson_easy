@@ -198,7 +198,12 @@ menu_filebrowser()
         local description= "a"
         local status=$(find "$real_path/$folder" -maxdepth 1 -name "*.txt" 2>/dev/null)
         if [[ ! -z $status ]]; then
-            description="config"
+            description=" config"
+            local project_name="X-$(echo $folder | cut -d "/" -f1)"
+            local status_script=$(find "$real_path/$folder" -maxdepth 1 -name "$project_name.sh" 2>/dev/null)
+            if [[ ! -z $status_script ]]; then
+                description=" conf & script"
+            fi
         fi
         FILE_LIST+=("$folder" "$description")
     done
@@ -238,7 +243,7 @@ menu_filebrowser()
 
 menu_message_introduction()
 {
-    if [ -e $USER_PWD/$MODULES_CONFIG_NAME ] || [ $config_folder != "$USER_PWD" ] ; then
+    if [ -e $USER_PWD/$MODULES_CONFIG_FOLDER/$MODULES_CONFIG_NAME ] || [ $config_folder != "$USER_PWD/$MODULES_CONFIG_FOLDER" ] ; then
         whiptail --title "$(menu_title)Biddibi Boddibi Boo" --textbox /dev/stdin 22 45 <<< "$(menu_header)
 --------------------------------------
 Load Config from $config_folder"

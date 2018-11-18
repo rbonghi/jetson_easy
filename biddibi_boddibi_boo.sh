@@ -69,7 +69,7 @@ if [ -z $USER_PWD ] ; then
 fi
 
 # Configuration folder information
-config_folder="$USER_PWD"
+config_folder="$USER_PWD/$MODULES_CONFIG_FOLDER"
 
 # --------------------------------
 # MAIN
