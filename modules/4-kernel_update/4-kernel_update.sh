@@ -62,8 +62,7 @@ KERNEL_SRC_FOLDER="/usr/src"
 KERNEL_CONFIG_FILE=".config"
 
 # Kernel driver list to check and add
-KERNEL_DRIVER_LIST=("FTDI:CONFIG_USB_SERIAL_FTDI_SIO:Driver for FTDI converter" "ACM:CONFIG_USB_ACM:Driver for ACM peripherals")
-
+KERNEL_DRIVER_LIST=("FTDI:CONFIG_USB_SERIAL_FTDI_SIO:Driver for FTDI converter" "ACM:CONFIG_USB_ACM:Driver for ACM peripherals" "V4L2:CONFIG_VIDEO_V4L2:USB Video Class V4L2")
 ##################################################################
 
 kernel_extract_config()
@@ -90,7 +89,7 @@ kernel_check_isconfig()
     local PARAMATER_STATUS="$2"
     local FILE=$3
     
-    if [ $(grep -F "$PARAMETER" $FILE) == "$PARAMETER=$PARAMATER_STATUS" ] ; then
+    if [ $(grep -w -F "$PARAMETER" $FILE) == "$PARAMETER=$PARAMATER_STATUS" ] ; then
         echo "ON"
     else
         echo "OFF"
@@ -174,19 +173,30 @@ script_run()
     local KERNEL_LINK=""
     local KERNEL_INTERNAL_FOLDER=""
     local KERNEL_FOLDER=""
-    if [ $JETSON_L4T == "28.2" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/GA/BSP/$(echo "${JETSON_BOARD,,}")_sources.tbz2"
-        KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
-        KERNEL_FOLDER="kernel/kernel-4.4"
-    elif [ $JETSON_L4T == "28.1" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
-        KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
-        KERNEL_FOLDER="kernel/kernel-4.4"
-    elif [ $JETSON_L4T == "27.1" ] ; then
-        KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r27_Release_v1.0/BSP/r27.1.0_sources.tbz2"
-        KERNEL_INTERNAL_FOLDER="kernel_src.tbz2"
-        KERNEL_FOLDER="kernel/kernel-4.4"
-    fi
+    # Download kernel
+    case $JETSON_L4T in
+        "31.1.0")
+                KERNEL_LINK="https://developer.download.nvidia.com/embedded/L4T/r31_Release_v1.0/BSP/public_sources.tbz2"
+                KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
+                KERNEL_FOLDER="kernel/kernel-4.9" 
+                ;;
+        "28.2" | "28.2.0")
+                KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.0/GA/BSP/$(echo "${JETSON_BOARD,,}")_sources.tbz2"
+                KERNEL_INTERNAL_FOLDER="public_release/kernel_src.tbz2"
+                KERNEL_FOLDER="kernel/kernel-4.4" 
+                ;;
+        "28.1") 
+                KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r28_Release_v1.0/BSP/source_release.tbz2"
+                KERNEL_INTERNAL_FOLDER="sources/kernel_src-$(echo "${JETSON_BOARD,,}").tbz2"
+                KERNEL_FOLDER="kernel/kernel-4.4"
+                ;;
+        "27.1") 
+                KERNEL_LINK="http://developer.download.nvidia.com/embedded/L4T/r27_Release_v1.0/BSP/r27.1.0_sources.tbz2"
+                KERNEL_INTERNAL_FOLDER="kernel_src.tbz2"
+                KERNEL_FOLDER="kernel/kernel-4.4"
+                ;;
+        * )     ;;
+    esac
     
     # List of driver to install
     local NEW_LIST=$(kernel_installer_list)
