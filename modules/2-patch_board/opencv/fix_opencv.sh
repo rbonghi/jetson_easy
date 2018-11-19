@@ -240,7 +240,15 @@ patch_opencv3_installer()
     tput sgr0
     
     cd $opencv_source_path/opencv
-    mkdir build
+    
+    if [ -d "build" ] ; then
+        tput setaf 6
+        echo "Clean old BUILD"
+        tput sgr0
+        
+        rm -R build
+    fi
+    mkdir build 
     cd build
 
     # Reference to cmake OpenCV
@@ -248,7 +256,7 @@ patch_opencv3_installer()
 
     # Added for this release of Jetson AGX Xavier from Jetson TX2
     local opencv_xavier_option=""
-    if [ $PATCH_DOWNLOAD_OPENCV_CONTRIB == "YES" ] ; then
+    if [ $JETSON_BOARD == "Xavier" ] ; then
         opencv_xavier_option="-D CUDA_NVCC_FLAGS=\"--expt-relaxed-constexpr\" -D WITH_TBB=ON"
     fi
     
