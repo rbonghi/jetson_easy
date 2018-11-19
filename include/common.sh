@@ -167,6 +167,9 @@ jetson_status()
         echo "    - CUDA GPU architecture: $JETSON_CUDA_ARCH_BIN"
         echo "    - Jetpack $JETSON_JETPACK [L4T $JETSON_L4T]"
         echo "    - CUDA: $JETSON_CUDA"
+        echo "    - cuDNN: $JETSON_CUDNN"
+        echo "    - TensorRT: $JETSON_TENSORRT"
+        echo "    - Visionworks: $JETSON_VISIONWORKS"
         echo "    - OpenCV: $JETSON_OPENCV compiled CUDA: $JETSON_OPENCV_CUDA"
     else
         echo "(*) It isn't an NVIDIA Jetson"
