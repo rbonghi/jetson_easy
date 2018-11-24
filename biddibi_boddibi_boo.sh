@@ -38,13 +38,6 @@ source /etc/lsb-release
 OS_ARCHITECTURE=$(uname -m)
 OS_KERNEL=$(uname -r)
 
-# Load environment variables:
-# - JETSON_BOARD
-# - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
-# - JETSON_DESCRIPTION
-# - JETSON_CUDA
-source jetson/jetson_variables
-
 # Load common script filed
 source include/common.sh
 # Load user interface
@@ -189,8 +182,21 @@ main()
 		shift 1
 	done
 	
+	# LOAD jetson stats folder
+	if [ ! -d "jetson" ] ; then
+	    echo "Jetson folder does not exist!"
+	    echo "Download informations"
+	    git clone https://github.com/rbonghi/jetson_stat.git jetson
+	fi
+    # Load environment variables:
+    # - JETSON_BOARD
+    # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
+    # - JETSON_DESCRIPTION
+    # - JETSON_CUDA
+    source jetson/jetson_variables
+
+	# Initialization and run biddibi boddibi boo
 	local mytitle="Jetson Easy"
-	
 	# Check if the code run in NVIDIA Jetson or in remote
 	if [ -z $JETSON_BOARD ] ; then
 	    # Set in Remote mode
