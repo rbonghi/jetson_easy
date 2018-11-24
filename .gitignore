@@ -1,4 +1,7 @@
 
+# Remove reference to jetson folder
+jetson/
+
 fix_wifi
 
 test*
