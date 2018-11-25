@@ -187,6 +187,11 @@ main()
 	    echo "Jetson folder does not exist!"
 	    echo "Download informations"
 	    git clone https://github.com/rbonghi/jetson_stat.git jetson
+    else
+        echo "Check updates for jetson stats ..."
+        cd jetson
+        git pull
+        cd ..
 	fi
     # Load environment variables:
     # - JETSON_BOARD
