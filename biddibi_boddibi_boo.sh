@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash --init-file
 # Copyright (C) 2018, Raffaello Bonghi <raffaello@rnext.it>
 # All rights reserved
 #
@@ -64,6 +64,9 @@ fi
 # Configuration folder information
 config_folder="$USER_PWD/$MODULES_CONFIG_FOLDER"
 
+# Make available the bashrc from first script
+# "#!/bin/bash --init-file"
+# https://stackoverflow.com/questions/21234025/making-a-bash-script-switch-to-interactive-mode-and-give-a-prompt
 # --------------------------------
 # MAIN
 # --------------------------------
