@@ -1,4 +1,4 @@
-#!/bin/bash --init-file
+#!/bin/bash
 # Copyright (C) 2018, Raffaello Bonghi <raffaello@rnext.it>
 # All rights reserved
 #
@@ -190,7 +190,8 @@ main()
 	    echo "Jetson folder does not exist!"
 	    echo "Download informations"
 	    git clone https://github.com/rbonghi/jetson_stats.git jetson
-    else
+    fi
+    if [ -z $MODULE_IM_HOST ] ; then
         echo "Check updates for jetson stats ..."
         cd jetson
         git pull

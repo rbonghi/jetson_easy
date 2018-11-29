@@ -116,15 +116,9 @@ remote_load_to_host()
     if [ -d /tmp/jetson_easy ] ; then
         rm -R /tmp/jetson_easy
     fi
-    # build a folder
-    mkdir -p /tmp/jetson_easy
+    
     # Copy all folders
-    cp -rf include /tmp/jetson_easy
-    cp -rf jetson /tmp/jetson_easy
-    cp -rf modules /tmp/jetson_easy
-    cp -rf biddibi_boddibi_boo.sh /tmp/jetson_easy
-    cp -rf LICENSE /tmp/jetson_easy
-    cp -rf README.md /tmp/jetson_easy
+    rsync -av --progress . /tmp/jetson_easy/ --exclude .git/ 2>&1 >/dev/null
     
     if [ -d $MODULES_CONFIG_PATH ] ; then
 	    # Copy folder
