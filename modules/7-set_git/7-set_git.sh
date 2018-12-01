@@ -110,12 +110,12 @@ script_load_default()
 
 script_save()
 {
-    if [ ! -z ${NEW_GIT_USERNAME+x} ] ; then
+    if [ ! -z ${NEW_GIT_USERNAME+x} ] && [ ! -z $NEW_GIT_USERNAME ] ; then
         # if [ NEW_GIT_USERNAME != $(git config user.name) ] ; then
         echo "NEW_GIT_USERNAME=\"$NEW_GIT_USERNAME\"" >> $1
         # fi
     fi
-    if [ ! -z ${NEW_GIT_EMAIL+x} ] ; then
+    if [ ! -z ${NEW_GIT_EMAIL+x} ] && [ ! -z $NEW_GIT_EMAIL ] ; then
         echo "NEW_GIT_EMAIL=\"$NEW_GIT_EMAIL\"" >> $1
     fi
 }
@@ -136,12 +136,9 @@ script_info()
 
 set_user_name()
 {
-    # Load default user
-    script_load_user
-    
     local NEW_GIT_USERNAME_TMP_VALUE
     NEW_GIT_USERNAME_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set user name" 8 78 $NEW_GIT_USERNAME --title "Set user.name" 3>&1 1>&2 2>&3)
-    exitstatus=$?
+    local exitstatus=$?
     if [ $exitstatus = 0 ] ; then
         # Write the new workspace
         NEW_GIT_USERNAME=$NEW_GIT_USERNAME_TMP_VALUE
@@ -150,12 +147,9 @@ set_user_name()
 
 set_email()
 {
-    # Load default email
-    script_load_email
-
     local NEW_GIT_EMAIL_TMP_VALUE
     NEW_GIT_EMAIL_TMP_VALUE=$(whiptail --inputbox "$MODULE_NAME - Set user email" 8 78 $NEW_GIT_EMAIL --title "Set user.email" 3>&1 1>&2 2>&3)
-    exitstatus=$?
+    local exitstatus=$?
     if [ $exitstatus = 0 ]; then
         # Write the new workspace
         NEW_GIT_EMAIL=$NEW_GIT_EMAIL_TMP_VALUE

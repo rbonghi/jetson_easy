@@ -292,8 +292,7 @@ script_save()
     fi
     
     if [ ! -z ${DP_FOLDER+x} ] ; then
-        if [ $DP_FOLDER != "\"\"" ]
-        then
+        if [ $DP_FOLDER != "\"\"" ] ; then
             echo "DP_FOLDER=\"$DP_FOLDER\"" >> $1
         fi
     fi

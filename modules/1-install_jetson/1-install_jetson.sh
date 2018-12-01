@@ -53,6 +53,17 @@ script_check()
     return 1
 }
 
+script_info()
+{
+    script_check
+    
+    if [ $? -eq 1 ] ; then
+        local info_je=$(jetson_release)
+        local je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
+        echo "    - Update jetson_easy from $je_version to $JETSON_EASY_VERSION"
+    fi
+}
+
 script_run()
 {
     tput setaf 6
