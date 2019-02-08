@@ -332,6 +332,12 @@ script_info()
     if [ $? -eq 1 ] ; then
         echo "    - Update Cuda Examples"
     fi
+    echo "    - Fix wifi speed problem"
+}
+
+patch_wifi(){
+    #Users using an old version of Jetpack will have a wifi speed problem capping the speeds. This should solve the problem. This was fixed on the lastest Jetpack
+    echo "options iwlwifi 11n_disable=8" | sudo tee -a /etc/modprobe.d/iwlwifi.conf
 }
 
 script_run()
@@ -367,6 +373,8 @@ script_run()
     source cuda_examples/fix_cuda_example.sh
     # Run cuda examples patch
     patch_cuda_examples
+    # Patch Wifi
+    patch_wifi
 }
 
 

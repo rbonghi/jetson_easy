@@ -32,7 +32,10 @@
 MODULE_NAME="Install standard packages"
 MODULE_DESCRIPTION="Install standard packages:
 htop
-nano"
+nano
+vs_oss
+synergy
+guake"
 MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
@@ -84,12 +87,61 @@ script_run()
         tput sgr0
         sudo apt install htop -y
     fi
+
+    if [ $(pkgs_is_enabled "vs_oss") == "ON" ] ; then
+        tput setaf 6
+        echo "Install Visual Studio"
+        tput sgr0
+        echo "Install will include NodeJS 8 and Yarn"
+        curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+        echo "Finished NodeJS install"
+        wget https://dl.yarnpkg.com/debian/pubkey.gpg
+
+        sudo apt-key add pubkey.gpg
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo apt update
+        sudo apt install yarn
+        mkdir ~/VisualStudio
+        cd ~/VisualStudio
+        git clone https://github.com/microsoft/vscode
+        cd vscode
+        sudo rm package.json
+        sudo rm test/smoke/package.json
+        #clones the first pkg.json into the Vscode folder.
+        git clone https://gist.github.com/e0010219e8af5e6cb4c4d34c35bba47d.git
+        cd test/smoke/
+        git clone https://gist.github.com/121e97781a56ae3e051335f77d2c600d.git
+        cd ..
+        cd ..
+        yarn
+        yarn run watch
+        ./scripts/code.sh
+        echo "Finished Install"
+    fi
     
     if [ $(pkgs_is_enabled "nano") == "ON" ] ; then
         tput setaf 6
         echo "Install nano"
         tput sgr0
         sudo apt install nano -y
+    fi
+
+        if [ $(pkgs_is_enabled "guake") == "ON" ] ; then
+        tput setaf 6
+        echo "Install guake"
+        tput sgr0
+        sudo apt install guake -y
+    fi
+
+    if [ $(pkgs_is_enabled "synergy") == "ON" ] ; then
+        tput setaf 6
+        echo "Install synergy"
+        tput sgr0
+        wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+        sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu trusty-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+        sudo apt-get update
+        sudo apt-get install synergy -y
     fi
 
     if [ $(pkgs_is_enabled "iftop") == "ON" ] ; then
@@ -191,10 +243,13 @@ set_pkgs()
     
     local PKGS_PATCH_LIST_TMP
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which new packages do you want add?" 15 60 4 \
+    "Which new packages do you want add?" 15 72 7 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
     "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
+    "vs_oss" "Adds Visual Studio code to the Jetson" $(pkgs_is_enabled "vs_oss") \
+    "synergy" "Adds Synergy for easy keyboard and mouse sharing" $(pkgs_is_enabled "synergy") \
+    "guake" "Adds Guake terminal, easy to use dropdown menu." $(pkgs_is_enabled "guake") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
