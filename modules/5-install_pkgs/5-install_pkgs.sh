@@ -35,7 +35,8 @@ htop
 nano
 vs_oss
 synergy
-guake"
+guake
+rtabmap"
 MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
@@ -127,7 +128,15 @@ script_run()
         sudo apt install nano -y
     fi
 
-        if [ $(pkgs_is_enabled "guake") == "ON" ] ; then
+    if [ $(pkgs_is_enabled "rtabmap") == "ON" ] ; then
+        tput setaf 6
+        echo "Install RTABMAP with Zed SDK support"
+        tput sgr0
+        ros_install_rtabmap
+        
+    fi
+
+    if [ $(pkgs_is_enabled "guake") == "ON" ] ; then
         tput setaf 6
         echo "Install guake"
         tput sgr0
@@ -218,6 +227,51 @@ script_load_default()
     fi
 }
 
+ros_install_rtabmap(){
+        tput setaf 6
+    echo "Installing RTABMAP enabled Zed SDK."
+    tput sgr0
+    #Purge existing RTABMAP with apt
+    sudo apt-get remove ros-melodic-rtabmap
+    #update sources
+    sudo apt-get update
+    #Install dependencies
+    sudo apt-get install libsqlite3-dev libpcl-dev libopencv-dev git cmake libproj-dev libqt5svg5-dev
+    mkdir ~/RTABMAP
+    cd ~/RTABMAP
+    #Install G2O
+    git clone https://github.com/RainerKuemmerle/g2o.git 
+    cd g2o
+    mkdir build
+    cd build
+    #run CMAKE
+    cmake -DBUILD_WITH_MARCH_NATIVE=OFF -DG2O_BUILD_APPS=OFF -DG2O_BUILD_EXAMPLES=OFF -DG2O_USE_OPENGL=OFF ..
+    make -j4
+    sudo make install
+    #Finished insall of G2O
+    #Install GTSAM
+    cd ~/RTABMAP
+    git clone --branch 4.0.0-alpha2 https://github.com/borglab/gtsam.git gtsam-4.0.0-alpha2
+    cd gtsam-4.0.0-alpha2
+    mkdir build
+    cd build
+    #run CMAKE 
+    cmake -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_UNSTABLE=OFF ..
+    make -j4
+    sudo make install
+    #End of GTSAM install
+
+    #Install RTABMAP
+    #Building from source will enable the Zed SDK and a few other important things.
+
+    cd ~/RTABMAP
+    git clone https://github.com/introlab/rtabmap.git rtabmap
+    cd rtabmap/build
+    cmake ..
+    make -j4 
+    sudo make install
+}
+
 script_save()
 {    
     if [ ! -z ${PKGS_PATCH_LIST+x} ] ; then
@@ -250,6 +304,7 @@ set_pkgs()
     "vs_oss" "Adds Visual Studio code to the Jetson" $(pkgs_is_enabled "vs_oss") \
     "synergy" "Adds Synergy for easy keyboard and mouse sharing" $(pkgs_is_enabled "synergy") \
     "guake" "Adds Guake terminal, easy to use dropdown menu." $(pkgs_is_enabled "guake") \
+    "rtabmap" "Adds rtabmap with Zed SDK support" $(pkgs_is_enabled "rtabmap") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
