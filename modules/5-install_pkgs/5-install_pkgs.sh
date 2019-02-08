@@ -93,32 +93,7 @@ script_run()
         tput setaf 6
         echo "Install Visual Studio"
         tput sgr0
-        echo "Install will include NodeJS 8 and Yarn"
-        curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-        sudo apt-get install -y nodejs
-        echo "Finished NodeJS install"
-        wget https://dl.yarnpkg.com/debian/pubkey.gpg
-
-        sudo apt-key add pubkey.gpg
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-        sudo apt update
-        sudo apt install yarn
-        mkdir ~/VisualStudio
-        cd ~/VisualStudio
-        git clone https://github.com/microsoft/vscode
-        cd vscode
-        sudo rm package.json
-        sudo rm test/smoke/package.json
-        #clones the first pkg.json into the Vscode folder.
-        git clone https://gist.github.com/e0010219e8af5e6cb4c4d34c35bba47d.git
-        cd test/smoke/
-        git clone https://gist.github.com/121e97781a56ae3e051335f77d2c600d.git
-        cd ..
-        cd ..
-        yarn
-        yarn run watch
-        ./scripts/code.sh
-        echo "Finished Install"
+        install_vs
     fi
     
     if [ $(pkgs_is_enabled "nano") == "ON" ] ; then
@@ -133,7 +108,6 @@ script_run()
         echo "Install RTABMAP with Zed SDK support"
         tput sgr0
         ros_install_rtabmap
-        
     fi
 
     if [ $(pkgs_is_enabled "guake") == "ON" ] ; then
@@ -225,6 +199,35 @@ script_load_default()
         # Empty packages patch list 
         PKGS_PATCH_LIST="\"\""
     fi
+}
+
+install_vs(){
+    echo "Install will include NodeJS 8 and Yarn"
+    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    echo "Finished NodeJS install"
+    wget https://dl.yarnpkg.com/debian/pubkey.gpg
+
+    sudo apt-key add pubkey.gpg
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    sudo apt update
+    sudo apt install yarn
+    mkdir ~/VisualStudio
+    cd ~/VisualStudio
+    git clone https://github.com/microsoft/vscode
+    cd vscode
+    sudo rm package.json
+    sudo rm test/smoke/package.json
+    #clones the first pkg.json into the Vscode folder.
+    git clone https://gist.github.com/e0010219e8af5e6cb4c4d34c35bba47d.git
+    cd test/smoke/
+    git clone https://gist.github.com/121e97781a56ae3e051335f77d2c600d.git
+    cd ..
+    cd ..
+    yarn
+    yarn run watch
+    ./scripts/code.sh
+    echo "Finished Install"
 }
 
 ros_install_rtabmap(){
