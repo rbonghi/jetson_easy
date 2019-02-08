@@ -33,7 +33,8 @@ MODULE_NAME="Install standard packages"
 MODULE_DESCRIPTION="Install standard packages:
 htop
 nano
-vs_oss"
+vs_oss
+synergy"
 MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
@@ -123,6 +124,16 @@ script_run()
         echo "Install nano"
         tput sgr0
         sudo apt install nano -y
+    fi
+
+    if [ $(pkgs_is_enabled "synergy") == "ON" ] ; then
+        tput setaf 6
+        echo "Install synergy"
+        tput sgr0
+        wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+        sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu trusty-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+        sudo apt-get update
+        sudo apt-get install synergy -y
     fi
 
     if [ $(pkgs_is_enabled "iftop") == "ON" ] ; then
@@ -229,6 +240,7 @@ set_pkgs()
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
     "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
     "vs_oss" "Adds Visual Studio code to the Jetson" $(pkgs_is_enabled "vs_oss") \
+    "synergy" "Adds Synergy for easy keyboard and mouse sharing" $(pkgs_is_enabled "synergy") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
