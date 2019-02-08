@@ -243,7 +243,7 @@ set_pkgs()
     
     local PKGS_PATCH_LIST_TMP
     PKGS_PATCH_LIST_TMP=$(whiptail --title "$MODULE_NAME" --checklist \
-    "Which new packages do you want add?" 15 60 4 \
+    "Which new packages do you want add?" 15 72 7 \
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
     "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
