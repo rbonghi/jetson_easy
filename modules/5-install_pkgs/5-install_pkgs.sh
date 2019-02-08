@@ -34,7 +34,8 @@ MODULE_DESCRIPTION="Install standard packages:
 htop
 nano
 vs_oss
-synergy"
+synergy
+guake"
 MODULE_DEFAULT="STOP"
 MODULE_OPTIONS=("RUN" "STOP")
 
@@ -124,6 +125,13 @@ script_run()
         echo "Install nano"
         tput sgr0
         sudo apt install nano -y
+    fi
+
+        if [ $(pkgs_is_enabled "guake") == "ON" ] ; then
+        tput setaf 6
+        echo "Install guake"
+        tput sgr0
+        sudo apt install guake -y
     fi
 
     if [ $(pkgs_is_enabled "synergy") == "ON" ] ; then
@@ -241,6 +249,7 @@ set_pkgs()
     "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
     "vs_oss" "Adds Visual Studio code to the Jetson" $(pkgs_is_enabled "vs_oss") \
     "synergy" "Adds Synergy for easy keyboard and mouse sharing" $(pkgs_is_enabled "synergy") \
+    "guake" "Adds Guake terminal, easy to use dropdown menu." $(pkgs_is_enabled "guake") \
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
