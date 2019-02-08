@@ -228,6 +228,7 @@ set_pkgs()
     "nano" "It is an easy-to-use text editor" $(pkgs_is_enabled "nano") \
     "htop" "Interactive processes viewer" $(pkgs_is_enabled "htop") \
     "iftop" "Network traffic viewer" $(pkgs_is_enabled "iftop") \
+    "vs_oss" "Adds Visual Studio code to the Jetson"
     "ZED" "Install ZED driver version:$INSTALL_ZED_VERSION" $(pkgs_is_enabled "ZED") 3>&1 1>&2 2>&3)
      
     exitstatus=$?
