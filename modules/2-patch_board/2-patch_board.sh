@@ -332,6 +332,7 @@ script_info()
     if [ $? -eq 1 ] ; then
         echo "    - Update Cuda Examples"
     fi
+    echo "    - Fix wifi speed problem"
 }
 
 patch_wifi(){
