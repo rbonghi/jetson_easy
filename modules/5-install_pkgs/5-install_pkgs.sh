@@ -83,6 +83,7 @@ script_run()
     echo "Install standard packages"
     
     if [ $(pkgs_is_enabled "htop") == "ON" ] ; then
+    #installs htop
         tput setaf 6
         echo "Install htop"
         tput sgr0
@@ -90,6 +91,7 @@ script_run()
     fi
 
     if [ $(pkgs_is_enabled "vs_oss") == "ON" ] ; then
+    #installs Visual Studio code, compatible with Jetson Xavier, not tested on Tx2 or Tx1. Most likley will work.
         tput setaf 6
         echo "Install Visual Studio"
         tput sgr0
@@ -104,6 +106,7 @@ script_run()
     fi
 
     if [ $(pkgs_is_enabled "rtabmap") == "ON" ] ; then
+    #Installs RTABMAP with Zed sdk support in Rtab stettings.
         tput setaf 6
         echo "Install RTABMAP with Zed SDK support"
         tput sgr0
@@ -118,6 +121,7 @@ script_run()
     fi
 
     if [ $(pkgs_is_enabled "synergy") == "ON" ] ; then
+    #Used for sharing the mouse and keyboard from other devices. Works with Linux/Mac/Windows.
         tput setaf 6
         echo "Install synergy"
         tput sgr0
