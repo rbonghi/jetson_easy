@@ -231,7 +231,7 @@ install_vs(){
 }
 
 ros_install_rtabmap(){
-        tput setaf 6
+    tput setaf 6
     echo "Installing RTABMAP enabled Zed SDK."
     tput sgr0
     #Purge existing RTABMAP with apt
