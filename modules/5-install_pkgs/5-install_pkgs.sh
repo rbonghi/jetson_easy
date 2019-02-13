@@ -207,6 +207,7 @@ script_load_default()
 }
 
 install_vs(){
+    #Conflicts with node9, add code to remove node9 if user allows.
     echo "Install will include NodeJS 8 and Yarn"
     curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
     sudo apt-get install -y nodejs
