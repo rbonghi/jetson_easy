@@ -35,7 +35,7 @@ MODULE_DEFAULT="AUTO"
 
 script_check()
 {
-    if hash jetson_release 2>/dev/null; then
+    if [[ -L "/usr/local/bin/jetson_release" ]] ; then 
         # Read version
         local info_je=$(jetson_release)
         local je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
@@ -58,34 +58,44 @@ script_info()
     script_check
     
     if [ $? -eq 1 ] ; then
-        local info_je=$(jetson_release)
-        local je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
-        echo "    - Update jetson_easy from $je_version to $JETSON_EASY_VERSION"
+        if [[ -L "/usr/local/bin/jetson_release" ]] ; then 
+            local info_je=$(jetson_release)
+            je_version=$(echo $info_je | grep -Po '(?<=Jetson Easy v)[^;]+' )
+            echo "    - Update jetson_easy from $je_version to $JETSON_EASY_VERSION"
+        else
+            echo "    - Install jetson_easy $JETSON_EASY_VERSION"
+        fi
     fi
 }
 
 script_run()
 {
+    # Local variables
+    local LOCAL_FOLDER=$(pwd)
+    
     tput setaf 6
-    echo "Uninstall previous version of jetson_easy"
+    echo "Uninstall previous version of jetson_stats"
     tput sgr0
     
     # Move in jetson folder
     cd ../../jetson
 
-    # Launch uninstaller jetson_easy
-    . uninstall_jetson_easy.sh
+    # Launch uninstaller jetson_stats
+    sudo ./install_jetson_stats.sh -s -uninstall
     
     tput setaf 6
-    echo "Install jetson_easy"
+    echo "Install jetson_stats"
     tput sgr0
     
-    # Launch installer jetson_easy
-    . install_jetson_easy.sh
+    # Launch installer jetson_stats
+    sudo ./install_jetson_stats.sh -s -f
     
     tput setaf 6
     echo "Complete!"
     tput sgr0
+    
+    # Restore previuous folder
+    cd $LOCAL_FOLDER
 }
 
 
