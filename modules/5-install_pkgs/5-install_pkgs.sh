@@ -43,7 +43,7 @@ MODULE_OPTIONS=("RUN" "STOP")
 MODULE_SUBMENU=("Add new packages:set_pkgs")
 
 #Will add check for Zed version status later.
-INSTALL_ZED_VERSION="2.7"
+INSTALL_ZED_VERSION="2.8"
 
 pkgs_is_enabled()
 {
