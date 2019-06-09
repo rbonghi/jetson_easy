@@ -202,7 +202,7 @@ main()
     # - JETSON_L4T (JETSON_L4T_RELEASE, JETSON_L4T_REVISION)
     # - JETSON_DESCRIPTION
     # - JETSON_CUDA
-    source jetson/jetson_variables
+    source jetson/scripts/jetson_variables
 
 	# Initialization and run biddibi boddibi boo
 	local mytitle="Jetson Easy"
